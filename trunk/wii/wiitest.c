@@ -66,7 +66,7 @@ void display(void){
            /* viewing transformation  */
    gluLookAt (obsx, obsy, obsz, obsx, obsy, obsz-1.0, 0.0, 1.0, 0.0);
 
-   
+  glLineWidth(1.0);
   float i;
   for (i=-50.0;i<=0.0;i+=2.0){
    glBegin(GL_LINE_LOOP);
@@ -92,6 +92,7 @@ void display(void){
    glEnd();
 
    glColor3f(1.0, 0.0, 0.0);
+   glLineWidth(3.0);
    glutWireCube (4.0);
 
    glColor3f(1.0, 1.0, 1.0);
