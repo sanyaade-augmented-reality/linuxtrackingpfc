@@ -8,6 +8,10 @@ Cube_wii -> Demo del cubo usando el mando de wii con la libreria cwiid
 
 facedetect -> demo facedetect "original" de openCV, incluida para facilitar los test
 
-vrpn_wiimote_server -> miniserver de vrpn para wiimote, exporta 1 wiimote con nombre Wiimote0
+vrpn_tracker_null_server -> miniserver de vrpn para un tracker generico, equivalente al null server del servidor generico de VRPN (se puede usar con vrpn_print_devices del propio vrpn o el vrpn_tracker_client de este juego de tests)
+
+vrpn_tracker_client -> minicliente de vrpn para testear trackers (por ejemplo los trackers del servidor generico de vrpn o el vrpn_tracker_null_server de estos tests)
+
+vrpn_wiimote_server -> miniserver de vrpn para wiimote, exporta un wiimote con nombre Wiimote0 (se puede usar con vrpn_print_devices)
 
 wii_leds -> Prueba de conexión con el wiimote y la libreria cwiid, los leds apuntan hacia la fuente infraroja (o la posición media, si hay mas de una)
