@@ -3,12 +3,20 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <vrpn_Tracker.h>
+
+// Variables globales
+  // posiciones del observador
    GLfloat obsx;
    GLfloat obsy;
    GLfloat obsz;
 
+  // Frame number y mensaje a mostrar
    GLint framen;
    GLchar mensaje[100];
+
+
+// Parte de OpenGL
 
 void init(void) 
 {
@@ -99,7 +107,7 @@ void display(void)
    framen++;
     
    output(-7.0, 4.5, mensaje );
-   //glFlush ();
+
    glutSwapBuffers(); //swap the buffers
 }
 
@@ -118,7 +126,7 @@ void keyboard(unsigned char key, int x, int y)
 	 glutLeaveGameMode(); //set the resolution how it was
          exit(0);
          break;
-      case 119: // w
+      /*case 119: // w
 	 obsz-=0.1;
 	 glutPostRedisplay();
 	 break;
@@ -141,32 +149,55 @@ void keyboard(unsigned char key, int x, int y)
       case 32: // space
 	 obsy+=0.1;
 	 glutPostRedisplay();
-	 break;
+	 break;*/
       default:
 	printf("Key %i not supported\n", key);
 	break;
    }
 }
 
+// Parte de vrpn
+vrpn_Tracker_Remote *tkr;
+
+void checktracker(){
+  tkr->mainloop();
+}
+
+void    VRPN_CALLBACK handle_tracker(void *userdata, const vrpn_TRACKERCB t)
+{
+  /*printf("handle_tracker\tSensor %d is now at (%g,%g,%g)\n", 
+	 t.sensor,
+	 t.pos[0], t.pos[1], t.pos[2]);*/
+   obsx = t.pos[0];
+   obsy = t.pos[1];
+   obsz = t.pos[2]+16.0;
+  glutPostRedisplay();
+}
+// Main y funciones auxiliares
 int main(int argc, char** argv)
 {
+   
+   tkr = new vrpn_Tracker_Remote("Tracker0@localhost");
+   tkr->register_change_handler(NULL, handle_tracker,0);
 
    framen=0;
-   sprintf(mensaje,"Keys: w a s d x space esc\n");
-
+   //sprintf(mensaje,"Keys: w a s d x space esc\n");
+   sprintf(mensaje,"Perspective adjustement via Tracker0@localhost (esc to exit)");
+   
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
    glutInitWindowSize (960, 600); 
    glutInitWindowPosition (0,0);
    glutCreateWindow (argv[0]);
    //glutGameModeString( "1920x1200:32@60" ); //the settings for fullscreen mode
-   /*glutGameModeString( "1024x768:32@60" ); //the settings for fullscreen mode
-   glutEnterGameMode(); //set glut to fullscreen using the settings in the line above*/
+   //glutGameModeString( "1024x768:32@60" ); //the settings for fullscreen mode
+   //glutEnterGameMode(); //set glut to fullscreen using the settings in the line above
    init ();
    glutDisplayFunc(display); 
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
    //glutIdleFunc(glutPostRedisplay);
+   glutIdleFunc(checktracker);
    glutMainLoop();
    return 0;
 }
