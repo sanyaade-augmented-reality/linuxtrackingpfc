@@ -139,7 +139,7 @@ void    VRPN_CALLBACK handle_tracker(void *userdata, const vrpn_TRACKERCB t)
    // en este ejemplo no se usa xq se ha registrado el callback para ejecutarse solo con el sensor0
    obsx = t.pos[0]*scr2mdl;
    obsy = t.pos[1]*scr2mdl;
-   obsz = (t.pos[2]+0.5)*scr2mdl;
+   obsz = t.pos[2]*scr2mdl;
    glutPostRedisplay();
 }
 // Main y funciones auxiliares

@@ -1,19 +1,40 @@
 Descripción de cada demo:
 
-Cube -> Codigo de la demo base de opengl con el cubo y el ajuste de frustum, solo funciona la navegación por teclas
+
+
+
+
+Cubes: Demos gráficas usando opengl, donde se ve un cubo y una habitacion, y se emula el cambio de punto de vista del observador modificando el frustrum
+
+Cube -> Codigo base de la demo base de opengl, se puede navegar por teclas
 
 Cube_face -> Demo del cubo usando el face_detect de openCV
 
-Cube_tracker -> Demo del cubo usando input del sensor 0 de Tracker0@localhost
+Cube_tracker -> Demo del cubo usando input del sensor 0 de Tracker0@localhost (para usar con vrpn_Trackers)
 
 Cube_wii -> Demo del cubo usando el mando de wii con la libreria cwiid
 
+
+
+
 facedetect -> demo facedetect "original" de openCV, incluida para facilitar los test
 
-vrpn_tracker_null_server -> miniserver de vrpn para un tracker generico, equivalente al null server del servidor generico de VRPN (se puede usar con vrpn_print_devices del propio vrpn o el vrpn_tracker_client de este juego de tests)
 
-vrpn_tracker_client -> minicliente de vrpn para testear trackers (por ejemplo los trackers del servidor generico de vrpn o el vrpn_tracker_null_server de estos tests)
 
-vrpn_wiimote_server -> miniserver de vrpn para wiimote, exporta un wiimote con nombre Wiimote0 (se puede usar con vrpn_print_devices)
+
+vrpn_Trackers: Serie de clientes y servidores de muestra.
+               Para testear el funcionamiento de los clientes, se puede ejecutar el server generico de vrpn, configurandolo para funcionar como un NULL server, o cualquiera de las demos de servidores)
+               Para testear los servidores, se puede usar el vrpn_print_devices del propio vrpn, o las demos de cliente (tanto el de texto como el del cubo de estos ejemplos)
+
+vrpn_tracker_client -> minicliente de vrpn para testear trackers (equivalente al vrpn_print_devices, pero solo con trackers)
+
+vrpn_tracker_examplenull_server -> miniserver de vrpn para un tracker generico, emula al Tracker_NULL server, pero esta creado usando el Tracker_server
+
+vrpn_tracker_null_server -> miniserver de vrpn_Tracker_NULL, equivalente a usar el NULL Tracker del servidor generico
+
+vrpn_wiimote_server -> miniserver de vrpn para wiimote, exporta un wiimote con nombre Wiimote0 (equivalente al wiimote del servidor generico)
+
+
+
 
 wii_leds -> Prueba de conexión con el wiimote y la libreria cwiid, los leds apuntan hacia la fuente infraroja (o la posición media, si hay mas de una)
