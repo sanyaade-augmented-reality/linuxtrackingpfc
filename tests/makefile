@@ -38,5 +38,5 @@ vrpn_wiimote_server : vrpn_wiimote_server.C
 
 # to clean up:
 clean:
-	rm cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker*.o *.c~ *.C~ 
+	rm cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker *.o *.c~ *.C~ 
 
