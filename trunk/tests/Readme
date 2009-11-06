@@ -4,6 +4,8 @@ Cube -> Codigo de la demo base de opengl con el cubo y el ajuste de frustum, sol
 
 Cube_face -> Demo del cubo usando el face_detect de openCV
 
+Cube_tracker -> Demo del cubo usando input del sensor 0 de Tracker0@localhost
+
 Cube_wii -> Demo del cubo usando el mando de wii con la libreria cwiid
 
 facedetect -> demo facedetect "original" de openCV, incluida para facilitar los test
