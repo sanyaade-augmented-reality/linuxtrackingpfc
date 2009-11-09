@@ -30,6 +30,8 @@ vrpn_tracker_client -> minicliente de vrpn para testear trackers (equivalente al
 
 vrpn_tracker_examplenull_server -> miniserver de vrpn para un tracker generico, emula al Tracker_NULL server, pero esta creado usando el Tracker_server
 
+vrpn_tracker_from_opencv -> miniserver de vrpn para un tracker generico, Da una posición aproximada de la cara del usuario, usando opencv
+
 vrpn_tracker_null_server -> miniserver de vrpn_Tracker_NULL, equivalente a usar el NULL Tracker del servidor generico
 
 vrpn_wiimote_server -> miniserver de vrpn para wiimote, exporta un wiimote con nombre Wiimote0 (equivalente al wiimote del servidor generico)
