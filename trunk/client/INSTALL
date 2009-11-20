@@ -1,0 +1,6 @@
+Comprobar los paths del makefile
+make
+sudo make install
+make test
+./test
+(para ver algo es necesario tener algun vrpn_Tracker emitiendo, usar los de la carpeta test)
