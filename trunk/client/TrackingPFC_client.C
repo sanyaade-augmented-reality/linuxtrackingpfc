@@ -1,4 +1,5 @@
 #include "TrackingPFC_client.h"
+// calback que actualiza los datos y llama al callback personalizado si lo hay
 void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
    // t.sensor es la variable que da el numero de sensor
    // en este ejemplo no se usa xq se ha registrado el callback para ejecutarse solo con el sensor0
@@ -11,6 +12,7 @@ void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
   //printf("%f\n",trk->obsx); // descomentar esto para ver si conecta
 }
 
+// Creadora
 TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPFC_client*)){
   obsx=0;
   obsy=0;
@@ -23,18 +25,48 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   pthread_create( &mainloop_thread, NULL, mainloop_executer,tracker);
 }
 
+// Destructora
 TrackingPFC_client::~TrackingPFC_client(){
   //pthread_join( mainloop_thread, NULL); //?
 }
 
+// Forzar un mainloop para evitar problemas de latencia
 // Esta funcion en realidad no se deberia usar casi nunca
 void TrackingPFC_client::mainloop(){
   tracker->mainloop();
 }
 
+// Codigo que ejecuta el thread encargado del mainloop
 void *mainloop_executer(void * t){
   while (1){// esto deberia poder acabar!
     ((vrpn_Tracker_Remote *)t)->mainloop();
     vrpn_SleepMsecs(1);
   }
 }
+
+// consultoras
+float TrackingPFC_client::getlastposx(){
+  return obsx;
+}
+float TrackingPFC_client::getlastposy(){
+  return obsy;
+}
+float TrackingPFC_client::getlastposz(){
+  return obsz;
+}
+float TrackingPFC_client::getDisplaySizex(){
+  return 0.52; // placeholder!!!
+}
+
+
+// modificadoras
+void TrackingPFC_client::setlastposx(float x){
+  obsx=x;
+}
+void TrackingPFC_client::setlastposy(float y){
+  obsy=y;
+}
+void TrackingPFC_client::setlastposz(float z){
+  obsz=z;
+}
+
