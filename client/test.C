@@ -1,7 +1,7 @@
 #include "TrackingPFC_client.h"
 
 void hi(TrackingPFC_client* data){
-  printf("hello! %f\n",data->obsx);
+  printf("hello! %f\n",data->getlastposx());
 }
 
 int main(){

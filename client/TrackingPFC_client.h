@@ -28,9 +28,18 @@ class TrackingPFC_client{
     TrackingPFC_client(const char* tname="Tracker0@localhost", void(TrackingPFC_client*)=NULL);
     ~TrackingPFC_client();
     
-    // TO DO:
-    // float getDisplaySize()
+    // Devuelve el tamaño de la pantalla (horizontal)
+    float getDisplaySizex();
+    //float getDisplaySizey();
+    //float getDisplayRatio();
+
     // consultoras y escritoras de los datos
+    float getlastposx();
+    float getlastposy();
+    float getlastposz();
+    void setlastposx(float);
+    void setlastposy(float);
+    void setlastposz(float);
     
 
 };
