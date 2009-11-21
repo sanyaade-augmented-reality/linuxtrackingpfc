@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <GL/glut.h>
 
 class TrackingPFC_client{
   public:
@@ -40,6 +41,9 @@ class TrackingPFC_client{
     void setlastposx(float);
     void setlastposy(float);
     void setlastposz(float);
+    
+    // gluLookAt modificado para cambiar la posición de la camara
+    void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
     
 
 };
