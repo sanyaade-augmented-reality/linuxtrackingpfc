@@ -8,6 +8,7 @@ En GLC Player sustituir los siguientes archivos por los de la carpeta player:
 
 y en GLC lib:
 /glc_lib.pro   (y cambiar los paths)
+/viewport/glc_viewport.cpp
 /viewport/glc_viewport.h
 /viewport/glc_camera.cpp
 /viewport/glc_camera.h
