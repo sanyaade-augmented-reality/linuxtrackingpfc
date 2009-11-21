@@ -73,7 +73,18 @@ void TrackingPFC_client::setlastposz(float z){
 void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
 				   float tarx, float tary, float tarz,
 				   float upx, float upy, float upz){
+  // vamos a asumir que el centro del bounding box es tar
+  float vecx,vecy,vecz,neweyex,neweyey,neweyez;
+  // vector hacia el que está mirando la camara
+  vecx=tarx-eyex;
+  vecy=tary-eyey;
+  vecz=tarz-eyez;
 
-  gluLookAt(eyex,eyey,eyez, tarx,tary,tarz,  upx,upy,upz);
+  // posicion modificada del ojo
+  neweyex=eyex+(obsx*250);
+  neweyey=eyey+(obsy*250);
+  neweyez=eyez+(obsz*250);
+  printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
+  gluLookAt(neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz,  upx,upy,upz);
 }
 
