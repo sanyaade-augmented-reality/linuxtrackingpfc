@@ -157,6 +157,10 @@ public:
 
 	//! Update OpenGL Projection Matrix
 	void updateProjectionMat(void) const;
+	// PFC MOD stars here
+	void updateProjectionMat(TrackingPFC_client*&) const;
+	// PFC MOD ends here
+	
 
 	//! Force the aspect ratio of the window
 	void forceAspectRatio(double);
