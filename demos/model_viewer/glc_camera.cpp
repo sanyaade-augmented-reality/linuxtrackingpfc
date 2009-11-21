@@ -437,9 +437,6 @@ void GLC_Camera::glExecute()
 // PFC MOD starts here
 void GLC_Camera::glExecute(TrackingPFC_client*& c)
 {	
-	printf("DEBUG: HT %f, %f, %f,     %f, %f, %f,          %f\n",m_Eye.X(), m_Eye.Y(), m_Eye.Z(),
-		m_Target.X(), m_Target.Y(), m_Target.Z(),c->getlastposx());
-
 	c->htgluLookAt(m_Eye.X(), m_Eye.Y(), m_Eye.Z(),
 		m_Target.X(), m_Target.Y(), m_Target.Z(),
 		m_VectUp.X(), m_VectUp.Y(), m_VectUp.Z());
