@@ -39,7 +39,6 @@ void display(void)
    obsy = track->getlastposy()*mld2scr;
    obsz = track->getlastposz()*mld2scr;
 
-   printf("%f %f %f\n",obsx,obsy,obsz);
    GLfloat znear =1.0;
    GLfloat zfar =100.0;
    GLfloat frleft=znear*(-8.0-obsx)/obsz;
