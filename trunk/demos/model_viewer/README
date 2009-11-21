@@ -1,0 +1,15 @@
+Esta demo está preparada para ejecutarse esobre el GLC Player 2.1.0 (http://www.glc-player.net/) y GLC_lib 1.2 (http://www.glc-lib.net/)
+
+En GLC Player sustituir los siguientes archivos por los de la carpeta player:
+/glc_player.pro   (y cambiar los paths)
+/glc_player.cpp
+/opengl_view/OpenglView.C
+/opengl_view/OpenglView.h
+
+y en GLC lib:
+/glc_lib.pro   (y cambiar los paths)
+/viewport/glc_viewport.h
+/viewport/glc_camera.C
+/viewport/glc_camera.h
+
+
