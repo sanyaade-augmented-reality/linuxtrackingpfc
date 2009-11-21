@@ -400,15 +400,15 @@ void OpenglView::paintGL()
 		// Primero necesitaremos hacer Cambios en el frustum ( ver GLC_Viewport::updateProjectionMat
 		// en glc_lib/viewport/glviewport.cpp, aunque ahi se usa gluPerspective)
 		// activamos la matriz de proyección
-		glMatrixMode(GL_PROJECTION);
+		//glMatrixMode(GL_PROJECTION);
 		// Aqui ejecutamos el frustum
 		
+		
 		// devolvemos la matriz activa a la de modelo, que es la que se esperaba en el codigo original
-		glMatrixMode(GL_MODELVIEW);
+		//glMatrixMode(GL_MODELVIEW);
 		
 		// ejecutamos la camara
 		m_GlView.glExecuteCam(ht_client);
-		//m_GlView.glExecuteCam();
 		// PFC MOD Ends here
 		
 
