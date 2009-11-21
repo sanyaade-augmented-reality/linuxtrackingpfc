@@ -19,6 +19,7 @@ install : libtpfcc.so.1.0.1
 	cp libtpfcc.so.1.0.1 /usr/lib/
 	ln -s -f /usr/lib/libtpfcc.so.1.0.1 /usr/lib/libtpfcc.so.1
 	ln -s -f /usr/lib/libtpfcc.so.1.0.1 /usr/lib/libtpfcc.so
+	cp TrackingPFC_client.h /usr/include/
 
 test : test.C
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $^ $(LIBRARIES) -ltpfcc
