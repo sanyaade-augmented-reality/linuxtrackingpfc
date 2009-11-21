@@ -70,3 +70,10 @@ void TrackingPFC_client::setlastposz(float z){
   obsz=z;
 }
 
+void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
+				   float tarx, float tary, float tarz,
+				   float upx, float upy, float upz){
+
+  gluLookAt(eyex,eyey,eyez, tarx,tary,tarz,  upx,upy,upz);
+}
+
