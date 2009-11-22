@@ -1,5 +1,7 @@
-INCLUDE = -I/usr/include/ -I/usr/local/include/opencv -I/home/plaga/bin/vrpn_07_22/vrpn/server_src/ -I/home/plaga/bin/vrpn_07_22/vrpn/client_src/ -I/home/plaga/bin/vrpn_07_22/vrpn/ -I/home/plaga/bin/vrpn_07_22/quat
-LIBDIR  = -L/usr/X11R6/lib -L/usr/local/lib -L/home/plaga/bin/vrpn_07_22/vrpn/pc_linux -L/home/plaga/bin/vrpn_07_22/vrpn/server_src/pc_linux -L/home/plaga/bin/vrpn_07_22/vrpn/client_src/pc_linux -L/home/plaga/bin/vrpn_07_22/quat/pc_linux
+#INCLUDE = -I/usr/include/ -I/usr/local/include/opencv -I/home/plaga/bin/vrpn_07_22/vrpn/server_src/ -I/home/plaga/bin/vrpn_07_22/vrpn/client_src/ -I/home/plaga/bin/vrpn_07_22/vrpn/ -I/home/plaga/bin/vrpn_07_22/quat
+#LIBDIR  = -L/usr/X11R6/lib -L/usr/local/lib -L/home/plaga/bin/vrpn_07_22/vrpn/pc_linux -L/home/plaga/bin/vrpn_07_22/vrpn/server_src/pc_linux -L/home/plaga/bin/vrpn_07_22/vrpn/client_src/pc_linux -L/home/plaga/bin/vrpn_07_22/quat/pc_linux
+INCLUDE = -I/usr/local/include/opencv 
+LIBDIR  = 
 
 #COMPILERFLAGS = -Wall -O2
 COMPILERFLAGS = -O2

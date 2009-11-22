@@ -1,5 +1,5 @@
-INCLUDE = -I/usr/include/ -I/home/plaga/bin/vrpn_07_22/vrpn/server_src/ -I/home/plaga/bin/vrpn_07_22/vrpn/client_src/ -I/home/plaga/bin/vrpn_07_22/vrpn/ -I/home/plaga/bin/vrpn_07_22/quat
-LIBDIR  = -L/usr/local/lib -L/home/plaga/bin/vrpn_07_22/vrpn/pc_linux -L/home/plaga/bin/vrpn_07_22/vrpn/server_src/pc_linux -L/home/plaga/bin/vrpn_07_22/vrpn/client_src/pc_linux -L/home/plaga/bin/vrpn_07_22/quat/pc_linux
+INCLUDE = 
+LIBDIR  = 
 
 #COMPILERFLAGS = -Wall -O2
 COMPILERFLAGS = -O2
