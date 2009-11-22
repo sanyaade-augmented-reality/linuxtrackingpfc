@@ -44,8 +44,9 @@ class TrackingPFC_client{
     void setlastposy(float);
     void setlastposz(float);
     
-    // gluLookAt modificado para cambiar la posición de la camara
+    // llamadas glu modificadas para cambiar la posición de la camara
     void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
+    void htgluPerspective(float, float, float, float);
     
 
 };
