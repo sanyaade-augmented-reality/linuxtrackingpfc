@@ -11,16 +11,19 @@
 
 class TrackingPFC_client{
   public:
-    // Datos de posicion (PLACEHOLDERS)
+    // Datos de posicion (PLACEHOLDERS, esto mas tarde será un tipo de datos complejo)
     float obsx;
     float obsy;
     float obsz;
   
-    int alive;
-    float virtualdisplaysize;
-    int coordmode;
-  
+    int alive; // indicador de si el thrad de mainloop debe seguir funcionando 1=si, 2=no
 
+    float virtualdisplaysize; // indicador del tamaño de la pantalla virtual
+    float originalfov;
+    float zadjustment;
+
+    int coordmode; // Modo de coordenadas que estamos usando
+  
     // vrpn_Tracker
     vrpn_Tracker_Remote *tracker;
     // thread que se encarga de ejecutar el mainloop del tracker
@@ -50,9 +53,10 @@ class TrackingPFC_client{
     
     void setvirtualdisplaysize(float);
     
-    // llamadas glu modificadas para cambiar la posición de la camara
+    // llamadas glut y GL modificadas para usar tracking
     void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
     void htgluPerspective(float, float, float, float);
+    void htadjustPerspective(float, float, float); // como la anterior, pero sin fov
     
 
 };
