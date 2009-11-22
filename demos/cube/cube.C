@@ -34,7 +34,7 @@ void display(void)
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
    
-   track->htgluPerspective(35.0, 1.6, znear, zfar);
+   track->htadjustPerspective(1.6, znear, zfar);
    glMatrixMode (GL_MODELVIEW);
    
 

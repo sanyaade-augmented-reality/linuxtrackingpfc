@@ -27,9 +27,13 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   callback_func= cbfx;
   pthread_create( &mainloop_thread, NULL, mainloop_executer,this);
 
-  // inicializamos el virtual display size a NULL
+  // virtual display size a 0 (no se usa)
   virtualdisplaysize=0;
-  // inicializamos el virtual display en modo default
+  // fov original a 0 (no se usa)
+  originalfov=0;
+  // distancia hasta el display para tener un fov = a originalfow
+  zadjustment=0; // inicialmente a 0, para que no influya en casos que no requieren ese ajuste (en los que no hay fov original)
+  // virtual display en modo default
   coordmode=TPFCCORD_DEFAULT;
 }
 
@@ -83,6 +87,30 @@ void TrackingPFC_client::setvirtualdisplaysize(float s){
   virtualdisplaysize=s;
 }
 
+
+void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
+  // descomentar esto y comentar el resto para hacer que la función sea transparente
+  //gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
+  originalfov = m_dFov;
+  float scry= getDisplaySizex()/AspectRatio;
+  zadjustment = scry/tan(m_dFov);
+  //printf("Z adjustment: %f\n", zadjustment);
+  htadjustPerspective(AspectRatio, m_dCamDistMin, m_dCamDistMax);
+}
+
+void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
+  // en un principio asumiremos que estamos en full screen, por lo tanto el tamaño horizontal del display es el 100% del reportado
+  float frleft, frright, frup,frdown, scrx, scry, fact;
+  scrx= getDisplaySizex();
+  scry= scrx/AspectRatio;
+  fact=m_dCamDistMin/obsz;
+  frleft= fact*((-scrx/2.0)-obsx);
+  frright= fact*((scrx/2.0)-obsx);
+  frup=fact*((-scry/2.0)-obsy);
+  frdown=fact*((scry/2.0)-obsy);
+  glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax);
+}
+
 void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
 				   float tarx, float tary, float tarz,
 				   float upx, float upy, float upz){
@@ -99,36 +127,24 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
     exit(-1);
   }
   mdl2scr = virtualdisplaysize / getDisplaySizex();
+  
+  // corregimos el obsz si habia un fov original
+  float cobsz= obsz -zadjustment;
 
   // posicion modificada del ojo
   if (coordmode==TPFCCORD_DEFAULT){
-    neweyex=eyex+(obsx*mdl2scr);
-    neweyey=eyey+(obsy*mdl2scr);
-    neweyez=eyez+(obsz*mdl2scr);
+    neweyex=eyex+(obsx*mdl2scr); // horizontal, derecha=positivo
+    neweyey=eyey+(obsy*mdl2scr); // vertical , arriba = positivo
+    neweyez=eyez+(cobsz*mdl2scr); // profundidad, alejarse de la pantalla = positivo
   }else if (coordmode==TPFCCORD_GLC){
-    neweyex=eyex-(obsx*mdl2scr);
-    neweyey=eyey;//+(obsz*mdl2scr);
-    neweyez=eyez+(obsy*mdl2scr);
+    neweyex=eyex-(obsx*mdl2scr); // horizontal, izda=positivo
+    neweyey=eyey+(cobsz*mdl2scr); // profundidad, alejarse de la pantalla = positivo
+    neweyez=eyez+(obsy*mdl2scr); // vertical, arriba = positivo
   }else{
     printf("Warning, TrackingPFC_client::htgluLookAt is being called withan unknown coordinate system. Aborting program now.\n");
+    exit(-1);
   }
 
-  printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
+  //printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
   gluLookAt(neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz,  upx,upy,upz);
-}
-
-void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
-  // descomentar esto y comentar el resto para hacer que la función sea transparente
-  //gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
-
-  // en un principio asumiremos que estamos en full screen, por lo tanto el tamaño horizontal del display es el 100% del reportado
-  float frleft, frright, frup,frdown, scrx, scry, fact;
-  scrx= getDisplaySizex();
-  scry= scrx/AspectRatio;
-  fact=m_dCamDistMin/obsz;
-  frleft= fact*((-scrx/2.0)-obsx);
-  frright= fact*((scrx/2.0)-obsx);
-  frup=fact*((-scry/2.0)-obsy);
-  frdown=fact*((scry/2.0)-obsy);
-  glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax);
 }
