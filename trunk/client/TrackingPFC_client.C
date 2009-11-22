@@ -17,17 +17,20 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   obsx=0;
   obsy=0;
   obsz=1;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
+
+  alive=1;
   tracker = new vrpn_Tracker_Remote(tname);
   tracker->register_change_handler(this, TrackingPFC_client_callback,0);
   
   //cbfx(NULL);
   callback_func= cbfx;
-  pthread_create( &mainloop_thread, NULL, mainloop_executer,tracker);
+  pthread_create( &mainloop_thread, NULL, mainloop_executer,this);
 }
 
 // Destructora
 TrackingPFC_client::~TrackingPFC_client(){
-  //pthread_join( mainloop_thread, NULL); //?
+  alive=0;
+  pthread_join( mainloop_thread, NULL); //?
 }
 
 // Forzar un mainloop para evitar problemas de latencia
@@ -38,8 +41,8 @@ void TrackingPFC_client::mainloop(){
 
 // Codigo que ejecuta el thread encargado del mainloop
 void *mainloop_executer(void * t){
-  while (1){// esto deberia poder acabar!
-    ((vrpn_Tracker_Remote *)t)->mainloop();
+  while ( ((TrackingPFC_client *)t)->alive ==1 ){// esto deberia poder acabar!
+    ((TrackingPFC_client *)t)->tracker->mainloop();
     vrpn_SleepMsecs(1);
   }
 }
