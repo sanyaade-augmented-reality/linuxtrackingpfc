@@ -92,6 +92,10 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
   vecy=tary-eyey;
   vecz=tarz-eyez;
   // calculamos el ratio modelo/realidad
+  if (virtualdisplaysize==NULL){
+    printf("Warning, TrackingPFC_client::htgluLookAt is being called without setting first the virtual display size or distance. Aborting program now.\n");
+    exit(-1);
+  }
   mdl2scr = virtualdisplaysize / getDisplaySizex();
   // posicion modificada del ojo
   neweyex=eyex+(obsx*mdl2scr);
