@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <GL/glut.h>
+#define TPFCCORD_DEFAULT 0
+#define TPFCCORD_GLC 1
 
 class TrackingPFC_client{
   public:
@@ -14,8 +16,9 @@ class TrackingPFC_client{
     float obsy;
     float obsz;
   
-  int alive;
+    int alive;
     float virtualdisplaysize;
+    int coordmode;
   
 
     // vrpn_Tracker
