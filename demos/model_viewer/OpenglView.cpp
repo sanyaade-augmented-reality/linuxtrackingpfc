@@ -402,7 +402,7 @@ void OpenglView::paintGL()
 		// activamos la matriz de proyección
 		//glMatrixMode(GL_PROJECTION);
 		// Aqui ejecutamos el frustum
-		
+		m_GlView.updateProjectionMat(ht_client);
 		
 		// devolvemos la matriz activa a la de modelo, que es la que se esperaba en el codigo original
 		//glMatrixMode(GL_MODELVIEW);
@@ -1041,7 +1041,10 @@ QImage OpenglView::takeScreenshot(const bool tryToUseFrameBuffer, const QSize& t
 
 	setAutoBufferSwap(true);
 	setSnapShootMode(false);
-	m_GlView.updateProjectionMat();
+	// PFC MOD Starts here
+	//m_GlView.updateProjectionMat();
+	m_GlView.updateProjectionMat(ht_client);
+	// PFC MOD ends here
 	updateGL();
 
 	return imageToSave;
@@ -1134,7 +1137,10 @@ void OpenglView::normalMode()
 
 	setAutoBufferSwap(true);
 	setSnapShootMode(false);
-	m_GlView.updateProjectionMat();
+	// PFC MOD Starts here
+	//m_GlView.updateProjectionMat();
+	m_GlView.updateProjectionMat(ht_client);
+	// PFC MOD ends here
 	updateGL();
 }
 
