@@ -91,10 +91,13 @@ void TrackingPFC_client::setvirtualdisplaysize(float s){
 void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
   // descomentar esto y comentar el resto para hacer que la función sea transparente
   //gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
-  originalfov = m_dFov;
-  float scry= getDisplaySizex()/AspectRatio;
-  zadjustment = scry/tan(m_dFov);
-  //printf("Z adjustment: %f\n", zadjustment);
+  if (originalfov != m_dFov){
+    originalfov = m_dFov;
+    float scry= getDisplaySizex()/AspectRatio;
+    float radfov=m_dFov*RADFACTOR;
+    zadjustment = (scry/2.0)/tan(radfov/2.0);
+    //printf("Z adjustment2 %f %f %f\n", zadjustment,scry/2.0,radfov/2.0);
+  }
   htadjustPerspective(AspectRatio, m_dCamDistMin, m_dCamDistMax);
 }
 
