@@ -23,6 +23,8 @@ class TrackingPFC_client{
     // Forzar la ejecución de mainloop (para solucionar problemas de latencia en bucles largos)
     void mainloop();
 
+    int alive;
+
 
     // Creadoras y destructora
     //TrackingPFC_client(); // No hace falta, la de abajo la suple
