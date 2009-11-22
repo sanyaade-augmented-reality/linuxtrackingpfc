@@ -28,7 +28,9 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   pthread_create( &mainloop_thread, NULL, mainloop_executer,this);
 
   // inicializamos el virtual display size a NULL
-  virtualdisplaysize=NULL;
+  virtualdisplaysize=0;
+  // inicializamos el virtual display en modo default
+  coordmode=TPFCCORD_DEFAULT;
 }
 
 // Destructora
@@ -92,17 +94,26 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
   vecy=tary-eyey;
   vecz=tarz-eyez;
   // calculamos el ratio modelo/realidad
-  if (virtualdisplaysize==NULL){
+  if (virtualdisplaysize==0){
     printf("Warning, TrackingPFC_client::htgluLookAt is being called without setting first the virtual display size or distance. Aborting program now.\n");
     exit(-1);
   }
   mdl2scr = virtualdisplaysize / getDisplaySizex();
-  // posicion modificada del ojo
-  neweyex=eyex+(obsx*mdl2scr);
-  neweyey=eyey+(obsy*mdl2scr);
-  neweyez=eyez+(obsz*mdl2scr);
 
-  //printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
+  // posicion modificada del ojo
+  if (coordmode==TPFCCORD_DEFAULT){
+    neweyex=eyex+(obsx*mdl2scr);
+    neweyey=eyey+(obsy*mdl2scr);
+    neweyez=eyez+(obsz*mdl2scr);
+  }else if (coordmode==TPFCCORD_GLC){
+    neweyex=eyex-(obsx*mdl2scr);
+    neweyey=eyey;//+(obsz*mdl2scr);
+    neweyez=eyez+(obsy*mdl2scr);
+  }else{
+    printf("Warning, TrackingPFC_client::htgluLookAt is being called withan unknown coordinate system. Aborting program now.\n");
+  }
+
+  printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
   gluLookAt(neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz,  upx,upy,upz);
 }
 
