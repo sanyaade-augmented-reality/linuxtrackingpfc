@@ -4,6 +4,10 @@
 #include <string.h>
 #include <TrackingPFC_client.h>
 
+   GLfloat obsx;
+   GLfloat obsy;
+   GLfloat obsz;
+
    GLint framen;
    GLchar mensaje[100];
 
@@ -13,6 +17,9 @@ void init(void)
 {
    glClearColor (0.0, 0.0, 0.0, 0.0);
    glShadeModel (GL_FLAT);
+   obsx = 0.0;
+   obsy = 0.0;
+   obsz = 16.0;
 }
 
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
@@ -27,22 +34,28 @@ void output(float x, float y, char *string){
    
 void display(void)
 {
+   GLfloat mld2scr= 16/(track->getDisplaySizex());
+   obsx = track->getlastposx()*mld2scr;
+   obsy = track->getlastposy()*mld2scr;
+   obsz = track->getlastposz()*mld2scr;
 
    GLfloat znear =1.0;
    GLfloat zfar =100.0;
-   
+   GLfloat frleft=znear*(-8.0-obsx)/obsz;
+   GLfloat frright=znear*(8.0-obsx)/obsz;
+   GLfloat frup=znear*(-5.0-obsy)/obsz;
+   GLfloat frdown=znear*(5.0-obsy)/obsz;
+
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
-   
-   track->htgluPerspective(35.0, 1.6, znear, zfar);
+   glFrustum (frleft, frright, frup, frdown, znear, zfar);
    glMatrixMode (GL_MODELVIEW);
-   
 
    glClear (GL_COLOR_BUFFER_BIT);
    glLoadIdentity ();             /* clear the matrix */
-   
-   track->setvirtualdisplaysize( 16.0);
-   track->htgluLookAt (0, 0, 0,  0, 0, -1.0,  0.0, 1.0, 0.0);
+
+           /* viewing transformation  */
+   gluLookAt (obsx, obsy, obsz, obsx, obsy, obsz-1.0, 0.0, 1.0, 0.0);
 
    
   glLineWidth(1.0);
@@ -101,12 +114,36 @@ void keyboard(unsigned char key, int x, int y)
 {
    switch (key) {
       case 27:
-	 //glutLeaveGameMode(); //set the resolution how it was
+	 glutLeaveGameMode(); //set the resolution how it was
 	 delete(track);
          exit(0);
          break;
+      case 119: // w
+	 obsz-=0.1;
+	 glutPostRedisplay();
+	 break;
+      case 115: // s
+	 obsz+=0.1;
+	 glutPostRedisplay();
+	 break;
+      case 97: // a
+	 obsx-=0.1;
+	 glutPostRedisplay();
+	 break;
+      case 100: // d
+	 obsx+=0.1;
+	 glutPostRedisplay();
+	 break;
+      case 120: // x
+	 obsy-=0.1;
+	 glutPostRedisplay();
+	 break;
+      case 32: // space
+	 obsy+=0.1;
+	 glutPostRedisplay();
+	 break;
       default:
-	//printf("Key %i not supported\n", key);
+	printf("Key %i not supported\n", key);
 	break;
    }
 }
@@ -115,7 +152,7 @@ int main(int argc, char** argv)
 {
 
    framen=0;
-   sprintf(mensaje,"press esc to exit\n");
+   sprintf(mensaje,"Keys: w a s d x space esc\n");
 
    track = new TrackingPFC_client();
 

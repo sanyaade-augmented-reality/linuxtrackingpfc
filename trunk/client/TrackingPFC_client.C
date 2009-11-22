@@ -16,7 +16,8 @@ void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
 TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPFC_client*)){
   obsx=0;
   obsy=0;
-  obsz=1;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
+  obsz=0.5;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
+  
 
   alive=1;
   tracker = new vrpn_Tracker_Remote(tname);
@@ -25,6 +26,9 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   //cbfx(NULL);
   callback_func= cbfx;
   pthread_create( &mainloop_thread, NULL, mainloop_executer,this);
+
+  // inicializamos el virtual display size a NULL
+  virtualdisplaysize=NULL;
 }
 
 // Destructora
@@ -73,24 +77,43 @@ void TrackingPFC_client::setlastposz(float z){
   obsz=z;
 }
 
+void TrackingPFC_client::setvirtualdisplaysize(float s){
+  virtualdisplaysize=s;
+}
+
 void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
 				   float tarx, float tary, float tarz,
 				   float upx, float upy, float upz){
-  // vamos a asumir que el centro del bounding box es tar
-  float vecx,vecy,vecz,neweyex,neweyey,neweyez;
+  // descomentar esto y comentar el resto para hacer que la funcion sea transparente
+  //gluLookAt(eyex,eyey, eyez,  tarx,tary, tarz,   upx, upy, upz);
+  float vecx,vecy,vecz,neweyex,neweyey,neweyez, mdl2scr;
   // vector hacia el que está mirando la camara
   vecx=tarx-eyex;
   vecy=tary-eyey;
   vecz=tarz-eyez;
-
+  // calculamos el ratio modelo/realidad
+  mdl2scr = virtualdisplaysize / getDisplaySizex();
   // posicion modificada del ojo
-  neweyex=eyex+(obsx*250);
-  neweyey=eyey+(obsy*250);
-  neweyez=eyez+(obsz*250);
+  neweyex=eyex+(obsx*mdl2scr);
+  neweyey=eyey+(obsy*mdl2scr);
+  neweyez=eyez+(obsz*mdl2scr);
+
   //printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
   gluLookAt(neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz,  upx,upy,upz);
 }
 
 void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
-  gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
+  // descomentar esto y comentar el resto para hacer que la función sea transparente
+  //gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
+
+  // en un principio asumiremos que estamos en full screen, por lo tanto el tamaño horizontal del display es el 100% del reportado
+  float frleft, frright, frup,frdown, scrx, scry, fact;
+  scrx= getDisplaySizex();
+  scry= scrx/AspectRatio;
+  fact=m_dCamDistMin/obsz;
+  frleft= fact*((-scrx/2.0)-obsx);
+  frright= fact*((scrx/2.0)-obsx);
+  frup=fact*((-scry/2.0)-obsy);
+  frdown=fact*((scry/2.0)-obsy);
+  glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax);
 }

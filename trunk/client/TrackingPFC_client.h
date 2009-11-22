@@ -14,6 +14,10 @@ class TrackingPFC_client{
     float obsy;
     float obsz;
   
+  int alive;
+    float virtualdisplaysize;
+  
+
     // vrpn_Tracker
     vrpn_Tracker_Remote *tracker;
     // thread que se encarga de ejecutar el mainloop del tracker
@@ -22,9 +26,6 @@ class TrackingPFC_client{
     void (*callback_func)(TrackingPFC_client*);
     // Forzar la ejecución de mainloop (para solucionar problemas de latencia en bucles largos)
     void mainloop();
-
-    int alive;
-
 
     // Creadoras y destructora
     //TrackingPFC_client(); // No hace falta, la de abajo la suple
@@ -43,6 +44,8 @@ class TrackingPFC_client{
     void setlastposx(float);
     void setlastposy(float);
     void setlastposz(float);
+    
+    void setvirtualdisplaysize(float);
     
     // llamadas glu modificadas para cambiar la posición de la camara
     void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
