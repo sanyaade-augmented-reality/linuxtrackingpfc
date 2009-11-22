@@ -115,6 +115,7 @@ void keyboard(unsigned char key, int x, int y)
    switch (key) {
       case 27:
 	 glutLeaveGameMode(); //set the resolution how it was
+	 delete(track);
          exit(0);
          break;
       case 119: // w
