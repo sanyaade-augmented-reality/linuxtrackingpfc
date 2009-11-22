@@ -16,7 +16,7 @@ void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
 TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPFC_client*)){
   obsx=0;
   obsy=0;
-  obsz=0;
+  obsz=1;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
   tracker = new vrpn_Tracker_Remote(tname);
   tracker->register_change_handler(this, TrackingPFC_client_callback,0);
   
