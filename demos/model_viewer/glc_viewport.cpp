@@ -137,9 +137,21 @@ void GLC_Viewport::updateProjectionMat(void) const
 }
 
 // PFC MOD stats here
-void GLC_Viewport::updateProjectionMat(TrackingPFC_client*& c) const
+void GLC_Viewport::updateProjectionMat(TrackingPFC_client*& t) const
 {
-	updateProjectionMat();
+	// Make opengl context attached the current One
+	m_pQGLWidget->makeCurrent();
+
+	glMatrixMode(GL_PROJECTION);						// select The Projection Matrix
+	glLoadIdentity();									// Reset The Projection Matrix
+
+	// Calculate The Aspect Ratio Of The Window
+	double AspectRatio;
+	AspectRatio= static_cast<double>(m_nWinHSize)/static_cast<double>(m_nWinVSize);
+	t->htgluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
+
+	glMatrixMode(GL_MODELVIEW);							// select The Modelview Matrix
+	glLoadIdentity();
 }
 // PFC MOD ends here
 

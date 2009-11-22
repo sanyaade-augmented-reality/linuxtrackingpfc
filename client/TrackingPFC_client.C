@@ -87,7 +87,10 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
   neweyex=eyex+(obsx*250);
   neweyey=eyey+(obsy*250);
   neweyez=eyez+(obsz*250);
-  printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
+  //printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
   gluLookAt(neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz,  upx,upy,upz);
 }
 
+void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
+  gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
+}
