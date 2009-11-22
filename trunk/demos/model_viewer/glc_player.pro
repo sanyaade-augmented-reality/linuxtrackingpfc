@@ -24,13 +24,7 @@ win32 {
 
 unix { 
     LIBS += -lGLC_lib -lvrpnserver -lvrpnatmel -lpthread  -lquat -ltpfcc
-    LIBS += -L/home/plaga/bin/vrpn_07_22/vrpn/pc_linux -L/home/plaga/bin/vrpn_07_22/vrpn/server_src/pc_linux
-    LIBS += -L/home/plaga/bin/vrpn_07_22/vrpn/client_src/pc_linux -L/home/plaga/bin/vrpn_07_22/quat/pc_linux
     INCLUDEPATH += "/usr/include/GLC_lib"
-    INCLUDEPATH += "/home/plaga/bin/vrpn_07_22/vrpn/server_src"
-    INCLUDEPATH += "/home/plaga/bin/vrpn_07_22/vrpn/client_src"
-    INCLUDEPATH += "/home/plaga/bin/vrpn_07_22/vrpn"
-    INCLUDEPATH += "/home/plaga/bin/vrpn_07_22/quat"
 }
 
 TRANSLATIONS = ressources/glc_player_fr.ts
