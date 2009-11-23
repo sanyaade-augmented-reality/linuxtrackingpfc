@@ -16,7 +16,7 @@ void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
 TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPFC_client*)){
   obsx=0;
   obsy=0;
-  obsz=0.5;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
+  obsz=10.5;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
   
 
   alive=1;
@@ -104,14 +104,26 @@ void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float
 void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
   // en un principio asumiremos que estamos en full screen, por lo tanto el tamaño horizontal del display es el 100% del reportado
   float frleft, frright, frup,frdown, scrx, scry, fact;
+  // tamaños del display
   scrx= getDisplaySizex();
   scry= scrx/AspectRatio;
+
+  // obtenemos el factor znear_display/mundo real
   fact=m_dCamDistMin/obsz;
   frleft= fact*((-scrx/2.0)-obsx);
   frright= fact*((scrx/2.0)-obsx);
   frup=fact*((-scry/2.0)-obsy);
   frdown=fact*((scry/2.0)-obsy);
-  glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax);
+  
+  // calculamos si tenemos que ampliar zfar (por estar moviendo la camara hacia atras
+  float adj=0.0;
+  if (obsz>zadjustment){
+    float mdl2scr = virtualdisplaysize / getDisplaySizex();
+    adj= (obsz -zadjustment)*mdl2scr;
+    printf("zfar amplied %f units\n",adj);
+  }
+
+  glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax+adj);
 }
 
 void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
