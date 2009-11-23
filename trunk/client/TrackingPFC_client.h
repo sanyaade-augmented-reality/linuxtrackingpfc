@@ -8,7 +8,7 @@
 #include <GL/glut.h>
 #define TPFCCORD_DEFAULT 0
 #define TPFCCORD_GLC 1
-#define RADFACTOR 14159265/180.0
+#define RADFACTOR 3.14159265/180.0
 
 class TrackingPFC_client{
   public:
