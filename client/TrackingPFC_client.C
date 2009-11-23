@@ -131,7 +131,7 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
   }
   mdl2scr = virtualdisplaysize / getDisplaySizex();
   
-  // corregimos el obsz si habia un fov original
+  // corregimos el obsz (por si habia un fov original)
   float cobsz= obsz -zadjustment;
 
   // posicion modificada del ojo

@@ -59,6 +59,10 @@ class TrackingPFC_client{
     void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
     void htgluPerspective(float, float, float, float);
     void htadjustPerspective(float, float, float); // como la anterior, pero sin fov
+
+    // TO DO && BRAINSTORM
+    // pause/unpause/togglepause (que se quede con la ultima posicion)
+    // enable tracking/disable tracking (en casos donde hay un original fov, que LookAt y Perspective pasen a "modo transparente"
     
 
 };
