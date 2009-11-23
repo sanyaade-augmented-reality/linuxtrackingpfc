@@ -118,32 +118,8 @@ void keyboard(unsigned char key, int x, int y)
 	 delete(track);
          exit(0);
          break;
-      case 119: // w
-	 obsz-=0.1;
-	 glutPostRedisplay();
-	 break;
-      case 115: // s
-	 obsz+=0.1;
-	 glutPostRedisplay();
-	 break;
-      case 97: // a
-	 obsx-=0.1;
-	 glutPostRedisplay();
-	 break;
-      case 100: // d
-	 obsx+=0.1;
-	 glutPostRedisplay();
-	 break;
-      case 120: // x
-	 obsy-=0.1;
-	 glutPostRedisplay();
-	 break;
-      case 32: // space
-	 obsy+=0.1;
-	 glutPostRedisplay();
-	 break;
       default:
-	printf("Key %i not supported\n", key);
+	//printf("Key %i not supported\n", key);
 	break;
    }
 }
@@ -152,7 +128,7 @@ int main(int argc, char** argv)
 {
 
    framen=0;
-   sprintf(mensaje,"Keys: w a s d x space esc\n");
+   sprintf(mensaje,"Press esc to exit\n");
 
    track = new TrackingPFC_client();
 
