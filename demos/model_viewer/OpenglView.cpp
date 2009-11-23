@@ -64,7 +64,10 @@ OpenglView::OpenglView(const bool useFrameBuffer, QWidget *pParent)
 	m_Light.setPosition(1.0, 1.0, 1.0);
 
 	// Set backroundImage
-	m_GlView.loadBackGroundImage(":images/default_background.png");
+	// PFC MOD starts here
+	// comento esto para que no se vea el fondo
+	//m_GlView.loadBackGroundImage(":images/default_background.png");
+	// PFC MOD starts here
 
 	//Use the default mover controller
 	QColor repColor;
