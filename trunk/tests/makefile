@@ -9,7 +9,7 @@ CC = gcc
 CFLAGS = $(COMPILERFLAGS) $(INCLUDE)
 LIBRARIES = -lX11 -lXi -lXmu -lglut -lGL -lGLU -lm -lcwiid -lcxcore -lcv -lhighgui -lcvaux -lml -lvrpnserver -lvrpnatmel -lpthread  -lquat  -lwiiuse
 
-all: cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker vrpn_tracker_examplenull_server vrpn_tracker_moving_server vrpn_tracker_from_opencv
+all: cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker vrpn_tracker_examplenull_server vrpn_tracker_moving_server vrpn_tracker_from_opencv vrpn_tracker_from_wii_1led
 
 cube : cube.c
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
@@ -35,6 +35,9 @@ vrpn_tracker_examplenull_server : vrpn_tracker_examplenull_server.C
 vrpn_tracker_from_opencv : vrpn_tracker_from_opencv.C
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
 
+vrpn_tracker_from_wii_1led : vrpn_tracker_from_wii_1led.C
+	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
+
 vrpn_tracker_moving_server : vrpn_tracker_moving_server.C
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
 
@@ -50,5 +53,5 @@ wii_leds : wii_leds.c
 
 # to clean up:
 clean:
-	rm cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker vrpn_tracker_examplenull_server vrpn_tracker_moving_server vrpn_tracker_from_opencv *.o *.c~ *.C~ 
+	rm cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker vrpn_tracker_examplenull_server vrpn_tracker_moving_server vrpn_tracker_from_opencv vrpn_tracker_from_wii_1led *.o *~
 
