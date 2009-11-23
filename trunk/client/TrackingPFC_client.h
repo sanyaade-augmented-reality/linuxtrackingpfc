@@ -22,6 +22,7 @@ class TrackingPFC_client{
     float virtualdisplaysize; // indicador del tamaño de la pantalla virtual
     float originalfov;
     float zadjustment;
+    float aspectratio;
 
     int coordmode; // Modo de coordenadas que estamos usando
   

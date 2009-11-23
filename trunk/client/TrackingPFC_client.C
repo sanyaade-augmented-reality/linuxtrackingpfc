@@ -33,6 +33,7 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   originalfov=0;
   // distancia hasta el display para tener un fov = a originalfow
   zadjustment=0; // inicialmente a 0, para que no influya en casos que no requieren ese ajuste (en los que no hay fov original)
+  aspectratio=0; // inicialmente a 0
   // virtual display en modo default
   coordmode=TPFCCORD_DEFAULT;
 }
@@ -91,7 +92,8 @@ void TrackingPFC_client::setvirtualdisplaysize(float s){
 void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
   // descomentar esto y comentar el resto para hacer que la función sea transparente
   //gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
-  if (originalfov != m_dFov){
+  if (originalfov != m_dFov || aspectratio !=AspectRatio){
+    aspectratio= AspectRatio;
     originalfov = m_dFov;
     float scry= getDisplaySizex()/AspectRatio;
     float radfov=m_dFov*RADFACTOR;
@@ -117,10 +119,10 @@ void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDist
   
   // calculamos si tenemos que ampliar zfar (por estar moviendo la camara hacia atras
   float adj=0.0;
-  if (obsz>zadjustment){
+  if (zadjustment > 0.0 && obsz>zadjustment){
     float mdl2scr = virtualdisplaysize / getDisplaySizex();
     adj= (obsz -zadjustment)*mdl2scr;
-    printf("zfar amplied %f units\n",adj);
+    //printf("zfar ampliado por %f\n", adj);
   }
 
   glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax+adj);
