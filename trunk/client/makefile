@@ -5,7 +5,7 @@ LIBDIR  =
 COMPILERFLAGS = -O2
 CC = g++
 CFLAGS = $(COMPILERFLAGS) $(INCLUDE)
-LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread  -lquat
+LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread  -lquat -lglut -lGL
 
 all: libtpfcc.so.1.0.1
 
