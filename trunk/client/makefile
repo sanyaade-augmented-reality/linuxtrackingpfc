@@ -21,11 +21,8 @@ install : libtpfcc.so.1.0.1
 	ln -s -f /usr/lib/libtpfcc.so.1.0.1 /usr/lib/libtpfcc.so
 	cp TrackingPFC_client.h /usr/include/
 
-test : test.C
-	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $^ $(LIBRARIES) -ltpfcc
-
 
 # to clean up:
 clean:
-	rm *~ test *.o *.so*
+	rm *~ *.o *.so*
 
