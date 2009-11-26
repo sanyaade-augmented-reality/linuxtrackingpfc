@@ -34,8 +34,6 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   // distancia hasta el display para tener un fov = a originalfow
   zadjustment=0; // inicialmente a 0, para que no influya en casos que no requieren ese ajuste (en los que no hay fov original)
   aspectratio=0; // inicialmente a 0
-  // virtual display en modo default
-  coordmode=TPFCCORD_DEFAULT;
 }
 
 // Destructora
