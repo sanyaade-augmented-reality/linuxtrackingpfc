@@ -128,7 +128,7 @@ void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDist
   glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax+adj);
 }
 
-void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
+/*void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
 				   float tarx, float tary, float tarz,
 				   float upx, float upy, float upz){
   // descomentar esto y comentar el resto para hacer que la funcion sea transparente
@@ -164,4 +164,25 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
 
   //printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
   gluLookAt(neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz,  upx,upy,upz);
+}*/
+void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
+				   float tarx, float tary, float tarz,
+				   float upx, float upy, float upz){
+  // descomentar esto y comentar el resto para hacer que la funcion sea transparente
+  //gluLookAt(eyex,eyey, eyez,  tarx,tary, tarz,   upx, upy, upz);
+    
+  // calculamos el ratio modelo/realidad
+  if (virtualdisplaysize==0){
+    printf("Warning, TrackingPFC_client::htgluLookAt is being called without setting first the virtual display size or distance. Aborting program now.\n");
+    exit(-1);
+  }
+  float mdl2scr = virtualdisplaysize / getDisplaySizex();
+  
+  // corregimos el obsz (por si habia un fov original)
+  float cobsz= obsz -zadjustment;
+
+  // En vez de reajustar la camara, movemos todo el modelo en direccion contraria
+  glTranslatef(-obsx*mdl2scr,-obsy*mdl2scr,-cobsz*mdl2scr);
+  
+  gluLookAt(eyex,eyey, eyez,  tarx,tary, tarz,   upx, upy, upz);
 }
