@@ -386,32 +386,20 @@ void OpenglView::paintGL()
 		// PFC ALERT original code ends here
 
 		// PFC MOD Starts here
-		// para mantener los cambios en local no tocaremos la libreria glc
-		// los archivos mencionados estan en glc_lib/viewport
-		// la llamada original era a: (glvierport.h)
-		/* void glExecuteCam(void){
-			m_pViewCam->glExecute();
-			glExecuteImagePlane();
-		   }*/
-		// que llama a: glc_camera.cpp
-		/* void GLC_Camera::glExecute(){	
-			gluLookAt(m_Eye.X(), m_Eye.Y(), m_Eye.Z(),
-			m_Target.X(), m_Target.Y(), m_Target.Z(),
-			m_VectUp.X(), m_VectUp.Y(), m_VectUp.Z());
-		}*/
-
+		
 		// Primero necesitaremos hacer Cambios en el frustum ( ver GLC_Viewport::updateProjectionMat
 		// en glc_lib/viewport/glviewport.cpp, aunque ahi se usa gluPerspective)
-		// activamos la matriz de proyección
-		//glMatrixMode(GL_PROJECTION);
 		// Aqui ejecutamos el frustum
 		m_GlView.updateProjectionMat(ht_client);
 		
-		// devolvemos la matriz activa a la de modelo, que es la que se esperaba en el codigo original
-		//glMatrixMode(GL_MODELVIEW);
-		
 		// ejecutamos la camara
-		ht_client->setvirtualdisplaysize(1000);
+		//ht_client->setvirtualdisplaysize(1000);
+
+		GLC_Camera* pfcaux=  m_GlView.cameraHandle();
+		GLC_Vector4d pfcaux2 = pfcaux->camVector();
+		float pfcaux3 = sqrt(pfcaux2.X()*pfcaux2.X() + pfcaux2.Y()*pfcaux2.Y() +pfcaux2.Z()*pfcaux2.Z());
+		//printf("%f, %f, %f -- %f\n",pfcaux2.X(),pfcaux2.Y(),pfcaux2.Z(), pfcaux3);
+		ht_client->setvirtualdisplaydistance(pfcaux3);
 		m_GlView.glExecuteCam(ht_client);
 		// PFC MOD Ends here
 		

@@ -51,6 +51,7 @@ class TrackingPFC_client{
     void setlastposz(float);
     
     void setvirtualdisplaysize(float);
+    void setvirtualdisplaydistance(float);
     
     // llamadas glut y GL modificadas para usar tracking
     void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
