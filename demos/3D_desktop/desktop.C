@@ -161,7 +161,7 @@ void init(void)
     GLuint t = loadTexture("desk.png", x, y);
     t = loadTexture("barsw.png", x, y);
     t = loadTexture("icons.png", x, y);
-    printf("x= %i\n",t);
+    //printf("x= %i\n",t);
 }
    
 void display(void)
@@ -298,8 +298,14 @@ void keyboard(unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
+   //printf("%i \n",argc);
+   char* resolution;
+   if (argc>1){
+       resolution= (char*)argv[1];
+   }else{
+       resolution= (char*)"1920x1200:32@60";
+   }
 
-   
    track = new TrackingPFC_client();
 
    glutInit(&argc, argv);
@@ -307,8 +313,7 @@ int main(int argc, char** argv)
    /*glutInitWindowSize (960, 600); 
    glutInitWindowPosition (0,0);
    glutCreateWindow (argv[0]);*/
-   glutGameModeString( "1920x1200:32@60" ); //the settings for fullscreen mode
-   //glutGameModeString( "1024x768:32@60" ); //the settings for fullscreen mode
+   glutGameModeString( resolution ); //the settings for fullscreen mode
    glutEnterGameMode(); //set glut to fullscreen using the settings in the line above*/
    init ();
    glutDisplayFunc(display); 
