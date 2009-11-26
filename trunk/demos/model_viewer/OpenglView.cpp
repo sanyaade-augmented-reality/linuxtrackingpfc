@@ -90,7 +90,6 @@ OpenglView::OpenglView(const bool useFrameBuffer, QWidget *pParent)
 	// PFC MOD Starts here
 	// añadimos el cliente de tracker y lo enlazamos con la funcion de callback (ver mas arriba)
 	ht_client= new TrackingPFC_client();
-	ht_client->coordmode=TPFCCORD_GLC;
 	// PFC MOD ends here
 
 }
