@@ -85,6 +85,12 @@ void TrackingPFC_client::setlastposz(float z){
 void TrackingPFC_client::setvirtualdisplaysize(float s){
   virtualdisplaysize=s;
 }
+void TrackingPFC_client::setvirtualdisplaydistance(float d){
+  float mdl2scr = d/zadjustment;
+  /*float mdl2scrx = virtualdisplaysize/getDisplaySizex();
+  printf("%f %f\n", mdl2scr, mdl2scrx);*/
+  virtualdisplaysize= mdl2scr*getDisplaySizex();
+}
 
 
 void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
