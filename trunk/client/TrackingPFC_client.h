@@ -24,7 +24,6 @@ class TrackingPFC_client{
     float zadjustment;
     float aspectratio;
 
-    int coordmode; // Modo de coordenadas que estamos usando
   
     // vrpn_Tracker
     vrpn_Tracker_Remote *tracker;
