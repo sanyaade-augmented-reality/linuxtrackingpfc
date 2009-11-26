@@ -392,14 +392,19 @@ void OpenglView::paintGL()
 		// Aqui ejecutamos el frustum
 		m_GlView.updateProjectionMat(ht_client);
 		
-		// ejecutamos la camara
-		//ht_client->setvirtualdisplaysize(1000);
-
+		// necesitamos definir a que distancia está el display virtual dentro de la piramide de vision
+		// este player, por defecto, apunta la camara al centro de la bounding box,
+		// asi que usaremos el vector ojo->target para calcular la distancia que necesitamos
+		// (dentro del player, cambiar el target equivaldrá a cambiar la profundidad de la escena respecto al punto de vista virtual)
+	      
+		// navegamos por el viewport y la camara hasta llegar al vector de la camara y calculamos su longitud
 		GLC_Camera* pfcaux=  m_GlView.cameraHandle();
 		GLC_Vector4d pfcaux2 = pfcaux->camVector();
 		float pfcaux3 = sqrt(pfcaux2.X()*pfcaux2.X() + pfcaux2.Y()*pfcaux2.Y() +pfcaux2.Z()*pfcaux2.Z());
-		//printf("%f, %f, %f -- %f\n",pfcaux2.X(),pfcaux2.Y(),pfcaux2.Z(), pfcaux3);
+		// y pasamos esa informacion al cliente de tracking
 		ht_client->setvirtualdisplaydistance(pfcaux3);
+
+		// ejecutamos la camara
 		m_GlView.glExecuteCam(ht_client);
 		// PFC MOD Ends here
 		
