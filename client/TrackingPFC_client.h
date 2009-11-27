@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <GL/glut.h>
+#include "TrackingPFC_data.h"
 #define RADFACTOR 3.14159265/180.0
 
 class TrackingPFC_client{
@@ -14,7 +15,7 @@ class TrackingPFC_client{
     float obsx;
     float obsy;
     float obsz;
-    //TrackingPFC_data * data;
+    TrackingPFC_data * data;
   
     int alive; // indicador de si el thrad de mainloop debe seguir funcionando 1=si, 2=no
 
