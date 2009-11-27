@@ -4,7 +4,7 @@ void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
    // t.sensor es la variable que da el numero de sensor
    // en este ejemplo no se usa xq se ha registrado el callback para ejecutarse solo con el sensor0
   TrackingPFC_client * trk= (TrackingPFC_client*)(userdata);
-  trk->data->setnewpos(t.pos[0],t.pos[1],t.pos[2]);
+  trk->setnewpos(t.pos[0],t.pos[1],t.pos[2]);
   if (trk->callback_func!=NULL)
     trk->callback_func(trk);
 }
@@ -44,8 +44,8 @@ void TrackingPFC_client::mainloop(){
 
 // Codigo que ejecuta el thread encargado del mainloop
 void *mainloop_executer(void * t){
-  while ( ((TrackingPFC_client *)t)->alive ==1 ){// esto deberia poder acabar!
-    ((TrackingPFC_client *)t)->tracker->mainloop();
+  while ( ((TrackingPFC_client *)t)->isalive() ==1 ){// esto deberia poder acabar!
+    ((TrackingPFC_client *)t)->mainloop();
     vrpn_SleepMsecs(1);
   }
 }
@@ -56,6 +56,10 @@ float* TrackingPFC_client::getlastpos(){
 }
 float TrackingPFC_client::getDisplaySizex(){
   return 0.52; // placeholder!!!
+}
+// consultoras
+int TrackingPFC_client::isalive(){
+  return alive;
 }
 
 

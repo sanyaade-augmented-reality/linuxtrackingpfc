@@ -10,7 +10,7 @@
 #define RADFACTOR 3.14159265/180.0
 
 class TrackingPFC_client{
-  public:
+  private:
     // datos recibidos
     TrackingPFC_data * data;
   
@@ -27,6 +27,7 @@ class TrackingPFC_client{
     vrpn_Tracker_Remote *tracker;
     // thread que se encarga de ejecutar el mainloop del tracker
     pthread_t mainloop_thread;
+  public:
     // placeholder para el callback personalizado (si es necesario)
     void (*callback_func)(TrackingPFC_client*);
     // Forzar la ejecución de mainloop (para solucionar problemas de latencia en bucles largos)
@@ -45,6 +46,7 @@ class TrackingPFC_client{
     // consultoras y escritoras de los datos
     float* getlastpos();
     void setnewpos(float, float, float);
+    int isalive();
     
     void setvirtualdisplaysize(float);
     void setvirtualdisplaydistance(float);
