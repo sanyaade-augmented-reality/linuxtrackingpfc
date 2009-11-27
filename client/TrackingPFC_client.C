@@ -17,6 +17,7 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   obsx=0;
   obsy=0;
   obsz=0.5;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
+  //data = new TrackingPFC_data();
   
 
   alive=1;
@@ -28,7 +29,7 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   pthread_create( &mainloop_thread, NULL, mainloop_executer,this);
 
   // virtual display size a 0 (no se usa)
-  virtualdisplaysize=0;
+  mdl2scr=0;
   // fov original a 0 (no se usa)
   originalfov=0;
   // distancia hasta el display para tener un fov = a originalfow
@@ -83,13 +84,10 @@ void TrackingPFC_client::setlastposz(float z){
 }
 
 void TrackingPFC_client::setvirtualdisplaysize(float s){
-  virtualdisplaysize=s;
+  mdl2scr = s / getDisplaySizex();
 }
 void TrackingPFC_client::setvirtualdisplaydistance(float d){
-  float mdl2scr = d/zadjustment;
-  /*float mdl2scrx = virtualdisplaysize/getDisplaySizex();
-  printf("%f %f\n", mdl2scr, mdl2scrx);*/
-  virtualdisplaysize= mdl2scr*getDisplaySizex();
+  mdl2scr = d/zadjustment;
 }
 
 
@@ -124,66 +122,26 @@ void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDist
   // calculamos si tenemos que ampliar zfar (por estar moviendo la camara hacia atras
   float adj=0.0;
   if (zadjustment > 0.0 && obsz>zadjustment){
-    float mdl2scr = virtualdisplaysize / getDisplaySizex();
+    // comprobamos que se haya ajustado la escala
+    if (mdl2scr==0) printf("Warning, TrackingPFC_client::htadjustPerspective is being called without setting first the virtual display size or distance.\n");
     adj= (obsz -zadjustment)*mdl2scr;
-    //printf("zfar ampliado por %f\n", adj);
   }
 
   glFrustum (frleft, frright, frup, frdown, m_dCamDistMin, m_dCamDistMax+adj);
 }
 
-/*void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
-				   float tarx, float tary, float tarz,
-				   float upx, float upy, float upz){
-  // descomentar esto y comentar el resto para hacer que la funcion sea transparente
-  //gluLookAt(eyex,eyey, eyez,  tarx,tary, tarz,   upx, upy, upz);
-  float vecx,vecy,vecz,neweyex,neweyey,neweyez, mdl2scr;
-  // vector hacia el que está mirando la camara
-  vecx=tarx-eyex;
-  vecy=tary-eyey;
-  vecz=tarz-eyez;
-  // calculamos el ratio modelo/realidad
-  if (virtualdisplaysize==0){
-    printf("Warning, TrackingPFC_client::htgluLookAt is being called without setting first the virtual display size or distance. Aborting program now.\n");
-    exit(-1);
-  }
-  mdl2scr = virtualdisplaysize / getDisplaySizex();
-  
-  // corregimos el obsz (por si habia un fov original)
-  float cobsz= obsz -zadjustment;
-
-  // posicion modificada del ojo
-  if (coordmode==TPFCCORD_DEFAULT){
-    neweyex=eyex+(obsx*mdl2scr); // horizontal, derecha=positivo
-    neweyey=eyey+(obsy*mdl2scr); // vertical , arriba = positivo
-    neweyez=eyez+(cobsz*mdl2scr); // profundidad, alejarse de la pantalla = positivo
-  }else if (coordmode==TPFCCORD_GLC){
-    neweyex=eyex-(obsx*mdl2scr); // horizontal, izda=positivo
-    neweyey=eyey+(cobsz*mdl2scr); // profundidad, alejarse de la pantalla = positivo
-    neweyez=eyez+(obsy*mdl2scr); // vertical, arriba = positivo
-  }else{
-    printf("Warning, TrackingPFC_client::htgluLookAt is being called withan unknown coordinate system. Aborting program now.\n");
-    exit(-1);
-  }
-
-  //printf("DEBUG: %f, %f, %f    %f, %f, %f\n",neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz);
-  gluLookAt(neweyex,neweyey,neweyez, neweyex+vecx,neweyey+vecy,neweyez+vecz,  upx,upy,upz);
-}*/
 void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
 				   float tarx, float tary, float tarz,
 				   float upx, float upy, float upz){
   // descomentar esto y comentar el resto para hacer que la funcion sea transparente
   //gluLookAt(eyex,eyey, eyez,  tarx,tary, tarz,   upx, upy, upz);
     
-  // calculamos el ratio modelo/realidad
-  if (virtualdisplaysize==0){
-    printf("Warning, TrackingPFC_client::htgluLookAt is being called without setting first the virtual display size or distance. Aborting program now.\n");
-    exit(-1);
-  }
-  float mdl2scr = virtualdisplaysize / getDisplaySizex();
-  
+   
   // corregimos el obsz (por si habia un fov original)
   float cobsz= obsz -zadjustment;
+
+  // comprobamos que se haya ajustado la escala
+  if (mdl2scr==0) printf("Warning, TrackingPFC_client::htadjustPerspective is being called without setting first the virtual display size or distance.\n");
 
   // En vez de reajustar la camara, movemos todo el modelo en direccion contraria
   glTranslatef(-obsx*mdl2scr,-obsy*mdl2scr,-cobsz*mdl2scr);
