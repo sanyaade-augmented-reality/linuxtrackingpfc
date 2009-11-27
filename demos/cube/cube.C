@@ -76,11 +76,12 @@ void display(void)
 
    glColor3f(1.0, 1.0, 1.0);
    char buffer[160];
-   sprintf(buffer, "X %f", track->getlastposx());   
+   float * lastpos = track->getlastpos();
+   sprintf(buffer, "X %f", lastpos[0]);   
    output(-7,-3.5,buffer ); 
-   sprintf(buffer, "Y %f", track->getlastposy());   
+   sprintf(buffer, "Y %f", lastpos[1]);   
    output(-7,-4.0,buffer ); 
-   sprintf(buffer, "Z %f", track->getlastposz());   
+   sprintf(buffer, "Z %f", lastpos[2]);   
    output(-7,-4.5,buffer ); 
 
 

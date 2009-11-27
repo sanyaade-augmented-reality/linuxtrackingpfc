@@ -4,22 +4,15 @@ void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
    // t.sensor es la variable que da el numero de sensor
    // en este ejemplo no se usa xq se ha registrado el callback para ejecutarse solo con el sensor0
   TrackingPFC_client * trk= (TrackingPFC_client*)(userdata);
-  trk->obsx = t.pos[0];
-  trk->obsy = t.pos[1];
-  trk->obsz = t.pos[2];
+  trk->data->setnewpos(t.pos[0],t.pos[1],t.pos[2]);
   if (trk->callback_func!=NULL)
     trk->callback_func(trk);
-  //printf("%f\n",trk->obsx); // descomentar esto para ver si conecta
 }
 
 // Creadora
 TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPFC_client*)){
-  obsx=0;
-  obsy=0;
-  obsz=0.5;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
   data = new TrackingPFC_data();
   
-
   alive=1;
   tracker = new vrpn_Tracker_Remote(tname);
   tracker->register_change_handler(this, TrackingPFC_client_callback,0);
@@ -58,14 +51,8 @@ void *mainloop_executer(void * t){
 }
 
 // consultoras
-float TrackingPFC_client::getlastposx(){
-  return obsx;
-}
-float TrackingPFC_client::getlastposy(){
-  return obsy;
-}
-float TrackingPFC_client::getlastposz(){
-  return obsz;
+float* TrackingPFC_client::getlastpos(){
+  return data->getlastpos();
 }
 float TrackingPFC_client::getDisplaySizex(){
   return 0.52; // placeholder!!!
@@ -73,14 +60,8 @@ float TrackingPFC_client::getDisplaySizex(){
 
 
 // modificadoras
-void TrackingPFC_client::setlastposx(float x){
-  obsx=x;
-}
-void TrackingPFC_client::setlastposy(float y){
-  obsy=y;
-}
-void TrackingPFC_client::setlastposz(float z){
-  obsz=z;
+void TrackingPFC_client::setnewpos(float x, float y, float z){
+  data->setnewpos(x,y,z);
 }
 
 void TrackingPFC_client::setvirtualdisplaysize(float s){
@@ -112,6 +93,11 @@ void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDist
   scrx= getDisplaySizex();
   scry= scrx/AspectRatio;
 
+  float* lastpos= data->getlastpos();
+  float obsx, obsy, obsz;
+  obsx=lastpos[0];
+  obsy=lastpos[1];
+  obsz=lastpos[2];
   // obtenemos el factor znear_display/mundo real
   fact=m_dCamDistMin/obsz;
   frleft= fact*((-scrx/2.0)-obsx);
@@ -137,6 +123,13 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
   //gluLookAt(eyex,eyey, eyez,  tarx,tary, tarz,   upx, upy, upz);
     
    
+
+  float* lastpos= data->getlastpos();
+  float obsx, obsy, obsz;
+  obsx=lastpos[0];
+  obsy=lastpos[1];
+  obsz=lastpos[2];
+
   // corregimos el obsz (por si habia un fov original)
   float cobsz= obsz -zadjustment;
 
