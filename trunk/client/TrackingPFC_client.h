@@ -14,13 +14,15 @@ class TrackingPFC_client{
     float obsx;
     float obsy;
     float obsz;
+    //TrackingPFC_data * data;
   
     int alive; // indicador de si el thrad de mainloop debe seguir funcionando 1=si, 2=no
 
-    float virtualdisplaysize; // indicador del tamaño de la pantalla virtual
-    float originalfov;
-    float zadjustment;
-    float aspectratio;
+    float mdl2scr; // ratio de la escala modelo / mundo real (o pantalla)
+    // datos para ajustes si la camara original no estaba pensada para HT
+    float originalfov; // fov original de la aplicación(si lo tenia)
+    float aspectratio; // aspect ratio de la ultima llamada a gluPerspective
+    float zadjustment; // ajuste en el eje z necesario si la aplicacion original tenia fov
 
   
     // vrpn_Tracker
