@@ -11,10 +11,7 @@
 
 class TrackingPFC_client{
   public:
-    // Datos de posicion (PLACEHOLDERS, esto mas tarde será un tipo de datos complejo)
-    float obsx;
-    float obsy;
-    float obsz;
+    // datos recibidos
     TrackingPFC_data * data;
   
     int alive; // indicador de si el thrad de mainloop debe seguir funcionando 1=si, 2=no
@@ -46,12 +43,8 @@ class TrackingPFC_client{
     //float getDisplayRatio();
 
     // consultoras y escritoras de los datos
-    float getlastposx();
-    float getlastposy();
-    float getlastposz();
-    void setlastposx(float);
-    void setlastposy(float);
-    void setlastposz(float);
+    float* getlastpos();
+    void setnewpos(float, float, float);
     
     void setvirtualdisplaysize(float);
     void setvirtualdisplaydistance(float);

@@ -34,10 +34,11 @@ void output(float x, float y, char *string){
    
 void display(void)
 {
+   float* lastpos = track->getlastpos();
    GLfloat mld2scr= 16/(track->getDisplaySizex());
-   obsx = track->getlastposx()*mld2scr;
-   obsy = track->getlastposy()*mld2scr;
-   obsz = track->getlastposz()*mld2scr;
+   obsx = lastpos[0]*mld2scr;
+   obsy = lastpos[1]*mld2scr;
+   obsz = lastpos[2]*mld2scr;
 
    GLfloat znear =1.0;
    GLfloat zfar =100.0;
@@ -89,11 +90,11 @@ void display(void)
 
    glColor3f(1.0, 1.0, 1.0);
    char buffer[160];
-   sprintf(buffer, "X %f", track->getlastposx());   
+   sprintf(buffer, "X %f", lastpos[0]);   
    output(-7,-3.5,buffer ); 
-   sprintf(buffer, "Y %f", track->getlastposy());   
+   sprintf(buffer, "Y %f", lastpos[1]);   
    output(-7,-4.0,buffer ); 
-   sprintf(buffer, "Z %f", track->getlastposz());   
+   sprintf(buffer, "Z %f", lastpos[2]);   
    output(-7,-4.5,buffer ); 
 
 

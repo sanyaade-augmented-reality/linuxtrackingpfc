@@ -14,9 +14,13 @@ class TrackingPFC_data{
     float obsx;
     float obsy;
     float obsz;
+
   public:  
-    TrackingPFC_data();
+    TrackingPFC_data(float x =0.0, float y = 0.0, float z = 0.5);
     ~TrackingPFC_data();
+
+  float* getlastpos();
+  void setnewpos(float, float, float);
 
 };
 #endif /*TRACKINGPFC_DATA_*/
