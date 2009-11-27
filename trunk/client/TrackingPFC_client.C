@@ -17,7 +17,7 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   obsx=0;
   obsy=0;
   obsz=0.5;// para que si no hay tracker podemos ver algo, asumimos que no tenemos pegada la nariz a la pantalla
-  //data = new TrackingPFC_data();
+  data = new TrackingPFC_data();
   
 
   alive=1;
