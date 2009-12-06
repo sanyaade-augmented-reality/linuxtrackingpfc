@@ -67,7 +67,7 @@ OpenglView::OpenglView(const bool useFrameBuffer, QWidget *pParent)
 	// PFC MOD starts here
 	// comento esto para que no se vea el fondo
 	//m_GlView.loadBackGroundImage(":images/default_background.png");
-	// PFC MOD starts here
+	// PFC MOD ends here
 
 	//Use the default mover controller
 	QColor repColor;
@@ -947,24 +947,33 @@ void OpenglView::setDistMinAndMax()
 void OpenglView::swapVisibleSpace()
 {
 	m_World.collection()->swapShowState();
+	// PFC MOD starts here
+	/* comento esto para que no se vean fondos
 	if (m_World.collection()->showState())
-	{
+	{	
 		m_GlView.loadBackGroundImage(":images/default_background.png");
 	}
 	else
 	{
 		m_GlView.loadBackGroundImage(":images/NoShow_background.png");
-	}
+	}*/
+	// PFC MOD ends here
 }
 // set the view to visible state
 void OpenglView::setToVisibleState()
-{
-	m_GlView.loadBackGroundImage(":images/default_background.png");
+{	
+	// PFC MOD starts here
+	// comentado para no ver fondos
+	//m_GlView.loadBackGroundImage(":images/default_background.png");
+	// PFC MOD ends here
 }
 // set the view to visible state
 void OpenglView::setToInVisibleState()
 {
-	m_GlView.loadBackGroundImage(":images/NoShow_background.png");
+	// PFC MOD starts here
+	// comentado para no ver fondos
+	// m_GlView.loadBackGroundImage(":images/NoShow_background.png");
+	// PFC MOD ends here
 }
 
 // Take a Screenshot of the current view
@@ -985,7 +994,7 @@ QImage OpenglView::takeScreenshot(const bool tryToUseFrameBuffer, const QSize& t
 
 	setAutoBufferSwap(false);
 	setSnapShootMode(true);
-
+	
 	// Test if the background must be changed
 	if (not backImageName.isEmpty())
 	{
