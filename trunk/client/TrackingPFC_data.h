@@ -2,10 +2,26 @@
 #define TRACKINGPFC_DATA_
 
 #include <pthread.h>
+#include <stdlib.h>
+
+#define TPFCDATA2D 0 
+#define TPFCDATA2DSIZE 1 
+#define TPFCDATA3D 2 
+#define TPFCDATA3DORI 3 
 
 class TrackingPFC_data{
   private:
-    // Datos de posicion (PLACEHOLDERS, esto mas tarde será un tipo de datos complejo)
+    // tipo de datos almacenados y tamaño del buffer
+    int type;
+    int size;
+    int dsize;
+    
+    // Datos almacenados
+    float *data; 
+    // indices que controlan el bufer
+    int ind; // indice que apunta al primer dato valido del buffer
+    int count; // total de datos recibidos
+
     float obsx;
     float obsy;
     float obsz;
@@ -13,11 +29,17 @@ class TrackingPFC_data{
     pthread_mutex_t* lock;
 
   public:  
-    TrackingPFC_data(float x =0.0, float y = 0.0, float z = 0.5);
+    TrackingPFC_data(int type=TPFCDATA3DORI, int size=1);
     ~TrackingPFC_data();
 
-  float* getlastpos();
-  void setnewpos(float, float, float);
+    //devuelve el tipo de datos almacenado
+    int datatype();
+    // devuelve el tamaño de los datos que se guardan (de cuanto es el vector que se devuelve)
+    int datasize();
+
+    float* getlastpos();
+    void setnewpos(float, float, float);
+    void setnewdata(float* d);
 
 };
 #endif /*TRACKINGPFC_DATA_*/
