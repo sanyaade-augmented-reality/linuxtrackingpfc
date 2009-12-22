@@ -28,13 +28,19 @@ int main( int argc, char** argv ){
     
     // Creamos los dispositivos del servidor
     TPFC_device* dev[TPFC_server_DEVS];
-    //dev[0]= new TPFC_device_opencv_face(0,0);
-    dev[0]= new TPFC_device_wiimote(0);
-    /*vrpn_SleepMsecs(50);
-    dev[1]= new TPFC_device_opencv_face(1,1);*/
+
+    /*dev[0]= new TPFC_device_opencv_face(0,0);
+    //vrpn_SleepMsecs(50);
+    //dev[1]= new TPFC_device_opencv_face(1,1);
     dev[1]= new TPFC_device_3dfrom2d(1,dev[0]);
-    settracker(dev[1], "Tracker0");
+    settracker(dev[1], "Tracker0");*/
     
+    dev[0]= new TPFC_device_wiimote(0);
+    dev[1]= new TPFC_device_wiimote(1);
+    dev[2]= new TPFC_device_3dfrom2d(2,dev[0]);
+    settracker(dev[2], "Tracker0");
+    dev[3]= new TPFC_device_3dfrom2d(3,dev[0]);
+    settracker(dev[3], "Tracker1");
     
     int devs =2;
 

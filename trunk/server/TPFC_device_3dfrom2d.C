@@ -16,6 +16,6 @@ TPFC_device_3dfrom2d::~TPFC_device_3dfrom2d(){
 void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
   //updateamos nuestros datos con los de la fuente
   float* aux = (s->getdata())->getlastpos();
-  data->setnewpos(-(aux[0]-320)/640.0, -(aux[1]-240)/480.0, 0.5);
+  data->setnewpos(aux[0], aux[1], 0.5);
   report();
 }
