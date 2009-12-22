@@ -2,7 +2,7 @@
 
 
 
-int detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaarClassifierCascade* cascade, const char* winname){
+int detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaarClassifierCascade* cascade, const char* winname, TPFC_device_opencv_face* d){
     static CvScalar colors[] =
     {
         {{0,0,255}},
@@ -51,19 +51,11 @@ int detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaar
             cvGetSubRect( small_img, &small_img_roi, *r );
         }
 	if (i>0){
-	  //printf("X: %i, Y: %i, r: %i (%f)\n", center.x, center.y, radius, sqrt(radius));
-	  /*position[0]=-(center.x-320)/640.0;
-	  position[1]=-(center.y-240)/480.0;
-	  //position[2]=1.0 + ( (6.0-sqrt(radius))/4 );
-	  position[2]=0.5;
-	  vrpn_gettimeofday(&current_time, NULL);
-	  nt->report_pose(0,current_time, position, quaternion);
-	  nt->mainloop();
-	  connection->mainloop();*/
-	  res = 1;
-	}
-	else{
-	  res = 0;
+	  float* aux= new float[3];
+	  aux[0]=center.x;
+	  aux[1]=center.y;
+	  aux[2]=radius;
+	  (d->getdata())->setnewdata(aux);
 	}
     }
     
@@ -71,7 +63,7 @@ int detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaar
     cvShowImage( winname, img );
     cvReleaseImage( &gray );
     cvReleaseImage( &small_img );
-    return res;
+    return i;
 }
 
 void *tpfcdevopencvfacedetect(void * t){
@@ -119,7 +111,7 @@ void *tpfcdevopencvfacedetect(void * t){
       else
 	  cvFlip( frame, frame_copy, 0 );
 
-      if (detect_and_draw( frame_copy , scale, storage, cascade, winname)==1)
+      if (detect_and_draw( frame_copy , scale, storage, cascade, winname, d)==1)
 	d->report();
       if (d->camera()==0) cvWaitKey( 10 ); // si quito esto la ventana no aparece :\
       // fin del bucle central de facedetect
@@ -147,6 +139,7 @@ void *tpfcdevopencvfacedetect(void * t){
 
 TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c):TPFC_device(ident){
   cam = c;
+  data = new TrackingPFC_data(TPFCDATA2DSIZE);
   // lanzamos el thread
   pthread_create( &facedetect_thread, NULL, tpfcdevopencvfacedetect,this);
   

@@ -21,13 +21,21 @@ int TPFC_device::report_to(TPFC_device* l){
 
 void TPFC_device::report(){
   for (int i =0; i<registered_listeners;i++){
-    listeners[i]-> report_from(id);
+    listeners[i]-> report_from(this);
   }
 
   if (server!=NULL){
     struct timeval current_time;
     vrpn_float64 position[3];
     vrpn_float64 quaternion[4];
+    float* aux = data->getlastpos();
+    position[0]=aux[0];
+    position[1]=aux[1];
+    position[2]=aux[2];
+    quaternion[0]=aux[3];
+    quaternion[1]=aux[4];
+    quaternion[2]=aux[5];
+    quaternion[3]=aux[6];
     vrpn_gettimeofday(&current_time, NULL);
     server->report_pose(0,current_time, position, quaternion);
     server->mainloop();
@@ -74,6 +82,6 @@ int TPFC_device::idnum(){
 }
 
 // placeholders para funciones virtualizadas
-void TPFC_device::report_from(int id){
+void TPFC_device::report_from(TPFC_device*){
 }
 
