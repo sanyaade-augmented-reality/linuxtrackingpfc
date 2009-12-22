@@ -42,7 +42,7 @@ class TPFC_device{
     // registra otro device como listener. devuelve 0 si es correcto, -1 si ha habido un error
     int report_to(TPFC_device*);
     // funcion que indica que hay nuevos datos desde uno de los inputs
-    virtual void report_from(int id);
+    virtual void report_from(TPFC_device*);
   
     // devuelve el puntero a los datos
     TrackingPFC_data * getdata();
