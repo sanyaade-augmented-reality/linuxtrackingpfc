@@ -15,11 +15,7 @@
 #include <ctype.h>
 
 
-
-#include <pthread.h>
-#include <TrackingPFC_data.h>
 #include "TPFC_device.h"
-#define TPFC_DEVICE_MAX_LISTENERS 10
 
 class TPFC_device_opencv_face : public TPFC_device{
   private:
