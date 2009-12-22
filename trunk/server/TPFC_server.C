@@ -2,6 +2,7 @@
 #include <vrpn_Tracker.h>
 #include "TPFC_device.h"
 #include "TPFC_device_opencv_face.h"
+#include "TPFC_device_wiimote.h"
 #include "TPFC_device_3dfrom2d.h"
 #define TPFC_server_DEVS 20
 
@@ -27,11 +28,13 @@ int main( int argc, char** argv ){
     
     // Creamos los dispositivos del servidor
     TPFC_device* dev[TPFC_server_DEVS];
-    dev[0]= new TPFC_device_opencv_face(0,0);
+    //dev[0]= new TPFC_device_opencv_face(0,0);
+    dev[0]= new TPFC_device_wiimote(0);
     /*vrpn_SleepMsecs(50);
     dev[1]= new TPFC_device_opencv_face(1,1);*/
     dev[1]= new TPFC_device_3dfrom2d(1,dev[0]);
     settracker(dev[1], "Tracker0");
+    
     
     int devs =2;
 

@@ -146,6 +146,7 @@ TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c):TPFC_device(i
 }
 
 TPFC_device_opencv_face::~TPFC_device_opencv_face(){
+  free(data);
 }
 
 void TPFC_device_opencv_face::stop(){

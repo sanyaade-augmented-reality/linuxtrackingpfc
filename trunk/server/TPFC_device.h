@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <TrackingPFC_data.h>
 #include <vrpn_Tracker.h>
+#include <pthread.h>
 #define TPFC_DEVICE_MAX_LISTENERS 10
 #define TPFC_STOP 0
 #define TPFC_RUN 1
