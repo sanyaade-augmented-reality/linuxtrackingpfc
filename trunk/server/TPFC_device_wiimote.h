@@ -21,6 +21,8 @@ class TPFC_device_wiimote : public TPFC_device{
     TPFC_device_wiimote(int ident);
     ~TPFC_device_wiimote();
     
+    static void err(cwiid_wiimote_t *, const char *, va_list);
+    static void set_rpt_mode(cwiid_wiimote_t *, unsigned char);
 
 };
 
