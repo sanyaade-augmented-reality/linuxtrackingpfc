@@ -4,15 +4,11 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#define TPFCDATA2D 0 
-#define TPFCDATA2DSIZE 1 
-#define TPFCDATA3D 2 
-#define TPFCDATA3DORI 3 
-
 class TrackingPFC_data{
   private:
     // tipo de datos almacenados y tamaño del buffer
-    int type;
+    enum TPFCdatatype { TPFCDATA2D, TPFCDATA2DSIZE, TPFCDATA3D, TPFCDATA3DORI};
+    TPFCdatatype type;
     int size;
     int dsize;
     
@@ -29,7 +25,7 @@ class TrackingPFC_data{
     pthread_mutex_t* lock;
 
   public:  
-    TrackingPFC_data(int type=TPFCDATA3DORI, int size=1);
+    TrackingPFC_data(TPFCdatatype type=TPFCDATA3DORI, int size=1);
     ~TrackingPFC_data();
 
     //devuelve el tipo de datos almacenado

@@ -1,5 +1,5 @@
 #include "TrackingPFC_data.h"
-TrackingPFC_data::TrackingPFC_data(int t, int s){
+TrackingPFC_data::TrackingPFC_data(TPFCdatatype t, int s){
   lock = new pthread_mutex_t();
   type = t;
   size = s;
