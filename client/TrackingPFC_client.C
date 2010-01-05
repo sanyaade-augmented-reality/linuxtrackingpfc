@@ -1,6 +1,6 @@
 #include "TrackingPFC_client.h"
 // calback que actualiza los datos y llama al callback personalizado si lo hay
-void TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
+void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
    // t.sensor es la variable que da el numero de sensor
    // en este ejemplo no se usa xq se ha registrado el callback para ejecutarse solo con el sensor0
   TrackingPFC_client * trk= (TrackingPFC_client*)(userdata);
@@ -43,7 +43,7 @@ void TrackingPFC_client::mainloop(){
 }
 
 // Codigo que ejecuta el thread encargado del mainloop
-void *mainloop_executer(void * t){
+void* TrackingPFC_client::mainloop_executer(void * t){
   while ( ((TrackingPFC_client *)t)->isalive() ==1 ){// esto deberia poder acabar!
     ((TrackingPFC_client *)t)->mainloop();
     vrpn_SleepMsecs(1);
