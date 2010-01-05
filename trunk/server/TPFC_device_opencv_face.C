@@ -150,7 +150,7 @@ TPFC_device_opencv_face::~TPFC_device_opencv_face(){
 }
 
 void TPFC_device_opencv_face::stop(){
-   running= TPFC_STOP;
+   running= STOP;
    pthread_join( facedetect_thread, NULL);
 }
 int TPFC_device_opencv_face::camera(){
