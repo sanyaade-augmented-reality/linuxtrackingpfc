@@ -29,8 +29,9 @@ class TPFC_device_opencv_face : public TPFC_device{
     ~TPFC_device_opencv_face(); 
     void stop();
     int camera();
+    static void* facedetect(void * t);
 };
 
-void *tpfcdevopencvfacedetect(void * t);
+
 
 #endif /*TPFC_DEVICE_OPENCV_FACE_*/
