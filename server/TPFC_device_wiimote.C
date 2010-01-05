@@ -1,19 +1,11 @@
 #include "TPFC_device_wiimote.h" 
 
-
-/*void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state);
-void set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode);
-void print_state(struct cwiid_state *state);*/
-//cwiid_mesg_callback_t cwiid_callback;
-//cwiid_err_t err;
-
-
 // variables globales donde se guarda la información de los wiimotes
-// y funciones para registrar y obtener el device
 int* wiimoteids= new int[TPFC_DEVICE_WII_MAXWIIMOTES];
 TPFC_device_wiimote** wiimotedevices= new TPFC_device_wiimote*[TPFC_DEVICE_WII_MAXWIIMOTES];
 int totalwiimotes=0;
 
+// Funciones para registrar y obtener los devices y los wiimotes
 void registerwiimote(cwiid_wiimote_t *wiimote, TPFC_device_wiimote* dev){
   wiimoteids[totalwiimotes]=cwiid_get_id(wiimote);
   wiimotedevices[totalwiimotes]=dev;
@@ -29,21 +21,7 @@ TPFC_device_wiimote* getwiimotedev(cwiid_wiimote_t *wiimote){
 }
 
 
-void err(cwiid_wiimote_t *wiimote, const char *s, va_list ap){
-	// comento para que no salga nada de errores
-}
 
-void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state){
-	if (cwiid_set_led(wiimote, led_state)) {
-		fprintf(stderr, "Error setting LEDs \n");
-	}
-}
-	
-void set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode){
-	if (cwiid_set_rpt_mode(wiimote, rpt_mode)) {
-		fprintf(stderr, "Error setting report mode\n");
-	}
-}
 
 void wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_count,
                     union cwiid_mesg mesg[], struct timespec *timestamp){
@@ -137,4 +115,15 @@ TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
 
 TPFC_device_wiimote::~TPFC_device_wiimote(){
   free(data);
+}
+
+
+// Funciones necesarias para el control del wiimote via cwiid
+void TPFC_device_wiimote::err(cwiid_wiimote_t *wiimote, const char *s, va_list ap){
+	// comento para que no salga nada de errores
+}
+void TPFC_device_wiimote::set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode){
+	if (cwiid_set_rpt_mode(wiimote, rpt_mode)) {
+		fprintf(stderr, "Error setting report mode\n");
+	}
 }
