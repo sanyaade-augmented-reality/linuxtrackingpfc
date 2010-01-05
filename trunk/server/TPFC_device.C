@@ -1,8 +1,9 @@
 #include "TPFC_device.h" 
 
 TPFC_device::TPFC_device(int ident){
+  // guardamos la ID del dispositivo
   id = ident;
-  registered_listeners=0;
+  // iniciamos el servidor a NULL (si es necesario, se ajusta con una llamada a settracker posteriormente
   server=NULL;
   // ajustamos el flag de funcionamiento
   running=RUN;
@@ -11,16 +12,12 @@ TPFC_device::TPFC_device(int ident){
 TPFC_device::~TPFC_device(){
 }
 
-int TPFC_device::report_to(TPFC_device* l){
-  if (registered_listeners>=TPFC_DEVICE_MAX_LISTENERS)
-    return -1;
-  listeners[registered_listeners]=l;
-  registered_listeners++;
-  return 0;
+void TPFC_device::report_to(TPFC_device* l){
+  listeners.push_back( l );
 }
 
 void TPFC_device::report(){
-  for (int i =0; i<registered_listeners;i++){
+  for (int i =0; i<listeners.size();i++){
     listeners[i]-> report_from(this);
   }
 
