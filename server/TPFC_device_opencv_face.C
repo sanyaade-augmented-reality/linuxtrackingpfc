@@ -66,7 +66,7 @@ int detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaar
     return i;
 }
 
-void *tpfcdevopencvfacedetect(void * t){
+void* TPFC_device_opencv_face::facedetect(void * t){
   // para no tener que estar haciendo casts, creamos un apuntador al device
   TPFC_device_opencv_face* d = (TPFC_device_opencv_face*)t;
 
@@ -141,7 +141,7 @@ TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c):TPFC_device(i
   cam = c;
   data = new TrackingPFC_data(TPFCDATA2DSIZE);
   // lanzamos el thread
-  pthread_create( &facedetect_thread, NULL, tpfcdevopencvfacedetect,this);
+  pthread_create( &facedetect_thread, NULL, facedetect,this);
   
 }
 
