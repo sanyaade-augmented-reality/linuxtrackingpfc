@@ -5,10 +5,10 @@
 #include <TrackingPFC_data.h>
 #include <vrpn_Tracker.h>
 #include <pthread.h>
-#define TPFC_DEVICE_MAX_LISTENERS 10
-// para poder usar vector
-/*#include <vector>
-using namespace std;*/
+
+
+#include <vector>
+using namespace std;
 
 
 class TPFC_device{
@@ -17,9 +17,7 @@ class TPFC_device{
     int id; 
 
     // Lista de los demas dispositivos a los que hay que avisar si hay un update
-    TPFC_device* listeners[TPFC_DEVICE_MAX_LISTENERS];
-    //vector<TPFC_device*> listeners;
-    int registered_listeners;
+    vector<TPFC_device*> listeners;
 
     // vrpn_Tracker server
     vrpn_Tracker_Server * server;
@@ -43,8 +41,8 @@ class TPFC_device{
     TPFC_device(int ident);
     ~TPFC_device();
 
-    // registra otro device como listener. devuelve 0 si es correcto, -1 si ha habido un error
-    int report_to(TPFC_device*);
+    // registra otro device como listener.
+    void report_to(TPFC_device*);
     // funcion que indica que hay nuevos datos desde uno de los inputs
     virtual void report_from(TPFC_device*);
   
