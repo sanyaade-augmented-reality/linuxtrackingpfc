@@ -1,17 +1,22 @@
 #include "TPFC_device_wiimote.h" 
 
+
 // variables globales donde se guarda la información de los wiimotes
 int* wiimoteids= new int[TPFC_DEVICE_WII_MAXWIIMOTES];
 TPFC_device_wiimote** wiimotedevices= new TPFC_device_wiimote*[TPFC_DEVICE_WII_MAXWIIMOTES];
 int totalwiimotes=0;
 
+
+
+
+
 // Funciones para registrar y obtener los devices y los wiimotes
-void registerwiimote(cwiid_wiimote_t *wiimote, TPFC_device_wiimote* dev){
+void TPFC_device_wiimote::registerwiimote(cwiid_wiimote_t *wiimote, TPFC_device_wiimote* dev){
   wiimoteids[totalwiimotes]=cwiid_get_id(wiimote);
   wiimotedevices[totalwiimotes]=dev;
   totalwiimotes++;
 }
-TPFC_device_wiimote* getwiimotedev(cwiid_wiimote_t *wiimote){
+TPFC_device_wiimote* TPFC_device_wiimote::getwiimotedev(cwiid_wiimote_t *wiimote){
   TPFC_device_wiimote* dev=NULL;
   for (int i = 0; i<totalwiimotes && dev==NULL;i++){
     if (wiimoteids[i]==cwiid_get_id(wiimote))
@@ -22,8 +27,8 @@ TPFC_device_wiimote* getwiimotedev(cwiid_wiimote_t *wiimote){
 
 
 
-
-void wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_count,
+// Callback del wiimote
+void TPFC_device_wiimote::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_count,
                     union cwiid_mesg mesg[], struct timespec *timestamp){
 	int i, j;
 	int valid_source;
@@ -95,7 +100,7 @@ TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
   }
   // registramos el wiimote para poder identificar despues los callbacks 
   registerwiimote(wiimote, this);
-
+  
   if (cwiid_set_mesg_callback(wiimote, wiimote_callback)) {
 	  fprintf(stderr, "Unable to set message callback\n");
   }
