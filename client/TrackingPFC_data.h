@@ -3,11 +3,11 @@
 
 #include <pthread.h>
 #include <stdlib.h>
+enum TPFCdatatype { TPFCDATA2D, TPFCDATA2DSIZE, TPFCDATA3D, TPFCDATA3DORI};
 
 class TrackingPFC_data{
   private:
     // tipo de datos almacenados y tamaño del buffer
-    enum TPFCdatatype { TPFCDATA2D, TPFCDATA2DSIZE, TPFCDATA3D, TPFCDATA3DORI};
     TPFCdatatype type;
     int size;
     int dsize;
