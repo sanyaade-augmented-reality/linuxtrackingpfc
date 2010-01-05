@@ -5,7 +5,7 @@ TPFC_device::TPFC_device(int ident){
   registered_listeners=0;
   server=NULL;
   // ajustamos el flag de funcionamiento
-  running=TPFC_RUN;
+  running=RUN;
 }
 
 TPFC_device::~TPFC_device(){
@@ -58,20 +58,20 @@ int TPFC_device::settracker(vrpn_Connection * con, const char* name){
 
 
 void TPFC_device::pause(){
-  running= TPFC_PAUSE;
+  running= PAUSE;
 }
 void TPFC_device::unpause(){
-  running= TPFC_RUN;
+  running= RUN;
 }
 void TPFC_device::stop(){
-  running= TPFC_STOP;
+  running= STOP;
 }
 
 int TPFC_device::alive(){
-  return running!=TPFC_STOP;
+  return running!=STOP;
 }
 int TPFC_device::working(){
-  return running==TPFC_RUN;
+  return running==RUN;
 }
 
 TrackingPFC_data * TPFC_device::getdata(){

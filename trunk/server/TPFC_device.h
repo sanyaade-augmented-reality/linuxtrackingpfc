@@ -6,9 +6,6 @@
 #include <vrpn_Tracker.h>
 #include <pthread.h>
 #define TPFC_DEVICE_MAX_LISTENERS 10
-#define TPFC_STOP 0
-#define TPFC_RUN 1
-#define TPFC_PAUSE 2
 
 class TPFC_device{
   private:
@@ -28,7 +25,8 @@ class TPFC_device{
     // apuntador al buffer de datos
     TrackingPFC_data * data;
     // flag de funcionamiento. Estados: TPFC_RUN, TPFC_STOP, TPFC_PAUSE
-    int running; 
+    enum TPFC_device_state { STOP, RUN, PAUSE };
+    TPFC_device_state running; 
 
 
     
