@@ -6,6 +6,10 @@
 #include <vrpn_Tracker.h>
 #include <pthread.h>
 #define TPFC_DEVICE_MAX_LISTENERS 10
+// para poder usar vector
+/*#include <vector>
+using namespace std;*/
+
 
 class TPFC_device{
   private:
@@ -14,6 +18,7 @@ class TPFC_device{
 
     // Lista de los demas dispositivos a los que hay que avisar si hay un update
     TPFC_device* listeners[TPFC_DEVICE_MAX_LISTENERS];
+    //vector<TPFC_device*> listeners;
     int registered_listeners;
 
     // vrpn_Tracker server
@@ -55,8 +60,8 @@ class TPFC_device{
     
 
     // consultoras sobre el estado del funcionamiento
-    int alive(); // devuelve 1 si el estado no es TPFC_STOP
-    int working(); // devuelve 1 si el estado es TPFC_RUN
+    int alive(); // devuelve 1 si el estado no es STOP
+    int working(); // devuelve 1 si el estado es RUN
 
     // función para avisar a los listeners
     void report();
