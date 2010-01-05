@@ -1,14 +1,10 @@
 #include "TPFC_device_wiimote.h" 
 
 
-// variables globales donde se guarda la información de los wiimotes
-int* wiimoteids= new int[TPFC_DEVICE_WII_MAXWIIMOTES];
-TPFC_device_wiimote** wiimotedevices= new TPFC_device_wiimote*[TPFC_DEVICE_WII_MAXWIIMOTES];
-int totalwiimotes=0;
-
-
-
-
+// Inicializamos las variables globales donde se guarda la información de los wiimotes
+int* TPFC_device_wiimote::wiimoteids= new int[TPFC_DEVICE_WII_MAXWIIMOTES];
+TPFC_device_wiimote** TPFC_device_wiimote::wiimotedevices= new TPFC_device_wiimote*[TPFC_DEVICE_WII_MAXWIIMOTES];
+int TPFC_device_wiimote::totalwiimotes=0;
 
 // Funciones para registrar y obtener los devices y los wiimotes
 void TPFC_device_wiimote::registerwiimote(cwiid_wiimote_t *wiimote, TPFC_device_wiimote* dev){

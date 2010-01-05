@@ -13,9 +13,9 @@
 class TPFC_device_wiimote : public TPFC_device{
   private:
     cwiid_wiimote_t *wiimote;	/* wiimote handle */
-    /*static int* wiimoteids;
+    static int* wiimoteids;
     static TPFC_device_wiimote** wiimotedevices;
-    static int totalwiimotes;*/
+    static int totalwiimotes;
 
   public:
     // consctructora y creadora
