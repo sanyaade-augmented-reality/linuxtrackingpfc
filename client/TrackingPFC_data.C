@@ -45,7 +45,7 @@ float* TrackingPFC_data::getlastpos(){
   return res;
 }
 
-// copia la orientacion de los ultimos datos, modificando la orientación.
+// copia la orientacion de los ultimos datos, modificando la posición.
 // aunque está pensado para funcionar con datos de tamaño 3 o mas, funcionara con los de 2
 // ignorando el 3r argumento
 void TrackingPFC_data::setnewpos(float x, float y, float z){
