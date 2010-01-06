@@ -16,6 +16,8 @@ class TPFC_device_wiimote : public TPFC_device{
     struct wiimoteinfo{
       int id;
       TPFC_device_wiimote* dev;
+      wiimoteinfo(){id=0; dev=NULL;};
+      wiimoteinfo(int i, TPFC_device_wiimote* d){id=i; dev=d;};
     };
     // vector que guarda la información de los wiimotes
     static vector<wiimoteinfo> wiimotes;
