@@ -1,22 +1,19 @@
 #include "TPFC_device_wiimote.h" 
 
 
-// Inicializamos las variables globales donde se guarda la información de los wiimotes
-int* TPFC_device_wiimote::wiimoteids= new int[TPFC_DEVICE_WII_MAXWIIMOTES];
-TPFC_device_wiimote** TPFC_device_wiimote::wiimotedevices= new TPFC_device_wiimote*[TPFC_DEVICE_WII_MAXWIIMOTES];
-int TPFC_device_wiimote::totalwiimotes=0;
+// Inicializamos el vector global donde se guarda la información de los wiimotes
+vector<TPFC_device_wiimote::wiimoteinfo> TPFC_device_wiimote::wiimotes;
 
-// Funciones para registrar y obtener los devices y los wiimotes
 void TPFC_device_wiimote::registerwiimote(cwiid_wiimote_t *wiimote, TPFC_device_wiimote* dev){
-  wiimoteids[totalwiimotes]=cwiid_get_id(wiimote);
-  wiimotedevices[totalwiimotes]=dev;
-  totalwiimotes++;
+  wiimotes.push_back(wiimoteinfo());
+  wiimotes[wiimotes.size()-1].id=cwiid_get_id(wiimote);
+  wiimotes[wiimotes.size()-1].dev=dev;
 }
 TPFC_device_wiimote* TPFC_device_wiimote::getwiimotedev(cwiid_wiimote_t *wiimote){
   TPFC_device_wiimote* dev=NULL;
-  for (int i = 0; i<totalwiimotes && dev==NULL;i++){
-    if (wiimoteids[i]==cwiid_get_id(wiimote))
-      dev= wiimotedevices[i];
+  for (int i = 0; i<wiimotes.size() && dev==NULL;i++){
+    if (wiimotes[i].id==cwiid_get_id(wiimote))
+      dev= wiimotes[i].dev;
   }
   return dev;
 }
@@ -108,9 +105,9 @@ TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
   set_rpt_mode(wiimote, rpt_mode);
   printf("Wiimote connected!\n");
   
-  for (int i = 0; i<totalwiimotes;i++){
+  /*for (int i = 0; i<totalwiimotes;i++){
     printf("Wiimote %i: id (%i), id del device (%i)\n", i, wiimoteids[i], wiimotedevices[i]->idnum());
-  }
+  }*/
   
 }
 

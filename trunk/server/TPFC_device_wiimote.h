@@ -8,14 +8,19 @@
 	(bf) = ((bf) & b)		\
 	       ? ((bf) & ~(b))	\
 	       : ((bf) | (b))
-#define TPFC_DEVICE_WII_MAXWIIMOTES 4
+//#define TPFC_DEVICE_WII_MAXWIIMOTES 4
 
 class TPFC_device_wiimote : public TPFC_device{
   private:
-    cwiid_wiimote_t *wiimote;	/* wiimote handle */
-    static int* wiimoteids;
-    static TPFC_device_wiimote** wiimotedevices;
-    static int totalwiimotes;
+    cwiid_wiimote_t *wiimote;	// wiimote handle 
+    // estructura que contiene la información de los wiimotes
+    struct wiimoteinfo{
+      int id;
+      TPFC_device_wiimote* dev;
+    };
+    // vector que guarda la información de los wiimotes
+    static vector<wiimoteinfo> wiimotes;
+
 
   public:
     // consctructora y creadora
@@ -29,7 +34,6 @@ class TPFC_device_wiimote : public TPFC_device{
 
     static void registerwiimote(cwiid_wiimote_t *, TPFC_device_wiimote* );
     static TPFC_device_wiimote* getwiimotedev(cwiid_wiimote_t *wiimote);
-
 };
 
 
