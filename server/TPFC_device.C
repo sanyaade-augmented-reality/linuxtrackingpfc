@@ -1,5 +1,6 @@
 #include "TPFC_device.h" 
 
+// Creadora y destructora
 TPFC_device::TPFC_device(int ident){
   // guardamos la ID del dispositivo
   id = ident;
@@ -8,19 +9,25 @@ TPFC_device::TPFC_device(int ident){
   // ajustamos el flag de funcionamiento
   running=RUN;
 }
-
 TPFC_device::~TPFC_device(){
 }
 
+// registrar un nuevo listener
 void TPFC_device::report_to(TPFC_device* l){
+  // simplemente añadimos el listener a la lista.
+  // no hay control de repetidos, como son los propios dispositivos los que se registran como listeners
+  // en el momento de su creación, asumimos que ninguno intentará registrarse 2 veces
   listeners.push_back( l );
 }
 
+// Reportar a los listeners que hay nuevos datos (enviando solo el aviso, no los datos en si)
+// y enviar los datos via vrpn_tracker si es que existe uno (en esta caso si que se envian los datos)
 void TPFC_device::report(){
+  // recorremos la lista de listeners enviando el aviso
   for (int i =0; i<listeners.size();i++){
     listeners[i]-> report_from(this);
   }
-
+  // si este dispositivo tiene un tracker asociado, enviamos un nuevo paquete
   if (server!=NULL){
     struct timeval current_time;
     vrpn_float64 position[3];
@@ -36,24 +43,24 @@ void TPFC_device::report(){
     vrpn_gettimeofday(&current_time, NULL);
     server->report_pose(0,current_time, position, quaternion);
     server->mainloop();
-    //connection->mainloop();
   }
 }
 
+// registrar un tracker asociado a este dispositivo
 int TPFC_device::settracker(vrpn_Connection * con, const char* name){
+  // si ya habia un tracker asociado, devolvemos -1, aunque esto no deberia pasar
   if (server!=NULL)
     return -1;
+  // si hay algun problema al crear el tracker, enviamos un -2
   if ((server = new vrpn_Tracker_Server(name, con)) == NULL){
     fprintf(stderr,"Can't create new vrpn_Tracker_NULL\n");
-    return -1;
+    return -2;
   }
- 
- 
-  //connection= con;
+  //si todo es correcto devolvemos un 0;
   return 0;
 }
 
-
+// Funciones para cambiar el estado del dispositivo
 void TPFC_device::pause(){
   running= PAUSE;
 }
@@ -64,6 +71,7 @@ void TPFC_device::stop(){
   running= STOP;
 }
 
+// Consultoras sobre el estado
 int TPFC_device::alive(){
   return running!=STOP;
 }
@@ -71,14 +79,16 @@ int TPFC_device::working(){
   return running==RUN;
 }
 
+// Consultora: obtiene un puntero a los datos del device
 TrackingPFC_data * TPFC_device::getdata(){
   return data;
 }
+// consultora de la id del dispositivo
 int TPFC_device::idnum(){
   return id;
 }
 
-// placeholders para funciones virtualizadas
+// placeholders para el handler de los reports. Esta función debe ser sobrecargada si el dispositivo va a usarla.
 void TPFC_device::report_from(TPFC_device*){
 }
 
