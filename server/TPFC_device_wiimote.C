@@ -5,9 +5,7 @@
 vector<TPFC_device_wiimote::wiimoteinfo> TPFC_device_wiimote::wiimotes;
 
 void TPFC_device_wiimote::registerwiimote(cwiid_wiimote_t *wiimote, TPFC_device_wiimote* dev){
-  wiimotes.push_back(wiimoteinfo());
-  wiimotes[wiimotes.size()-1].id=cwiid_get_id(wiimote);
-  wiimotes[wiimotes.size()-1].dev=dev;
+  wiimotes.push_back(wiimoteinfo(cwiid_get_id(wiimote),dev));
 }
 TPFC_device_wiimote* TPFC_device_wiimote::getwiimotedev(cwiid_wiimote_t *wiimote){
   TPFC_device_wiimote* dev=NULL;
