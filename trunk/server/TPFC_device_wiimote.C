@@ -19,9 +19,8 @@ TPFC_device_wiimote* TPFC_device_wiimote::getwiimotedev(cwiid_wiimote_t *wiimote
 }
 
 
-
 // Callback del wiimote
-void TPFC_device_wiimote::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_count,
+void TPFC_device_wiimote::callback(cwiid_wiimote_t *wiimote, int mesg_count,
                     union cwiid_mesg mesg[], struct timespec *timestamp){
 	int i, j;
 	int valid_source;
@@ -94,7 +93,7 @@ TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
   // registramos el wiimote para poder identificar despues los callbacks 
   registerwiimote(wiimote, this);
   
-  if (cwiid_set_mesg_callback(wiimote, wiimote_callback)) {
+  if (cwiid_set_mesg_callback(wiimote, callback)) {
 	  fprintf(stderr, "Unable to set message callback\n");
   }
   if (cwiid_enable(wiimote, CWIID_FLAG_MESG_IFC)) {
