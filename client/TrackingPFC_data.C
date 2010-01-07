@@ -93,6 +93,22 @@ void TrackingPFC_data::setnewdata(float* d, bool real){
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
 
+// añade informacion sobre otro punto al ultimo report
+void TrackingPFC_data::setmoredata(float* d, bool real){
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  // no debemos incrementar ind ni count ya que estamos ante el mismo report.
+  // creamos un nuevo vector para los datos
+  float* aux = new float[dsize];
+  // y lo rellenamos
+  for (int i =0; i<dsize;i++)
+    aux[i]=d[i];
+  // creamos un datachunk nuevo insertandolo en el buffer, el datachunk que antes ocupaba
+  // data[ind] ahora esta en data[ind]->next
+  data[ind]= new datachunk(aux, count, real, data[ind]);
+  
+  pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
+}
+
 // devuelve el tipo
 TPFCdatatype TrackingPFC_data::datatype(){
   return type;
