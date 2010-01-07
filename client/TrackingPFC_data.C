@@ -52,6 +52,17 @@ float* TrackingPFC_data::getlastpos(){
   return res;
 }
 
+// consultora avanzada que devuelve una copia del ultimo datachunk
+TrackingPFC_data::datachunk* TrackingPFC_data::getlastdata(){
+  datachunk* res;
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  // copiamos los datos
+  res = new datachunk(data[ind], dsize);
+  pthread_mutex_unlock( lock ); // liberamos el acceso
+  //y los devolvemos
+  return res;
+}
+
 // copia la orientacion de los ultimos datos (si la hay), modificando la posición.
 // aunque está pensado para funcionar con datos de tamaño 3 o mas, funcionara con los de 2
 // ignorando el 3r argumento
@@ -134,4 +145,42 @@ TPFCdatatype TrackingPFC_data::datatype(){
 // devuelve el tamaño de los datos segun el tipo
 inline int TrackingPFC_data::datasize(){
   return dsize;
+}
+
+
+
+// STRUCT DATACHUNK
+// constructora
+TrackingPFC_data::datachunk::datachunk(float* f, int c, bool r, datachunk* n){
+  data= f;
+  time=clock();
+  count = c;
+  tag=0;
+  valid=true;
+  real=r;
+  next=n;
+}
+// copiadora
+TrackingPFC_data::datachunk::datachunk(datachunk* d, int dsize){
+  data = new float[dsize];
+  for (int i =0; i<dsize;i++)
+    data[i]=d->data[i];
+  time=d->time;
+  tag= d->tag;
+  count= d->count;
+  real= d->real;
+  valid= d->valid;
+  if (d->next==NULL)
+    next=NULL;
+  else
+    next= new datachunk(d->next,dsize);
+}
+// destructora
+TrackingPFC_data::datachunk::~datachunk(){
+  // si hay datos, los destruimos
+  if (data!=NULL)
+    free(data);
+  // si hay mas datachunks en el mismo report, los destruimos
+  if (next!=NULL)
+    free(next);
 }
