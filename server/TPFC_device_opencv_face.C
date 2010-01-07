@@ -56,6 +56,8 @@ int detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaar
 	  aux[1]=-(center.y-240)/480.0;
 	  aux[2]=radius;
 	  (d->getdata())->setnewdata(aux);
+	}else{
+	   (d->getdata())->setnodata();
 	}
     }
     
