@@ -22,14 +22,14 @@ class TrackingPFC_data{
       datachunk* next; // puntero al siguiente datachunk del mismo report (para reports con mas de 1 punto)
 
       // constructora
-      datachunk(float* f, int c, bool r = true){
+      datachunk(float* f, int c, bool r = true, datachunk* n=NULL){
 	data= f;
 	time=clock();
 	count = c;
 	tag=0;
 	valid=true;
 	real=r;
-	next=NULL;
+	next=n;
       }
       // destructora
       ~datachunk(){
@@ -76,5 +76,7 @@ class TrackingPFC_data{
     // añade un nuevo report con los datos de d, d debe tener tamaño dsize
     void setnewdata(float* d, bool real = true);
 
+    // añadir información de otro punto adicional al ultimo report
+    void setmoredata(float* d, bool real = true);
 };
 #endif /*TRACKINGPFC_DATA_*/

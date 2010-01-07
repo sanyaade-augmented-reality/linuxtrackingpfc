@@ -9,12 +9,20 @@
 #include "TrackingPFC_data.h"
 #define RADFACTOR 3.14159265/180.0
 
+#include <vector>
+using namespace std;
+
 class TrackingPFC_client{
   private:
     // datos recibidos
     TrackingPFC_data * data;
   
     int alive; // indicador de si el thrad de mainloop debe seguir funcionando 1=si, 2=no
+
+    vector<int> reports; // lista de puntos de los que se ha recibido report hasta el momento
+			 // cuando se detecte que de un sensor ya se han recibido datos, se entenderá
+			 // que estamos ante un report nuevo
+    pthread_mutex_t* lock; // semaforo para la exclusión mutua para que 2 callbacks no escriban a la vez
 
     float mdl2scr; // ratio de la escala modelo / mundo real (o pantalla)
     // datos para ajustes si la camara original no estaba pensada para HT
@@ -50,7 +58,7 @@ class TrackingPFC_client{
 
     // consultoras y escritoras de los datos
     float* getlastpos();
-    void setnewpos(float, float, float);
+    void setdata(float*, int);
     int isalive();
     
     void setvirtualdisplaysize(float);

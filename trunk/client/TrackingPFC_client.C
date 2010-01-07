@@ -3,8 +3,20 @@
 void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
    // t.sensor es la variable que da el numero de sensor
    // en este ejemplo no se usa xq se ha registrado el callback para ejecutarse solo con el sensor0
+
+  // obtenemos el tracker desde los argumentos
   TrackingPFC_client * trk= (TrackingPFC_client*)(userdata);
-  trk->setnewpos(t.pos[0],t.pos[1],t.pos[2]);
+
+  float* aux = new float[7];
+  aux[0]=t.pos[0];
+  aux[1]=t.pos[1];
+  aux[2]=t.pos[2];
+  aux[3]=t.quat[0];
+  aux[4]=t.quat[1];
+  aux[5]=t.quat[2];
+  aux[6]=t.quat[3];
+  trk->setdata(aux, t.sensor);
+
   if (trk->callback_func!=NULL)
     trk->callback_func(trk);
 }
@@ -15,7 +27,8 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   
   alive=1;
   tracker = new vrpn_Tracker_Remote(tname);
-  tracker->register_change_handler(this, TrackingPFC_client_callback,0);
+  //tracker->register_change_handler(this, TrackingPFC_client_callback,0);
+  tracker->register_change_handler(this, TrackingPFC_client_callback);
   
   //cbfx(NULL);
   callback_func= cbfx;
@@ -28,6 +41,8 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   // distancia hasta el display para tener un fov = a originalfow
   zadjustment=0; // inicialmente a 0, para que no influya en casos que no requieren ese ajuste (en los que no hay fov original)
   aspectratio=0; // inicialmente a 0
+
+  lock = new pthread_mutex_t(); // inicializamos el semaforo
 }
 
 // Destructora
@@ -64,9 +79,31 @@ int TrackingPFC_client::isalive(){
 
 
 // modificadoras
-void TrackingPFC_client::setnewpos(float x, float y, float z){
-  data->setnewpos(x,y,z);
+void TrackingPFC_client::setdata(float * f, int sensor){
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  // si aun no hemos recibido ningun report, añadimos el dato normalmente
+  if (reports.size()==0){
+    reports.push_back(sensor);
+    data->setnewdata(f);
+  }else{ // si no, tenemos que comprobar que ese sensor no este incluido ya en ese report
+    bool found = false;
+    for (int i =0; i<reports.size() && !found;i++)
+      if (reports[i]==sensor) found = true;
+    // si ese sensor no esta aun en ese report, lo añadimos
+    if ( !found){
+      reports.push_back(sensor);
+      data->setmoredata(f); // usamos setmore ya que estamos ante un report que ya contiene almenos un dato
+    }else{
+      // limpiamos el vector
+      reports.clear();
+      // y añadimos los datos con normalidad
+      reports.push_back(sensor);
+      data->setnewdata(f);
+    }
+  }
+  pthread_mutex_unlock( lock ); // liberamos el acceso
 }
+
 
 void TrackingPFC_client::setvirtualdisplaysize(float s){
   mdl2scr = s / getDisplaySizex();
