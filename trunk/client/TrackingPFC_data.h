@@ -18,10 +18,6 @@ class TrackingPFC_data{
     int ind; // indice que apunta al primer dato valido del buffer
     int count; // total de datos recibidos
 
-    float obsx;
-    float obsy;
-    float obsz;
-
     pthread_mutex_t* lock;
 
   public:  
