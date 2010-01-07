@@ -40,7 +40,7 @@ class TrackingPFC_data{
       int getcount(); // devuelve el numero de report
       bool getreal(); // los datos son reales o artificiales
       bool getvalid(); // los datos son validos, o el report es vacio
-      bool size();  // cantidad de puntos en el report
+      int size();  // cantidad de puntos en el report
       void setvalid(bool);
       void settag(int,int n = 0);
 
@@ -90,7 +90,7 @@ class TrackingPFC_data{
     void setnodata(bool real = true);
 
     // Consultoras avanzadas
-    // devuelve el ultimo datachunk 
+    // devuelve una copia del ultimo datachunk 
     datachunk* getlastdata();
 };
 #endif /*TRACKINGPFC_DATA_*/

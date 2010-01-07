@@ -31,21 +31,21 @@ int main( int argc, char** argv ){
     vector<TPFC_device*> dev;
 
     // Facedetec
-    /*dev.push_back( new TPFC_device_opencv_face(0,0) );
+    dev.push_back( new TPFC_device_opencv_face(0,0) );
     dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-    settracker(dev[1], "Tracker0");*/
+    settracker(dev[1], "Tracker0");
 
     // wiimote
     /*dev.push_back( new TPFC_device_wiimote(0) );
     dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
     settracker(dev[1], "Tracker0");*/
 
-    dev.push_back( new TPFC_device_wiimote(0) );
+    /*dev.push_back( new TPFC_device_wiimote(0) );
     dev.push_back( new TPFC_device_wiimote(1) );
     dev.push_back( new TPFC_device_3dfrom2d(2,dev[0]) );
     settracker(dev[2], "Tracker0");
     dev.push_back( new TPFC_device_3dfrom2d(3,dev[1]) );
-    settracker(dev[3], "Tracker1");
+    settracker(dev[3], "Tracker1");*/
 
     
     

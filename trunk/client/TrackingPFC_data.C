@@ -187,25 +187,31 @@ TrackingPFC_data::datachunk::~datachunk(){
 }
 
 // Consultoras y escritoras
-/*
-    float* getdata(int n =0); // devuelve los datos del punto n 
-clock_t gettime(int n =0); // devuelve el time
-int gettag(int n = 0); // devuelve el tag del punto n
-int getcount(); // devuelve el numero de report
-bool getreal(); // los datos son reales o artificiales
-bool getvalid(); // los datos son validos, o el report es vacio
-bool size();  // cantidad de puntos en el report
-    void setvalid(bool);
-void settag(int,int n = 0);*/
-// TrackingPFC_data::datachunk::
-
 const float* TrackingPFC_data::datachunk::getdata(int n){
   datachunk* aux = getchunk(n);
   return aux->data;
 }
+
+/*clock_t gettime(int n =0); // devuelve el time
+int gettag(int n = 0); // devuelve el tag del punto n
+int getcount(); // devuelve el numero de report
+bool getreal(); // los datos son reales o artificiales*/
+bool TrackingPFC_data::datachunk::getvalid(){
+  return valid;
+}
+int TrackingPFC_data::datachunk::size(){
+  datachunk* aux= this;
+  int n =1;
+  while (aux->next!=NULL){
+    aux=aux->next;
+    n++;
+  }
+}
+
 void TrackingPFC_data::datachunk::setvalid(bool v){
   valid=v;
 }
+//void settag(int,int n = 0);
 TrackingPFC_data::datachunk* TrackingPFC_data::datachunk::getchunk(int n){
   datachunk* aux= this;
   for (int i =0; i<n;i++)
