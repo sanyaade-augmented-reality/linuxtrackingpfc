@@ -78,5 +78,7 @@ class TrackingPFC_data{
 
     // añadir información de otro punto adicional al ultimo report
     void setmoredata(float* d, bool real = true);
+    // añadir un nuevo report vacio y con el flag de datos no validos
+    void setnodata(bool real = true);
 };
 #endif /*TRACKINGPFC_DATA_*/
