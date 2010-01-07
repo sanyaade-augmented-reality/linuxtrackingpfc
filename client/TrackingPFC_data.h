@@ -11,8 +11,9 @@ enum TPFCdatatype { TPFCDATA2D, TPFCDATA2DSIZE, TPFCDATA3D, TPFCDATA3DORI};
 class TrackingPFC_data{
   // struct basico de la información relativa a un punto
   public:
+
     struct datachunk{
-      
+      private:
       float* data; // float[] que guarda los datos de posicion y orientacion
       clock_t time; // time
       int tag; // int reservado para que se puedan guardar estados
@@ -22,12 +23,30 @@ class TrackingPFC_data{
       bool valid; // flag de validez de los datos
       datachunk* next; // puntero al siguiente datachunk del mismo report (para reports con mas de 1 punto)
       
+      public:
       // constructora
       datachunk(float* f, int c, bool r = true, datachunk* n=NULL);
       // copiadora
       datachunk(datachunk* d, int dsize);
       // destructora
       ~datachunk();
+      
+      // consultoras y escritoras
+      // las que tienen un argumento es porque son individuales de cada punto
+      // las que no lo tienen es porque deberian ser identicas en todos los puntos
+      const float* getdata(int n =0); // devuelve los datos del punto n 
+      clock_t gettime(int n =0); // devuelve el time
+      int gettag(int n = 0); // devuelve el tag del punto n
+      int getcount(); // devuelve el numero de report
+      bool getreal(); // los datos son reales o artificiales
+      bool getvalid(); // los datos son validos, o el report es vacio
+      bool size();  // cantidad de puntos en el report
+      void setvalid(bool);
+      void settag(int,int n = 0);
+
+      private:
+      // auxiliares
+      datachunk* getchunk(int); // obtiene el punto n desde el primero.
       
     };
 
