@@ -27,7 +27,7 @@ TrackingPFC_data::TrackingPFC_data(TPFCdatatype t, int s){
   defaultdata[4]=0.0;
   defaultdata[5]=0.0;
   defaultdata[6]=0.0;
-  setnewdata(defaultdata);
+  setnewdata(defaultdata, false);
 }
 
 // Destructora
@@ -74,10 +74,12 @@ void TrackingPFC_data::setnewpos(float x, float y, float z){
 
 // añade un nuevo chunk a los datos, con tiempo actual y los datos de d
 // no comprueba que los datos sean del tamaño correcto (que debe ser ==dsize)
-void TrackingPFC_data::setnewdata(float* d){
+void TrackingPFC_data::setnewdata(float* d, bool real){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // aumentamos el indice
   ind=(ind+1)%size;
+  // incrementamos el contador
+  count++;
   // destruimos el datachunk anterior
   if (count>size)
     free(data[ind]);
@@ -87,9 +89,7 @@ void TrackingPFC_data::setnewdata(float* d){
   for (int i =0; i<dsize;i++)
     aux[i]=d[i];
   // creamos un datachunk nuevo insertandolo en el buffer
-  data[ind]= new datachunk(aux);
-  // incrementamos el contador
-  count++;
+  data[ind]= new datachunk(aux, count, real);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
 
