@@ -60,6 +60,10 @@ void TPFC_device_wiimote::callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			    nt->report_pose(0,current_time, position, quaternion);
 			    nt->mainloop();
 			    connection->mainloop();*/
+			  }else{
+			    // en esta toma de datos no hay datos que reportar
+			    getwiimotedev(wiimote)->getdata()->setnodata();
+			    getwiimotedev(wiimote)->nullreport();
 			  }
 			  break;
 		  default:

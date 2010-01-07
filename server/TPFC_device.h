@@ -34,8 +34,9 @@ class TPFC_device{
     ~TPFC_device();
     // registra otro device como listener.
     void report_to(TPFC_device*);
-    // funcion que indica que hay nuevos datos desde uno de los inputs
+    // funcion de aviso de nuevos reports desde los inputs
     virtual void report_from(TPFC_device*);
+    virtual void nullreport_from(TPFC_device*);
     // devuelve el puntero a los datos
     TrackingPFC_data * getdata();
     // devuelve el id del dispositivo
@@ -49,6 +50,9 @@ class TPFC_device{
     int working(); // devuelve 1 si el estado es RUN
     // función para avisar a los listeners de que hay nuevos datos
     void report();
+    // función para avisar a los listeners de que no nuevos datos en este report
+    void nullreport();
+    
     // función para activar el envio de datos via vrpn_tracker al hacer report()
     int settracker(vrpn_Connection *, const char*);
     

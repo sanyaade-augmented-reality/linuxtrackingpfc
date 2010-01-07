@@ -46,6 +46,14 @@ void TPFC_device::report(){
   }
 }
 
+// Reportar a los listeners que no hay nuevos datos
+void TPFC_device::nullreport(){
+  // recorremos la lista de listeners enviando el aviso
+  for (int i =0; i<listeners.size();i++){
+    listeners[i]-> nullreport_from(this);
+  }
+}
+
 // registrar un tracker asociado a este dispositivo
 int TPFC_device::settracker(vrpn_Connection * con, const char* name){
   // si ya habia un tracker asociado, devolvemos -1, aunque esto no deberia pasar
@@ -91,4 +99,5 @@ int TPFC_device::idnum(){
 // placeholders para el handler de los reports. Esta función debe ser sobrecargada si el dispositivo va a usarla.
 void TPFC_device::report_from(TPFC_device*){
 }
-
+void TPFC_device::nullreport_from(TPFC_device*){
+}

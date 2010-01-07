@@ -109,6 +109,23 @@ void TrackingPFC_data::setmoredata(float* d, bool real){
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
 
+// añade un nuevo chunk a los datos, vacio y con el flag de datos no validos
+void TrackingPFC_data::setnodata(bool real){
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  // aumentamos el indice
+  ind=(ind+1)%size;
+  // incrementamos el contador
+  count++;
+  // destruimos el datachunk anterior
+  if (count>size)
+    free(data[ind]);
+  // creamos un datachunk nuevo insertandolo en el buffer
+  data[ind]= new datachunk(NULL, count, real);
+  // y marcamos el flag de valid
+  data[ind]->valid=false;
+  pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
+}
+
 // devuelve el tipo
 TPFCdatatype TrackingPFC_data::datatype(){
   return type;
