@@ -12,18 +12,18 @@ class TrackingPFC_data{
   // struct basico de la información relativa a un punto
   public:
     struct datachunk{
-      float* data;
-      clock_t time;
-      int tag;
-      bool valid;
-      datachunk* next;
+      float* data; // float[] que guarda los datos de posicion y orientacion
+      clock_t time; // time
+      int tag; // int reservado para que se puedan guardar estados
+      bool valid; // flag de validez de los datos
+      datachunk* next; // puntero al siguiente datachunk del mismo report (para reports con mas de 1 punto)
 
       // constructora
       datachunk(float* f){
 	data= f;
 	time=clock();
 	tag=0;
-	valid=false;
+	valid=true;
 	next=NULL;
       }
       // destructora
