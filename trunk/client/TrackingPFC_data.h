@@ -15,15 +15,20 @@ class TrackingPFC_data{
       float* data; // float[] que guarda los datos de posicion y orientacion
       clock_t time; // time
       int tag; // int reservado para que se puedan guardar estados
+      int count; // numero de report (para facilitar la identificación de los datachunks);
+      bool real; // flag de si es un reporte real o un dato ficticio (como por ejemplo la posicion inicial)
+		 // asi se pueden ignorar los datos ficticios a la hora de trabajar con los datos
       bool valid; // flag de validez de los datos
       datachunk* next; // puntero al siguiente datachunk del mismo report (para reports con mas de 1 punto)
 
       // constructora
-      datachunk(float* f){
+      datachunk(float* f, int c, bool r = true){
 	data= f;
 	time=clock();
+	count = c;
 	tag=0;
 	valid=true;
+	real=r;
 	next=NULL;
       }
       // destructora
@@ -69,7 +74,7 @@ class TrackingPFC_data{
     // funciona tb para datos 2d, simplemente ignora el 3r float
     void setnewpos(float, float, float f = 0.0);
     // añade un nuevo report con los datos de d, d debe tener tamaño dsize
-    void setnewdata(float* d);
+    void setnewdata(float* d, bool real = true);
 
 };
 #endif /*TRACKINGPFC_DATA_*/
