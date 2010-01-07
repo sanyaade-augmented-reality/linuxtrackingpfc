@@ -44,9 +44,10 @@ float* TrackingPFC_data::getlastpos(){
   // creamos el vector que devolveremos
   float* res= new float[dsize];
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  const float* aux= data[ind]->getdata();
   // copiamos los datos
   for (int i =0; i<dsize; i++){
-    res[i]=data[ind]->data[i];
+    res[i]=aux[i];
   }
   pthread_mutex_unlock( lock ); // liberamos el acceso
   return res;
@@ -133,7 +134,7 @@ void TrackingPFC_data::setnodata(bool real){
   // creamos un datachunk nuevo insertandolo en el buffer
   data[ind]= new datachunk(NULL, count, real);
   // y marcamos el flag de valid
-  data[ind]->valid=false;
+  data[ind]->setvalid(false);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
 
@@ -183,4 +184,31 @@ TrackingPFC_data::datachunk::~datachunk(){
   // si hay mas datachunks en el mismo report, los destruimos
   if (next!=NULL)
     free(next);
+}
+
+// Consultoras y escritoras
+/*
+    float* getdata(int n =0); // devuelve los datos del punto n 
+clock_t gettime(int n =0); // devuelve el time
+int gettag(int n = 0); // devuelve el tag del punto n
+int getcount(); // devuelve el numero de report
+bool getreal(); // los datos son reales o artificiales
+bool getvalid(); // los datos son validos, o el report es vacio
+bool size();  // cantidad de puntos en el report
+    void setvalid(bool);
+void settag(int,int n = 0);*/
+// TrackingPFC_data::datachunk::
+
+const float* TrackingPFC_data::datachunk::getdata(int n){
+  datachunk* aux = getchunk(n);
+  return aux->data;
+}
+void TrackingPFC_data::datachunk::setvalid(bool v){
+  valid=v;
+}
+TrackingPFC_data::datachunk* TrackingPFC_data::datachunk::getchunk(int n){
+  datachunk* aux= this;
+  for (int i =0; i<n;i++)
+    aux=aux->next;
+  return aux;
 }
