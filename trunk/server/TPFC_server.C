@@ -6,6 +6,10 @@
 #include "TPFC_device_3dfrom2d.h"
 
 #include <vector>
+
+#include <iostream>
+//#include <string>
+
 using namespace std;
 
 vrpn_Connection * connection;
@@ -47,32 +51,45 @@ int main( int argc, char** argv ){
     // Creamos los dispositivos del servidor
     vector<TPFC_device*> dev;
 
-    // Facedetec
-    dev.push_back( new TPFC_device_opencv_face(0,0) );
-    dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-    settracker(dev[1], "Tracker0");
+    
+	
+    string s;
+    // bucle principal
+    while (alive && getline(cin, s) ){
+      
+      // salir
+      if (s.compare("exit")==0){
+	// paramos los devices
+	for (int i =0; i<dev.size();i++){
+	  dev[i]->stop();
+	}
+	// desactivamos el flag para que se detenga el thread del mainloop
+	alive=false;
+      }
 
-    // wiimote
-    /*dev.push_back( new TPFC_device_wiimote(0) );
-    dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-    settracker(dev[1], "Tracker0",4);*/
-
-    /*dev.push_back( new TPFC_device_wiimote(0) );
-    dev.push_back( new TPFC_device_wiimote(1) );
-    dev.push_back( new TPFC_device_3dfrom2d(2,dev[0]) );
-    settracker(dev[2], "Tracker0");
-    dev.push_back( new TPFC_device_3dfrom2d(3,dev[1]) );
-    settracker(dev[3], "Tracker1");*/
-
-    // placeholder para el bucle principal
-    char x = getchar();
-
-    // paramos los devices
-    for (int i =0; i<dev.size();i++){
-       dev[i]->stop();
+      if (s.compare("face")==0){
+	// Facedetec
+	dev.push_back( new TPFC_device_opencv_face(0,0) );
+	dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
+	settracker(dev[1], "Tracker0");
+      }
+      if (s.compare("wii")==0){
+	// wiimote
+	dev.push_back( new TPFC_device_wiimote(0) );
+	dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
+	settracker(dev[1], "Tracker0",4);
+      }
+      if (s.compare("wii2")==0){
+	    // wiimote x2
+	    dev.push_back( new TPFC_device_wiimote(0) );
+	    dev.push_back( new TPFC_device_wiimote(1) );
+	    dev.push_back( new TPFC_device_3dfrom2d(2,dev[0]) );
+	    settracker(dev[2], "Tracker0",4);
+	    dev.push_back( new TPFC_device_3dfrom2d(3,dev[1]) );
+	    settracker(dev[3], "Tracker1",4);
+      }
     }
-    // desactivamos el flag para que se detenga el thread del mainloop
-    alive=false;
+
     // esperamos a que pare el mainloop (si hay servidor)
     if (connection!=NULL)
       pthread_join( mainlooper, NULL);
@@ -84,4 +101,5 @@ int main( int argc, char** argv ){
 TO DO LIST:
 - Quitar la chapuza del if (d->camera()==0) cvWaitKey( 10 ); en el opencv
 - Ver por que mostrar 2 ventanas del facedetect acaba provocando un segfault
+- eliminar el mensaje de error de vrpn tracker cuando no se envian reports en >10 secs
 */
