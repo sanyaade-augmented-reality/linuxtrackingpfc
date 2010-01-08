@@ -5,7 +5,7 @@ TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* source):TPFC_
   // creamos los datos
   data = new TrackingPFC_data(TPFCDATA3DORI);
   // La opción de merge esta activada por defecto
-  merge = false;
+  merge = true;
   // La opción por defecto es usar una profundidad fija
   deep=FIJA;
   dist = 1.0;
@@ -64,6 +64,8 @@ void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
   }
 }
 
+// función auxiliar que añade los datos segun el tipo de deep
+// si new==true se usara setdata, si ==false, se usara setmoredata (no se empezara report nuevo)
 void TPFC_device_3dfrom2d::setdata(float x, float y, bool newrep){
   float* aux= new float[3];
 
@@ -79,4 +81,13 @@ void TPFC_device_3dfrom2d::setdata(float x, float y, bool newrep){
     data->setnewdata(aux);
   else
     data->setmoredata(aux);
+}
+
+// Opciones
+void TPFC_device_3dfrom2d::setmerge(bool m){
+  merge = m;
+}
+void TPFC_device_3dfrom2d::setdeep(deeptype d, float di){
+  deep=d;
+  dist=di;
 }
