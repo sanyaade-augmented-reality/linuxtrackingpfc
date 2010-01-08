@@ -94,9 +94,6 @@ TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
   set_rpt_mode(wiimote, rpt_mode);
   printf("Wiimote connected!\n");
   
-  /*for (int i = 0; i<totalwiimotes;i++){
-    printf("Wiimote %i: id (%i), id del device (%i)\n", i, wiimoteids[i], wiimotedevices[i]->idnum());
-  }*/
   
 }
 
