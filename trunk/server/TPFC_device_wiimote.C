@@ -66,7 +66,7 @@ void TPFC_device_wiimote::callback(cwiid_wiimote_t *wiimote, int mesg_count,
 
 TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
   
-  data = new TrackingPFC_data(TPFCDATA2D);
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2D);
   
   cwiid_set_err(err);
 

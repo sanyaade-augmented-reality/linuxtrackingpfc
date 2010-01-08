@@ -143,7 +143,7 @@ void* TPFC_device_opencv_face::facedetect(void * t){
 
 TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c):TPFC_device(ident){
   cam = c;
-  data = new TrackingPFC_data(TPFCDATA2DSIZE);
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
   // lanzamos el thread
   pthread_create( &facedetect_thread, NULL, facedetect,this);
   

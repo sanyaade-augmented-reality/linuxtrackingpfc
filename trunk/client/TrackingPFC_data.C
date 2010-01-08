@@ -139,7 +139,7 @@ void TrackingPFC_data::setnodata(bool real){
 }
 
 // devuelve el tipo
-TPFCdatatype TrackingPFC_data::datatype(){
+TrackingPFC_data::TPFCdatatype TrackingPFC_data::datatype(){
   return type;
 }
 
