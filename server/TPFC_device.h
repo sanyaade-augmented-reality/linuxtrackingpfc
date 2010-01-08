@@ -26,8 +26,7 @@ class TPFC_device{
     // apuntador al buffer de datos
     TrackingPFC_data * data;
     // flag de funcionamiento
-    enum TPFC_device_state { STOP, RUN, PAUSE };
-    TPFC_device_state running; 
+    enum { STOP, RUN, PAUSE } running; 
 
   public:
     // consctructora y creadora
