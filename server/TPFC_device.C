@@ -32,17 +32,25 @@ void TPFC_device::report(){
     struct timeval current_time;
     vrpn_float64 position[3];
     vrpn_float64 quaternion[4];
-    float* aux = data->getlastpos();
-    position[0]=aux[0];
-    position[1]=aux[1];
-    position[2]=aux[2];
-    quaternion[0]=aux[3];
-    quaternion[1]=aux[4];
-    quaternion[2]=aux[5];
-    quaternion[3]=aux[6];
+
+    TrackingPFC_data::datachunk* d = data->getlastdata();
     vrpn_gettimeofday(&current_time, NULL);
-    server->report_pose(0,current_time, position, quaternion);
+    const float* aux;
+    for (int i =0; i<d->size() && i<sensors;i++){
+      aux= d->getdata(i);
+      position[0]=aux[0];
+      position[1]=aux[1];
+      position[2]=aux[2];
+      quaternion[0]=aux[3];
+      quaternion[1]=aux[4];
+      quaternion[2]=aux[5];
+      quaternion[3]=aux[6];
+      server->report_pose(i,current_time, position, quaternion);
+    }
     server->mainloop();
+    // si habia mas puntos de los que podemos reportar por el numero fijado en sensors, avisamos
+    if (d->size()>sensors)
+      fprintf(stderr,"El dispositivo %i tiene un numero maximo de sensores de %i en el tracker, pero habia %i puntos que reportar\n", id, sensors, d->size());
   }
 }
 
@@ -55,15 +63,17 @@ void TPFC_device::nullreport(){
 }
 
 // registrar un tracker asociado a este dispositivo
-int TPFC_device::settracker(vrpn_Connection * con, const char* name){
+int TPFC_device::settracker(vrpn_Connection * con, const char* name, int nsensors){
   // si ya habia un tracker asociado, devolvemos -1, aunque esto no deberia pasar
   if (server!=NULL)
     return -1;
   // si hay algun problema al crear el tracker, enviamos un -2
-  if ((server = new vrpn_Tracker_Server(name, con)) == NULL){
+  if ((server = new vrpn_Tracker_Server(name, con, nsensors)) == NULL){
     fprintf(stderr,"Can't create new vrpn_Tracker_NULL\n");
     return -2;
   }
+  // guardamos el numero de sensores
+  sensors=nsensors;
   //si todo es correcto devolvemos un 0;
   return 0;
 }

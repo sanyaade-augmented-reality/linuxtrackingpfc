@@ -20,6 +20,7 @@ class TPFC_device{
     vector<TPFC_device*> listeners;
     // vrpn_Tracker server
     vrpn_Tracker_Server * server;
+    int sensors; // numero maximo de sensores que reportará el tracker
 
   protected:
     // apuntador al buffer de datos
@@ -54,7 +55,7 @@ class TPFC_device{
     void nullreport();
     
     // función para activar el envio de datos via vrpn_tracker al hacer report()
-    int settracker(vrpn_Connection *, const char*);
+    int settracker(vrpn_Connection *, const char*, int nsensors=1);
     
 };
 

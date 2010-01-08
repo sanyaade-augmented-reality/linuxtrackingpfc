@@ -11,7 +11,7 @@ using namespace std;
 vrpn_Connection * connection;
 
 // funcion auxiliar para arrancar los Trackers
-void settracker(TPFC_device* dev, const char* name){
+void settracker(TPFC_device* dev, const char* name, int nsensors = 1){
   // si es la primera vez que se llama a settracker, iniciamos la conexion
   if (connection == NULL){
     int	port = vrpn_DEFAULT_LISTEN_PORT_NO;
@@ -20,7 +20,7 @@ void settracker(TPFC_device* dev, const char* name){
     connection = vrpn_create_server_connection(con_name, NULL, NULL);
   }
   // creamos el tracker en la conexion
-  dev->settracker(connection, name);
+  dev->settracker(connection, name, nsensors);
 }
 
 int main( int argc, char** argv ){
@@ -31,14 +31,14 @@ int main( int argc, char** argv ){
     vector<TPFC_device*> dev;
 
     // Facedetec
-    dev.push_back( new TPFC_device_opencv_face(0,0) );
-    dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-    settracker(dev[1], "Tracker0");
-
-    // wiimote
-    /*dev.push_back( new TPFC_device_wiimote(0) );
+    /*dev.push_back( new TPFC_device_opencv_face(0,0) );
     dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
     settracker(dev[1], "Tracker0");*/
+
+    // wiimote
+    dev.push_back( new TPFC_device_wiimote(0) );
+    dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
+    settracker(dev[1], "Tracker0");
 
     /*dev.push_back( new TPFC_device_wiimote(0) );
     dev.push_back( new TPFC_device_wiimote(1) );
