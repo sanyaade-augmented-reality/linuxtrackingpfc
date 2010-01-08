@@ -8,11 +8,21 @@ class TPFC_device_3dfrom2d : public TPFC_device{
     // flags de control
     bool merge; // a cierto -> unificar todos los datos de un report y hacer la media
 		// falso -> enviar cada dato de un report como un sensor diferente
-    // int deep; // como se infiere la profundidad?
+    enum{FIJA, ROTACION, APROXSIZE} deep; // como se infiere la profundidad?
+    float dist; // variable auxiliar para el calculo de profundidad, distinto uso segun deep
+		// FIJA -> distancia al plano de la pantalla, en metros
+		// ROTACION -> radio de rotación
+		// APROXSIZE -> factor necesario para inferir la distancia dado un SIZE
+
+   // función auxiliar que añade los datos segun el tipo de deep
+   // si new==true es usara setdata, si ==false, se usara setmoredata (no se empezara report nuevo)
+   void setdata(float, float, bool newrep = true);
+
    public:
     // consctructora y creadora
     TPFC_device_3dfrom2d(int ident, TPFC_device* source);
     ~TPFC_device_3dfrom2d();
+    // sobrecarga de report from, que en este caso es la que realizará los calculos del device
     void report_from(TPFC_device*);
 };
 
