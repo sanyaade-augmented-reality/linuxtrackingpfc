@@ -32,14 +32,11 @@ void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
       const float* aux;
       for (int i =0; i<n; i++){
 	aux = sourcedata->getdata(i);
-	printf("3dfrom2d:     %f, %f\n", aux[0], aux[1]);
 	acumx+=aux[0];
 	acumy+=aux[1];
       }
-      printf("3dfrom2d: %f, %f\n", acumx, acumy);
       acumx=acumx/n;
       acumy=acumy/n;
-      printf("3dfrom2d: %f, %f\n", acumx, acumy);
       data->setnewpos(acumx, acumy, 0.5);
     }else{ // Los datos se envian como sensores separados
       

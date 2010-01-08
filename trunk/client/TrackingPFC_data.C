@@ -206,6 +206,7 @@ int TrackingPFC_data::datachunk::size(){
     aux=aux->next;
     n++;
   }
+  return n;
 }
 
 void TrackingPFC_data::datachunk::setvalid(bool v){
