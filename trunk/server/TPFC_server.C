@@ -78,6 +78,7 @@ int main( int argc, char** argv ){
 	  dev.push_back( new TPFC_device_opencv_face(0,0) );
 	  dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
 	  settracker(dev[1], "Tracker0");
+	  //((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
 	  loaded=true;
 	}
       }else
