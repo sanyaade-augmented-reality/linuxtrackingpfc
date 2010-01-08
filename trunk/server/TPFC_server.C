@@ -18,11 +18,14 @@ pthread_t mainlooper;
 
 // thread que se encarga del mainloop del vrpn
 void* mainloop_thread(void* ){
+  // el bucle se ejecuta mientras el flag de alive no este a falso
   while (alive){
     if (connection!=NULL){
       connection->mainloop();
+      // sleep para no consumir cpu innecesariamente
       vrpn_SleepMsecs(1); 
     }else{
+      // si aun no hay conexión, hacemos un sleep mas largo
       vrpn_SleepMsecs(1000); 
     }
   }
@@ -47,18 +50,15 @@ int main( int argc, char** argv ){
     // incializaciones
     connection=NULL;
     alive = true;
+    vector<TPFC_device*> dev; // lista de dispositivos
 
-    // Creamos los dispositivos del servidor
-    vector<TPFC_device*> dev;
+    string s; // buffer de las ordenes recibidas
+    bool loaded = false; // flag, a cierto si se carga 
 
-    
-	
-    string s; // buffer
-    bool loaded = false; // flag de carga de alguna configuracion
-    // bucle principal
+    // bucle principal, lee una linea del input a no ser que se haya recibido la orden de parar
     while (alive && getline(cin, s) ){
       
-      // salir
+      // Fin de programa
       if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
 	// paramos los devices
 	for (int i =0; i<dev.size();i++){
@@ -68,6 +68,8 @@ int main( int argc, char** argv ){
 	alive=false;
       }else
       
+
+      // Presets que cargan tipos comunes de server
       if (s.compare("face")==0){
 	if (loaded){
 	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
@@ -105,11 +107,16 @@ int main( int argc, char** argv ){
 	  settracker(dev[3], "Tracker1",4);
 	  loaded= true;
 	}
-      }else if (s.compare("")!=0){
-	if (s.compare("help")==0 || s.compare("?")==0)
-	  printf("Tracking PFC Server, lista de ordenes:\n");
-	else
+      }else
+      
+
+      // Si hemos llegado a este punto o es una orden vacia, o petición de ayuda o una orden incorrecta
+      if (s.compare("")!=0){ // si no es una orden vacia
+	if (s.compare("help")==0 || s.compare("?")==0) // si es una peticion de ayuda
+	  printf("Ayuda de TPFCServer, lista de ordenes:\n");
+	else // si es una orden incorrecta
 	  printf("Orden no reconocida, lista de ordenes:\n");
+	// sea por petición de ayuda o por orden incorrecta, mostramos la ayuda
 	printf("Face, wii, wii2 -> cargar uno de los presets predeterminados\n");
 	printf("Exit, quit, q -> salir\n\n");
       }
