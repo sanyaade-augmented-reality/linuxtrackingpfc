@@ -4,15 +4,23 @@
 // Inicializamos el vector global donde se guarda la información de los wiimotes
 vector<TPFC_device_wiimote::wiimoteinfo> TPFC_device_wiimote::wiimotes;
 
+// Función que registra los wiimotes por su id, 
 void TPFC_device_wiimote::registerwiimote(cwiid_wiimote_t *wiimote, TPFC_device_wiimote* dev){
   wiimotes.push_back(wiimoteinfo(cwiid_get_id(wiimote),dev));
 }
+// Funcion que recupera un puntero al dev wiimote dada su id
 TPFC_device_wiimote* TPFC_device_wiimote::getwiimotedev(cwiid_wiimote_t *wiimote){
   TPFC_device_wiimote* dev=NULL;
+  // recorremos la lista por orden (esta operación es poco eficiente, pero
+  // teniendo en cuenta que el numero de wiimotes será normalmente bajo (<4)
+  // la eficiencia en la busqueda no es un problema
   for (int i = 0; i<wiimotes.size() && dev==NULL;i++){
+    // comparamos los ids registrados con el actual
     if (wiimotes[i].id==cwiid_get_id(wiimote))
+      // cuando encontramos la coincidencia, guardamos el puntero
       dev= wiimotes[i].dev;
   }
+  // y lo devolvemos
   return dev;
 }
 
@@ -46,7 +54,8 @@ void TPFC_device_wiimote::callback(cwiid_wiimote_t *wiimote, int mesg_count,
 	}
 	
 	if (valid_source>0) {
-	  // los datos se han guardado en el bucle anterior, solo falta reportar
+	  // Habia fuentes validas, al llegar a este punto los datos ya los tenemos guardados
+	  // solo falta avisar a los listeners
 	  getwiimotedev(wiimote)->report();
 	}else{
 	  // en esta toma de datos no hay datos que reportar
@@ -62,50 +71,55 @@ void TPFC_device_wiimote::callback(cwiid_wiimote_t *wiimote, int mesg_count,
 }
 
 
-
-
+// Creadora del device
 TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
-  
+  // creamos el bufer de datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2D);
-  
+  // sobreescribimos el mensaje de error por defecto con el nuestro, para evitar spam
   cwiid_set_err(err);
 
   // conectarse al primer wiimote que se encuentre
   bdaddr_t bdaddr = *BDADDR_ANY;// bluetooth device address
 
-  // Connect to the wiimote s
-  printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
+  // Conectar los wiimotes
+  printf("Pon el wiimote en modo discoverable (pulsa 1+2)...\n");
   while (!wiimote){
     if ( !(wiimote = cwiid_open(&bdaddr, 0)) && !(wiimote = cwiid_open(&bdaddr, 0)) ){
-	    printf("waiting for a wiimote (press 1+2)...\n");
+	    printf("Esperando al wiimote (pulsa 1+2)...\n");
     }
   }
+
   // registramos el wiimote para poder identificar despues los callbacks 
   registerwiimote(wiimote, this);
   
+  // registramos nuestro callback con el wiimote
   if (cwiid_set_mesg_callback(wiimote, callback)) {
-	  fprintf(stderr, "Unable to set message callback\n");
+	  fprintf(stderr, "No se ha podido registrar el callback\n");
   }
+  // activamos el paso de mensajes desde el wiimote
   if (cwiid_enable(wiimote, CWIID_FLAG_MESG_IFC)) {
-	  fprintf(stderr, "Error enabling messages\n");
+	  fprintf(stderr, "Error activando los mensajes\n");
   }
+  // configuramos el report mode
   unsigned char rpt_mode = 0;
   toggle_bit(rpt_mode, CWIID_RPT_IR);
   set_rpt_mode(wiimote, rpt_mode);
-  printf("Wiimote connected!\n");
+
   
+  printf("Wiimote conectado!\n");
   
 }
 
+// Destructora
 TPFC_device_wiimote::~TPFC_device_wiimote(){
   free(data);
 }
-
 
 // Funciones necesarias para el control del wiimote via cwiid
 void TPFC_device_wiimote::err(cwiid_wiimote_t *wiimote, const char *s, va_list ap){
 	// comento para que no salga nada de errores
 }
+// report mode
 void TPFC_device_wiimote::set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode){
 	if (cwiid_set_rpt_mode(wiimote, rpt_mode)) {
 		fprintf(stderr, "Error setting report mode\n");
