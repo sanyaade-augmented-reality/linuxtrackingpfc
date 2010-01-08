@@ -53,41 +53,67 @@ int main( int argc, char** argv ){
 
     
 	
-    string s;
+    string s; // buffer
+    bool loaded = false; // flag de carga de alguna configuracion
     // bucle principal
     while (alive && getline(cin, s) ){
       
       // salir
-      if (s.compare("exit")==0){
+      if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
 	// paramos los devices
 	for (int i =0; i<dev.size();i++){
 	  dev[i]->stop();
 	}
 	// desactivamos el flag para que se detenga el thread del mainloop
 	alive=false;
+      }else
+      
+      if (s.compare("face")==0){
+	if (loaded){
+	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
+	}else{
+	  // Facedetec
+	  dev.push_back( new TPFC_device_opencv_face(0,0) );
+	  dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
+	  settracker(dev[1], "Tracker0");
+	  loaded=true;
+	}
+      }else
+
+      if (s.compare("wii")==0){
+	if (loaded){
+	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
+	}else{
+	  // wiimote
+	  dev.push_back( new TPFC_device_wiimote(0) );
+	  dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
+	  settracker(dev[1], "Tracker0",4);
+	  loaded=true;
+	}
+      }else
+
+      if (s.compare("wii2")==0){
+	if (loaded){
+	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
+	}else{
+	  // wiimote x2
+	  dev.push_back( new TPFC_device_wiimote(0) );
+	  dev.push_back( new TPFC_device_wiimote(1) );
+	  dev.push_back( new TPFC_device_3dfrom2d(2,dev[0]) );
+	  settracker(dev[2], "Tracker0",4);
+	  dev.push_back( new TPFC_device_3dfrom2d(3,dev[1]) );
+	  settracker(dev[3], "Tracker1",4);
+	  loaded= true;
+	}
+      }else if (s.compare("")!=0){
+	if (s.compare("help")==0 || s.compare("?")==0)
+	  printf("Tracking PFC Server, lista de ordenes:\n");
+	else
+	  printf("Orden no reconocida, lista de ordenes:\n");
+	printf("Face, wii, wii2 -> cargar uno de los presets predeterminados\n");
+	printf("Exit, quit, q -> salir\n\n");
       }
 
-      if (s.compare("face")==0){
-	// Facedetec
-	dev.push_back( new TPFC_device_opencv_face(0,0) );
-	dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-	settracker(dev[1], "Tracker0");
-      }
-      if (s.compare("wii")==0){
-	// wiimote
-	dev.push_back( new TPFC_device_wiimote(0) );
-	dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-	settracker(dev[1], "Tracker0",4);
-      }
-      if (s.compare("wii2")==0){
-	    // wiimote x2
-	    dev.push_back( new TPFC_device_wiimote(0) );
-	    dev.push_back( new TPFC_device_wiimote(1) );
-	    dev.push_back( new TPFC_device_3dfrom2d(2,dev[0]) );
-	    settracker(dev[2], "Tracker0",4);
-	    dev.push_back( new TPFC_device_3dfrom2d(3,dev[1]) );
-	    settracker(dev[3], "Tracker1",4);
-      }
     }
 
     // esperamos a que pare el mainloop (si hay servidor)
