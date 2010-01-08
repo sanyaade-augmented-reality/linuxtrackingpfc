@@ -3,7 +3,7 @@
 
 TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* source):TPFC_device(ident){
   // creamos los datos
-  data = new TrackingPFC_data(TPFCDATA3DORI);
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI);
   // La opción de merge esta activada por defecto
   merge = true;
   // La opción por defecto es usar una profundidad fija

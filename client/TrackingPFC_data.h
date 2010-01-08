@@ -6,12 +6,12 @@
 #include <time.h>
 #include <stdio.h>
 
-enum TPFCdatatype { TPFCDATA2D, TPFCDATA2DSIZE, TPFCDATA3D, TPFCDATA3DORI};
-
 class TrackingPFC_data{
-  // struct basico de la información relativa a un punto
+  
   public:
-
+    // tipo de datos que se guardan en los buffers
+    enum TPFCdatatype { TPFCDATA2D, TPFCDATA2DSIZE, TPFCDATA3D, TPFCDATA3DORI};
+    // struct basico de la información relativa a un punto
     struct datachunk{
       private:
       float* data; // float[] que guarda los datos de posicion y orientacion
