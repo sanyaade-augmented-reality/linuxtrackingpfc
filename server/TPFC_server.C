@@ -4,6 +4,7 @@
 #include "TPFC_device_opencv_face.h"
 #include "TPFC_device_wiimote.h"
 #include "TPFC_device_3dfrom2d.h"
+#include "TPFC_device_3dstereo.h"
 
 #include <vector>
 
@@ -104,16 +105,18 @@ int main( int argc, char** argv ){
 	if ( input[0].compare("device")==0 || input[0].compare("dev")==0){
 	  if (input.size()<2){
 	    printf("No se ha especificado el tipo de dispositivo a crear.\n");
-	  }else if ( input[1].compare("opencvfacedetect")==0 || input[1].compare("face")==0 ){
+	  }else
+
+	  if ( input[1].compare("opencvfacedetect")==0 || input[1].compare("face")==0 ){
 	    if (input.size()!=3){
 	      printf("Device OpenCV Facedetect requiere el numero de camara.\n");
 	    }else{
 	      dev.push_back( new TPFC_device_opencv_face(dev.size(),str2int(input[2]) ) );
 	      printf("Añadido dispositivo %i: OpenCV Facedetect\n",dev.size()-1);
 	    }
+	  }else
 
-
-	  }else if ( input[1].compare("3dfrom2d")==0 ){
+	  if ( input[1].compare("3dfrom2d")==0 ){
 	    // comprobamos que tengamos el parametro adicional necesario
 	    // comprobamos que exista
 	    if (input.size()!=3){
@@ -122,11 +125,30 @@ int main( int argc, char** argv ){
 	      int source = str2int( input[2] );
 	      // comprobamos que sea valido
 	      if (source<0 || source >=dev.size()){
-		printf("No se puede establecer la fuente: no existe un dispositivo con esa ID\n");
+		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n", source);
 	      }else{ //si lo es, creamos el nuevo dispositivo
 		dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[source]) );
 		//((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
 		printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
+	      }
+	    }
+	  }else
+
+	  if ( input[1].compare("3dstereo")==0 ){
+	    // comprobamos que tengamos los parametro adicional necesario
+	    if (input.size()!=4){
+	      printf("Los dispositivos 3dstereo requieren el numero de id de los dispositivo fuente\n");
+	    }else{
+	      int source1 = str2int( input[2] );
+	      int source2 = str2int( input[3] );
+	      // comprobamos que sean validos y diferentes
+	      if (source1<0 || source1 >=dev.size()){
+		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n",source1);
+	      }else if (source2<0 || source2 >=dev.size()){
+		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n",source2);
+	      }else{ //si lo son, creamos el nuevo dispositivo
+		dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
+		printf("Añadido dispositivo %i: 3dstereo con fuentes %i %i\n",dev.size()-1, source1, source2);
 	      }
 	    }
 	  }else
@@ -199,6 +221,7 @@ int main( int argc, char** argv ){
 	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("     wiimote (wii)\n");
 	  printf("     3dfrom2d <id del dispositivo fuente>\n");
+	  printf("     3dstereo <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list -> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");

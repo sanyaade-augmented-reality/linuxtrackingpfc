@@ -15,13 +15,16 @@ tpfcdevopencvface.o : TPFC_device_opencv_face.C TPFC_device_opencv_face.h tpfcde
 tpfcdev3df2d.o : TPFC_device_3dfrom2d.C TPFC_device_3dfrom2d.h tpfcdev.o
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
+tpfcdev3dstereo.o : TPFC_device_3dstereo.C TPFC_device_3dstereo.h tpfcdev.o
+	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
+
 tpfcdevwii.o : TPFC_device_wiimote.C TPFC_device_wiimote.h tpfcdev.o
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
 tpfcdev.o : TPFC_device.C TPFC_device.h
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
-tpfcserver : TPFC_server.C tpfcdev.o tpfcdevopencvface.o tpfcdev3df2d.o tpfcdevwii.o
+tpfcserver : TPFC_server.C tpfcdev.o tpfcdevopencvface.o tpfcdev3df2d.o tpfcdev3dstereo.o tpfcdevwii.o
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $^ $(LIBRARIES)
 
 
