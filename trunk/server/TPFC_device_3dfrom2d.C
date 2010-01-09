@@ -9,6 +9,8 @@ TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* s):TPFC_devic
   // La opción por defecto es usar una profundidad fija
   deep=FIJA;
   dist = 1.0;
+  // por defecto el calculo de la orientacion
+  ori=NULA;
   // registramos este dispositivo en la lista de listeners del que vamos a usar como input
   s-> report_to(this);
   // guardamos un puntero a la fuente
@@ -92,6 +94,9 @@ void TPFC_device_3dfrom2d::setmerge(bool m){
 void TPFC_device_3dfrom2d::setdeep(deeptype d, float di){
   deep=d;
   dist=di;
+}
+void TPFC_device_3dfrom2d::setori(oritype o){
+  ori=o;
 }
 
 // Informacion sobre el dispositivo
