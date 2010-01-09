@@ -306,7 +306,13 @@ int main(int argc, char** argv)
        resolution= (char*)"1920x1200:32@60";
    }
 
-   track = new TrackingPFC_client();
+   char* trkname = (char*)"Tracker0@localhost";
+   // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
+   // se espera un nombre valido y libre, si no lo es, la aplicación fallara
+   if (argc>2)
+     trkname=argv[2];
+
+   track = new TrackingPFC_client(trkname);
 
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
