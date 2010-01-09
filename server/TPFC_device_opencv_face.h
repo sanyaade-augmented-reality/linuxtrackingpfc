@@ -30,6 +30,9 @@ class TPFC_device_opencv_face : public TPFC_device{
     void stop();
     int camera();
     static void* facedetect(void * t);
+
+    // funcion que devuelve en un string la información relativa al dispositivo
+    string info();
 };
 
 

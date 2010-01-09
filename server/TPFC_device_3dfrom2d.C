@@ -1,7 +1,7 @@
 #include "TPFC_device_3dfrom2d.h" 
 
 
-TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* source):TPFC_device(ident){
+TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* s):TPFC_device(ident){
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI);
   // La opción de merge esta activada por defecto
@@ -10,7 +10,9 @@ TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* source):TPFC_
   deep=FIJA;
   dist = 1.0;
   // registramos este dispositivo en la lista de listeners del que vamos a usar como input
-  source-> report_to(this);
+  s-> report_to(this);
+  // guardamos un puntero a la fuente
+  source=s;
 
 }
 
@@ -90,4 +92,11 @@ void TPFC_device_3dfrom2d::setmerge(bool m){
 void TPFC_device_3dfrom2d::setdeep(deeptype d, float di){
   deep=d;
   dist=di;
+}
+
+// Informacion sobre el dispositivo
+string TPFC_device_3dfrom2d::info(){
+  char aux[50]; // si se crean mas de 1 millon de dispositivos nos saldremos del buffer... dudo que sea un problema
+  sprintf(aux, "3dfrom2d (usando de fuente el dispositivo %i)", source->idnum());
+  return aux;
 }

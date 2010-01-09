@@ -2,7 +2,7 @@
 #define TPFC_DEVICE_
 
 #include <stdio.h>
-
+#include <string>
 #include <TrackingPFC_data.h>
 #include <vrpn_Tracker.h>
 
@@ -55,6 +55,9 @@ class TPFC_device{
     
     // función para activar el envio de datos via vrpn_tracker al hacer report()
     int settracker(vrpn_Connection *, const char*, int nsensors=1);
+
+    // funcion que devuelve en un string la información relativa al dispositivo
+    virtual string info() =0;
     
 };
 

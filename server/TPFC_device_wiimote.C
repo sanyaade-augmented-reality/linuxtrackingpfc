@@ -125,3 +125,8 @@ void TPFC_device_wiimote::set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char r
 		fprintf(stderr, "Error setting report mode\n");
 	}
 }
+
+// Informacion sobre el dispositivo
+string TPFC_device_wiimote::info(){
+  return "Wiimote";
+}

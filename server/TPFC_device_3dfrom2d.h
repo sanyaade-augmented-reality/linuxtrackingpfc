@@ -7,6 +7,7 @@ class TPFC_device_3dfrom2d : public TPFC_device{
    public:
     enum deeptype {FIJA, ROTACION, APROXSIZE};
    private:
+    TPFC_device* source;
     // flags de control
     bool merge; // a cierto -> unificar todos los datos de un report y hacer la media
 		// falso -> enviar cada dato de un report como un sensor diferente
@@ -30,6 +31,9 @@ class TPFC_device_3dfrom2d : public TPFC_device{
     // Opciones
     void setmerge(bool); // merge a cierto o falso
     void setdeep(deeptype, float); // inferencia de profundidad los parametros son (deep, dist)
+
+    // funcion que devuelve en un string la información relativa al dispositivo
+    string info();
 };
 
 #endif /*TPFC_DEVICE_3DFROM2D_*/

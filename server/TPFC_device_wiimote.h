@@ -45,7 +45,9 @@ class TPFC_device_wiimote : public TPFC_device{
 
     // callback del wiimote
     static void callback(cwiid_wiimote_t *, int , union cwiid_mesg mesg[], struct timespec *);
-    
+
+    // funcion que devuelve en un string la información relativa al dispositivo
+    string info();
     
 };
 

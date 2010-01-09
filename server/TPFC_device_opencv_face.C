@@ -160,3 +160,8 @@ void TPFC_device_opencv_face::stop(){
 int TPFC_device_opencv_face::camera(){
    return cam;
 }
+
+// Informacion sobre el dispositivo
+string TPFC_device_opencv_face::info(){
+  return "OpenCV Facedetect";
+}
