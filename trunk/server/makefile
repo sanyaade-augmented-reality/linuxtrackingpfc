@@ -30,5 +30,5 @@ tpfcserver : TPFC_server.C tpfcdev.o tpfcdevopencvface.o tpfcdev3df2d.o tpfcdev3
 
 # to clean up:
 clean:
-	rm *~ *.o *.so* tpfcserver
+	rm *~ *.o *.so* tpfcserver cfgs/*~
 
