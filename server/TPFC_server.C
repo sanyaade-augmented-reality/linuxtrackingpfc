@@ -31,6 +31,8 @@ void* mainloop_thread(void* ){
   }
 }
 
+
+
 // funcion auxiliar para arrancar los Trackers
 void settracker(TPFC_device* dev, const char* name, int nsensors = 1){
   // si es la primera vez que se llama a settracker, iniciamos la conexion
@@ -46,6 +48,8 @@ void settracker(TPFC_device* dev, const char* name, int nsensors = 1){
   dev->settracker(connection, name, nsensors);
 }
 
+
+
 // funcion auxiliar para pasar de str a int
 int str2int (const string &str) {
   stringstream ss(str);
@@ -53,6 +57,22 @@ int str2int (const string &str) {
   ss >> n;
   return n;
 }
+// funcion auxiliar para parsear la entrada
+void StringExplode(string str, string separator, vector<string>* results){
+    int found;
+    found = str.find_first_of(separator);
+    while(found != string::npos){
+        if(found > 0){
+            results->push_back(str.substr(0,found));
+        }
+        str = str.substr(found+1);
+        found = str.find_first_of(separator);
+    }
+    if(str.length() > 0){
+        results->push_back(str);
+    }
+}
+
 
 int main( int argc, char** argv ){
     // incializaciones
@@ -60,102 +80,126 @@ int main( int argc, char** argv ){
     alive = true;
     vector<TPFC_device*> dev; // lista de dispositivos
 
-    string s; // buffer para la entrada
+    string s; // buffer para el string la entrada
+    vector<string> input; // buffer para los tonkens resultantes de procesar la entrada
+
+    bool readinput = true; // flag que marca que debemos seguir leyendo de la entrada
     
     // bucle principal, lee una linea del input a no ser que se haya recibido la orden de parar
-    while (alive && getline(cin, s) ){
+    while (alive && readinput && getline(cin, s)){
       
       // ignorar la linea si es un comentario (empieza por #) o esta vacia
       if ( (s.substr(0,1)).compare("#")==0 || s.compare("")==0){
 	// No hacemos nada
-      } else
-      
+      }else{
+	// Hay instrucciones
+	// separamos la entrada en tokens sueltos
+	input.clear();
+	StringExplode(s, " ", &input);
 
-      // Nuevos devices
-      if ( (s.substr(0,7)).compare("device ")==0 ){
-	if ( (s.substr(7,16)).compare("opencvfacedetect")==0 ){
-	  dev.push_back( new TPFC_device_opencv_face(dev.size(),0) );
-	  printf("Añadido dispositivo %i: OpenCV Facedetect\n",dev.size()-1);
+	// Nuevos devices
+	if ( input[0].compare("device")==0 || input[0].compare("dev")==0){
+	  if (input.size()<2){
+	    printf("No se ha especificado el tipo de dispositivo a crear.\n");
+	  }else if ( input[1].compare("opencvfacedetect")==0 || input[1].compare("face")==0 ){
+	    if (input.size()!=3){
+	      printf("Device OpenCV Facedetect requiere el numero de camara.\n");
+	    }else{
+	      dev.push_back( new TPFC_device_opencv_face(dev.size(),str2int(input[2]) ) );
+	      printf("Añadido dispositivo %i: OpenCV Facedetect\n",dev.size()-1);
+	    }
 
-	}else if ( (s.substr(7,8)).compare("3dfrom2d")==0 ){
-	  // comprobamos que tengamos el parametro adicional necesario
-	  // comprobamos que exista
-	  if (s.size()<17 || (s.substr(15,1)).compare(" ")!=0){
-	    printf("Los dispositivos 3dfrom2d requieren el numero de id del dispositivo fuente\n");
+
+	  }else if ( input[1].compare("3dfrom2d")==0 ){
+	    // comprobamos que tengamos el parametro adicional necesario
+	    // comprobamos que exista
+	    if (input.size()!=2){
+	      printf("Los dispositivos 3dfrom2d requieren el numero de id del dispositivo fuente\n");
+	    }else{
+	      int source = str2int( input[1] );
+	      // comprobamos que sea valido
+	      if (source<0 || source >=dev.size()){
+		printf("No se puede establecer la fuente: no existe un dispositivo con esa ID\n");
+	      }else{ //si lo es, creamos el nuevo dispositivo
+		dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[0]) );
+		//((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
+		printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
+	      }
+	    }
+	  }else
+
+
+	  if ( input[1].compare("wiimote")==0 || input[1].compare("wii")==0){
+	    dev.push_back( new TPFC_device_wiimote(dev.size()) );
+	    printf("Añadido dispositivo %i: Wiimote\n",dev.size()-1);
+
+
+	  }else
+	  
+	    printf("'%s' no es un tipo de dispositivo valido.\n", input[1].c_str() );
+	  
+	}else
+	
+
+	// añadir tracker
+	if ( input[0].compare("addtracker")==0 || input[0].compare("addt")==0){
+	  // comprobamos primero que haya un device al que añadir el tracker
+	  if (dev.size()==0){
+	    printf("Para usar addtracker, primero se debe haber añadido un dispositivo.\n");
 	  }else{
-	    int source = str2int( s.substr(16,s.size()-16) );
-	    // comprobamos que sea valido
-	    if (source<0 || source >=dev.size()){
-	      printf("No se puede establecer la fuente: no existe un dispositivo con esa ID\n");
-	    }else{ //si lo es, creamos el nuevo dispositivo
-	      dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[0]) );
-	      //((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
-	      printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
+	    // comprobamos que el numero sea el esperado
+	    if (input.size()==1 || input.size()>3){
+	      printf("addtracker necesita uno o 2 parametros adicionales: el nombre del tracker y el numero de sensores.\n");
+	    }else{
+	      // si solo tenemos 2 parametros llamamos a la funcion default
+	      if (input.size()==2)
+		settracker(dev[dev.size()-1], input[1].c_str() );
+	      else // si tenemos 3, incluimos el parametro
+		settracker(dev[dev.size()-1], input[1].c_str() , str2int(input[2]) );
+	      printf("Añadido tracker, con nombre '%s'\n", input[1].c_str() );
 	    }
 	  }
+	}else
+	
 
-	}else{
-	  printf("'%s' no es un tipo de dispositivo valido.\n", (s.substr(7,s.size()-7)).c_str() );
-	} 
-      }else
-      
-      // añadir tracker
-      if ( (s.substr(0,11)).compare("addtracker ")==0 ){
-	settracker(dev[dev.size()-1], (s.substr(11,s.size()-11)).c_str() );
-	printf("Añadido tracker, con nombre '%s'\n", (s.substr(11,s.size()-11)).c_str() );
-      }else
-      
 
-      /* 
-	if (s.compare("wii")==0){
-	if (loaded){
-	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
-	}else{
-	  // wiimote
-	  dev.push_back( new TPFC_device_wiimote(0) );
-	  dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-	  settracker(dev[1], "Tracker0",4);
-	  loaded=true;
+	// Fin de programa
+	if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
+	  // paramos los devices
+	  for (int i =0; i<dev.size();i++){
+	    dev[i]->stop();
+	  }
+	  // desactivamos el flag para que se detenga el thread del mainloop
+	  alive=false;
+	}else
+	// Dejar de aceptar inputs (daemon mode)
+	if (s.compare("daemon")==0){
+	  // bajamos el flag de read input
+	  readinput=false;
+	  printf("Entrando en modo daemon. El servidor ya no aceptará mas comandos. (Ctrl+c para matar el proceso)\n");
+	}else
+	if (s.compare("help")==0 || s.compare("?")==0 || s.compare("h")==0){
+	  // si es una peticion de ayuda, imprimimos la lista de comandos
+	  printf("Ayuda de TPFCServer, lista de comandos:\n");
+	  printf("help (?, h) -> muestra la lista de comandos disponibles.\n");
+	  printf("device (dev) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
+	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
+	  printf("     wiimote (wii)\n");
+	  printf("     3dfrom2d <id del dispositivo fuente>\n");
+	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
+	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
+	  printf("Exit (quit, q) -> finalizar el servidor.\n");
+	  printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
+	  printf("Leyenda: (alias de los comandos), <parametros obligatorios>, [<parametros opcionales>].\n");
+	  printf("Se pueden encontrar ejemplos de uso en las configuraciones de ejemplo en la carpeta cfg.\n");
+	  printf("\n");
+	}else{ // si hemos llegado aqui sin reconocer la orden avisamos de que es incorrecta
+	  printf("'%s' no es una orden valida. Escribe '?' para obtener ayuda.\n",s.c_str());
 	}
-      }else
-
-      if (s.compare("wii2")==0){
-	if (loaded){
-	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
-	}else{
-	  // wiimote x2
-	  dev.push_back( new TPFC_device_wiimote(0) );
-	  dev.push_back( new TPFC_device_wiimote(1) );
-	  dev.push_back( new TPFC_device_3dfrom2d(2,dev[0]) );
-	  settracker(dev[2], "Tracker0",4);
-	  dev.push_back( new TPFC_device_3dfrom2d(3,dev[1]) );
-	  settracker(dev[3], "Tracker1",4);
-	  loaded= true;
-	}
-      }else*/
-
-
-      // Fin de programa
-      if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
-	// paramos los devices
-	for (int i =0; i<dev.size();i++){
-	  dev[i]->stop();
-	}
-	// desactivamos el flag para que se detenga el thread del mainloop
-	alive=false;
-      }else if (s.compare("help")==0 || s.compare("?")==0 || s.compare("h")==0){
-	// si es una peticion de ayuda, imprimimos la lista de comandos
-	printf("Ayuda de TPFCServer, lista de comandos:\n");
-	printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
-	printf("help, ?, h -> muestra la lista de comandos disponibles.\n");
-	printf("Exit, quit, q -> finalizar el servidor.\n\n");
-      }else{ // si hemos llegado aqui sin reconocer la orden avisamos de que es incorrecta
-	printf("'%s' no es una orden valida. Escribe '?' para obtener ayuda.\n",s.c_str());
       }
-      
     }
 
-    // si se acaba el input (por ejemplo al hacer un ./tpfcserver <cfg
+    // si se acaba el input (por ejemplo al hacer un ./tpfcserver <cfg )
     // podemos llegar aqui con alive = true, este bucle se encarga
     // de que el servidor se siga ejecutando
     while (alive){
@@ -165,9 +209,7 @@ int main( int argc, char** argv ){
 
     // esperamos a que pare el mainloop (si hay servidor)
     if (connection!=NULL){
-      printf("saliendo\n");
       pthread_join( mainlooper, NULL);
-      printf("saliendo\n");
     }
     // finalizamos
     return 0;
