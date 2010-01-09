@@ -2,5 +2,5 @@
 # Simple Opencv Facedetect Tracking
 
 device opencvfacedetect
-device 3dfrom2d
+device 3dfrom2d 0
 addtracker Tracker0
