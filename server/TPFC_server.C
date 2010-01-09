@@ -46,44 +46,68 @@ void settracker(TPFC_device* dev, const char* name, int nsensors = 1){
   dev->settracker(connection, name, nsensors);
 }
 
+// funcion auxiliar para pasar de str a int
+int str2int (const string &str) {
+  stringstream ss(str);
+  int n;
+  ss >> n;
+  return n;
+}
+
 int main( int argc, char** argv ){
     // incializaciones
     connection=NULL;
     alive = true;
     vector<TPFC_device*> dev; // lista de dispositivos
 
-    string s; // buffer de las ordenes recibidas
-    bool loaded = false; // flag, a cierto si se carga 
-
+    string s; // buffer para la entrada
+    
     // bucle principal, lee una linea del input a no ser que se haya recibido la orden de parar
     while (alive && getline(cin, s) ){
       
-      // Fin de programa
-      if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
-	// paramos los devices
-	for (int i =0; i<dev.size();i++){
-	  dev[i]->stop();
-	}
-	// desactivamos el flag para que se detenga el thread del mainloop
-	alive=false;
+      // ignorar la linea si es un comentario (empieza por #) o esta vacia
+      if ( (s.substr(0,1)).compare("#")==0 || s.compare("")==0){
+	// No hacemos nada
+      } else
+      
+
+      // Nuevos devices
+      if ( (s.substr(0,7)).compare("device ")==0 ){
+	if ( (s.substr(7,16)).compare("opencvfacedetect")==0 ){
+	  dev.push_back( new TPFC_device_opencv_face(dev.size(),0) );
+	  printf("Añadido dispositivo %i: OpenCV Facedetect\n",dev.size()-1);
+
+	}else if ( (s.substr(7,8)).compare("3dfrom2d")==0 ){
+	  // comprobamos que tengamos el parametro adicional necesario
+	  // comprobamos que exista
+	  if (s.size()<17 || (s.substr(15,1)).compare(" ")!=0){
+	    printf("Los dispositivos 3dfrom2d requieren el numero de id del dispositivo fuente\n");
+	  }else{
+	    int source = str2int( s.substr(16,s.size()-16) );
+	    // comprobamos que sea valido
+	    if (source<0 || source >=dev.size()){
+	      printf("No se puede establecer la fuente: no existe un dispositivo con esa ID\n");
+	    }else{ //si lo es, creamos el nuevo dispositivo
+	      dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[0]) );
+	      //((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
+	      printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
+	    }
+	  }
+
+	}else{
+	  printf("'%s' no es un tipo de dispositivo valido.\n", (s.substr(7,s.size()-7)).c_str() );
+	} 
+      }else
+      
+      // añadir tracker
+      if ( (s.substr(0,11)).compare("addtracker ")==0 ){
+	settracker(dev[dev.size()-1], (s.substr(11,s.size()-11)).c_str() );
+	printf("Añadido tracker, con nombre '%s'\n", (s.substr(11,s.size()-11)).c_str() );
       }else
       
 
-      // Presets que cargan tipos comunes de server
-      if (s.compare("face")==0){
-	if (loaded){
-	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
-	}else{
-	  // Facedetec
-	  dev.push_back( new TPFC_device_opencv_face(0,0) );
-	  dev.push_back( new TPFC_device_3dfrom2d(1,dev[0]) );
-	  settracker(dev[1], "Tracker0");
-	  //((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
-	  loaded=true;
-	}
-      }else
-
-      if (s.compare("wii")==0){
+      /* 
+	if (s.compare("wii")==0){
 	if (loaded){
 	  printf("Solo se puede cargar un archivo o una configuración predeterminada. Orden ignorada\n");
 	}else{
@@ -108,25 +132,43 @@ int main( int argc, char** argv ){
 	  settracker(dev[3], "Tracker1",4);
 	  loaded= true;
 	}
-      }else
-      
+      }else*/
 
-      // Si hemos llegado a este punto o es una orden vacia, o petición de ayuda o una orden incorrecta
-      if (s.compare("")!=0){ // si no es una orden vacia
-	if (s.compare("help")==0 || s.compare("?")==0) // si es una peticion de ayuda
-	  printf("Ayuda de TPFCServer, lista de ordenes:\n");
-	else // si es una orden incorrecta
-	  printf("Orden no reconocida, lista de ordenes:\n");
-	// sea por petición de ayuda o por orden incorrecta, mostramos la ayuda
-	printf("Face, wii, wii2 -> cargar uno de los presets predeterminados\n");
-	printf("Exit, quit, q -> salir\n\n");
+
+      // Fin de programa
+      if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
+	// paramos los devices
+	for (int i =0; i<dev.size();i++){
+	  dev[i]->stop();
+	}
+	// desactivamos el flag para que se detenga el thread del mainloop
+	alive=false;
+      }else if (s.compare("help")==0 || s.compare("?")==0 || s.compare("h")==0){
+	// si es una peticion de ayuda, imprimimos la lista de comandos
+	printf("Ayuda de TPFCServer, lista de comandos:\n");
+	printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
+	printf("help, ?, h -> muestra la lista de comandos disponibles.\n");
+	printf("Exit, quit, q -> finalizar el servidor.\n\n");
+      }else{ // si hemos llegado aqui sin reconocer la orden avisamos de que es incorrecta
+	printf("'%s' no es una orden valida. Escribe '?' para obtener ayuda.\n",s.c_str());
       }
+      
+    }
 
+    // si se acaba el input (por ejemplo al hacer un ./tpfcserver <cfg
+    // podemos llegar aqui con alive = true, este bucle se encarga
+    // de que el servidor se siga ejecutando
+    while (alive){
+      // largos periodos (1 min) de sleep para no consumir cpu
+      vrpn_SleepMsecs(60000);
     }
 
     // esperamos a que pare el mainloop (si hay servidor)
-    if (connection!=NULL)
+    if (connection!=NULL){
+      printf("saliendo\n");
       pthread_join( mainlooper, NULL);
+      printf("saliendo\n");
+    }
     // finalizamos
     return 0;
 }
