@@ -1,0 +1,6 @@
+# Tracking PFC Server Sample Configuration file
+# Simple Opencv Facedetect Tracking
+
+device opencvfacedetect
+device 3dfrom2d
+addtracker Tracker0
