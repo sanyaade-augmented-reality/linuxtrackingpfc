@@ -46,8 +46,8 @@ class TPFC_device{
     void unpause();
     virtual void stop();
     // consultoras sobre el estado del funcionamiento
-    int alive(); // devuelve 1 si el estado no es STOP
-    int working(); // devuelve 1 si el estado es RUN
+    bool alive(); // devuelve 1 si el estado no es STOP
+    bool working(); // devuelve 1 si el estado es RUN
     // función para avisar a los listeners de que hay nuevos datos
     void report();
     // función para avisar a los listeners de que no nuevos datos en este report

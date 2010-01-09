@@ -90,10 +90,10 @@ void TPFC_device::stop(){
 }
 
 // Consultoras sobre el estado
-int TPFC_device::alive(){
+bool TPFC_device::alive(){
   return running!=STOP;
 }
-int TPFC_device::working(){
+bool TPFC_device::working(){
   return running==RUN;
 }
 

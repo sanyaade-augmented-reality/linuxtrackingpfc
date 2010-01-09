@@ -101,7 +101,7 @@ void* TPFC_device_opencv_face::facedetect(void * t){
   // fin de las inicializaciones
     
   while (d->alive()==1){ // mientras no recibamos la señal de parar
-    if (d->working()==1){ // si no estamos en pausa
+    if (d->working()){ // si no estamos en pausa
 
       // bucle central del facedetect
       frame = cvQueryFrame( capture );
