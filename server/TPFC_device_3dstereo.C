@@ -3,14 +3,15 @@
 
 TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_device* s2):TPFC_device(ident){
   // creamos los datos
-  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI);
-  // registramos este dispositivo en la lista de listeners que vamos a usar como input
-  s1-> report_to(this);
-  s2-> report_to(this);
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D);
   // guardamos un puntero a la fuente
   sources= new TPFC_device*[2];
   sources[0]= s1;
   sources[1]= s2;
+  // registramos este dispositivo en la lista de listeners que vamos a usar como input
+  s1-> report_to(this);
+  s2-> report_to(this);
+  
 
 }
 
