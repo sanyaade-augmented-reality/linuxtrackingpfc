@@ -116,7 +116,7 @@ int main( int argc, char** argv ){
 	    }
 	  }else
 
-	  if ( input[1].compare("3dfrom2d")==0 ){
+	  if ( input[1].compare("3dfrom2d")==0 || input[1].compare("3f2")==0){
 	    // comprobamos que tengamos el parametro adicional necesario
 	    // comprobamos que exista
 	    if (input.size()!=3){
@@ -134,7 +134,7 @@ int main( int argc, char** argv ){
 	    }
 	  }else
 
-	  if ( input[1].compare("3dstereo")==0 ){
+	  if ( input[1].compare("3dstereo")==0 || input[1].compare("stereo")==0){
 	    // comprobamos que tengamos los parametro adicional necesario
 	    if (input.size()!=4){
 	      printf("Los dispositivos 3dstereo requieren el numero de id de los dispositivo fuente\n");
@@ -220,8 +220,8 @@ int main( int argc, char** argv ){
 	  printf("device (dev) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
 	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("     wiimote (wii)\n");
-	  printf("     3dfrom2d <id del dispositivo fuente>\n");
-	  printf("     3dstereo <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
+	  printf("     3dfrom2d (3f2) <id del dispositivo fuente>\n");
+	  printf("     3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list -> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
