@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
 	  trkname=argv[1];
 	// abrimos el tracker
         tkr = new vrpn_Tracker_Remote(trkname);
-		// Set up the tracker callback handler
 
+	// Set up the tracker callback handler
         tkr->register_change_handler(NULL, handle_tracker);
 
 	// the handle_tracker fucntion will be called whenever the 

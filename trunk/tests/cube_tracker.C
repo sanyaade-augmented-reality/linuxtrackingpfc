@@ -146,7 +146,15 @@ void    VRPN_CALLBACK handle_tracker(void *userdata, const vrpn_TRACKERCB t)
 int main(int argc, char** argv)
 {
    
-   tkr = new vrpn_Tracker_Remote("Tracker0@localhost");
+  char* trkname = (char*)"Tracker0@localhost";
+  // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
+  // se espera un nombre valido y libre, si no lo es, la aplicación fallara
+  if (argc>1)
+    trkname=argv[1];
+  // abrimos el tracker
+  tkr = new vrpn_Tracker_Remote(trkname);
+
+
    tkr->register_change_handler(NULL, handle_tracker,0);
 
    framen=0;
