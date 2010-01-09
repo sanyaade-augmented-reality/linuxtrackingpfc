@@ -66,8 +66,10 @@ void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
       }
       // sea cual sea la opción, una vez escritos los datos, reportamos
       report();
-    }
-  }
+    }//valid
+  // liberamos la memoria de sourcedata
+  free(sourcedata);
+  }// working
 }
 
 // función auxiliar que añade los datos segun el tipo de deep

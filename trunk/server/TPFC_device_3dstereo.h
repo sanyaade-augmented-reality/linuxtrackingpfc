@@ -6,6 +6,7 @@
 class TPFC_device_3dstereo : public TPFC_device{
    private:
     TPFC_device** sources;
+    TrackingPFC_data::datachunk** lastdatas;
 
     bool calibrated; // flag de calibrado
     void calibrate(); // funcion para calibrar
