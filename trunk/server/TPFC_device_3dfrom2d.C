@@ -23,48 +23,50 @@ TPFC_device_3dfrom2d::~TPFC_device_3dfrom2d(){
 }
 
 void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
-  
-  // obtenemos los datos
-  TrackingPFC_data::datachunk* sourcedata= (s->getdata())->getlastdata();
-  // comprobamos si los datos son validos
-  if (sourcedata->getvalid() == false){
-    // si no son validos guardamos un chunk no valido en nuestros datos y damos un nullreport
-    data->setnodata();
-    nullreport();
-  }else{// si son validos...
-    // obtenemos el numero de puntos del report
-    int n = sourcedata->size();
-    const float* aux;
+  // comprobamos que no estemos en pausa
+  if (working()){
+    // obtenemos los datos
+    TrackingPFC_data::datachunk* sourcedata= (s->getdata())->getlastdata();
+    // comprobamos si los datos son validos
+    if (sourcedata->getvalid() == false){
+      // si no son validos guardamos un chunk no valido en nuestros datos y damos un nullreport
+      data->setnodata();
+      nullreport();
+    }else{// si son validos...
+      // obtenemos el numero de puntos del report
+      int n = sourcedata->size();
+      const float* aux;
 
-    if (merge){ // Hay que unificar todos los datos
-      // acumuladores
-      float acumx=0;
-      float acumy=0;
-      // recorremos los puntos sumando los datos
-      for (int i =0; i<n; i++){
-	aux = sourcedata->getdata(i);
-	acumx+=aux[0];
-	acumy+=aux[1];
+      if (merge){ // Hay que unificar todos los datos
+	// acumuladores
+	float acumx=0;
+	float acumy=0;
+	// recorremos los puntos sumando los datos
+	for (int i =0; i<n; i++){
+	  aux = sourcedata->getdata(i);
+	  acumx+=aux[0];
+	  acumy+=aux[1];
+	}
+	// obtenemos la media
+	acumx=acumx/n;
+	acumy=acumy/n;
+	// guardamos los datos
+	setdata(acumx, acumy);
+      }else{ // Los datos se envian como sensores separados
+	// obtenemos el primer punto
+	aux = sourcedata->getdata();
+	// y lo guardamos en un nuevo report
+	setdata(aux[0], aux[1]);
+	// recorremos los siguientes puntos (si los hay)
+	for (int i =1; i<n; i++){
+	  // obtenemos y guardamos los datos de los puntos, pero añadiendolos al report existente
+	  aux = sourcedata->getdata(i);
+	  setdata(aux[0], aux[1], false);
+	}
       }
-      // obtenemos la media
-      acumx=acumx/n;
-      acumy=acumy/n;
-      // guardamos los datos
-      setdata(acumx, acumy);
-    }else{ // Los datos se envian como sensores separados
-      // obtenemos el primer punto
-      aux = sourcedata->getdata();
-      // y lo guardamos en un nuevo report
-      setdata(aux[0], aux[1]);
-      // recorremos los siguientes puntos (si los hay)
-      for (int i =1; i<n; i++){
-	// obtenemos y guardamos los datos de los puntos, pero añadiendolos al report existente
-	aux = sourcedata->getdata(i);
-	setdata(aux[0], aux[1], false);
-      }
+      // sea cual sea la opción, una vez escritos los datos, reportamos
+      report();
     }
-    // sea cual sea la opción, una vez escritos los datos, reportamos
-    report();
   }
 }
 
