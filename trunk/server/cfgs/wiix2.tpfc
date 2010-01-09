@@ -1,0 +1,10 @@
+# Tracking PFC Server Sample Configuration file
+# Simple Wii Tracking using 2 wiimotes
+
+device wiimote
+device wiimote
+device 3dfrom2d 0
+addtracker Tracker0 4
+device 3dfrom2d 1
+addtracker Tracker1 4
+daemon
