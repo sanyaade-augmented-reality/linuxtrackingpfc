@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <iostream>
-//#include <string>
+
 
 using namespace std;
 
@@ -116,15 +116,15 @@ int main( int argc, char** argv ){
 	  }else if ( input[1].compare("3dfrom2d")==0 ){
 	    // comprobamos que tengamos el parametro adicional necesario
 	    // comprobamos que exista
-	    if (input.size()!=2){
+	    if (input.size()!=3){
 	      printf("Los dispositivos 3dfrom2d requieren el numero de id del dispositivo fuente\n");
 	    }else{
-	      int source = str2int( input[1] );
+	      int source = str2int( input[2] );
 	      // comprobamos que sea valido
 	      if (source<0 || source >=dev.size()){
 		printf("No se puede establecer la fuente: no existe un dispositivo con esa ID\n");
 	      }else{ //si lo es, creamos el nuevo dispositivo
-		dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[0]) );
+		dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[source]) );
 		//((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
 		printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
 	      }
@@ -165,6 +165,16 @@ int main( int argc, char** argv ){
 	}else
 	
 
+	// Listar dispositivos
+	if ( input[0].compare("list")==0){
+	  if (dev.size()==0)
+	    printf("No hay dispositivos que listar.\n");
+	  else
+	    printf("%i dispositivos encontrados:\n", dev.size());
+	  for (int i =0 ; i<dev.size();i++)
+	    printf("Device %i; %s\n",i,(dev[i]->info()).c_str() );
+	} else
+
 
 	// Fin de programa
 	if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
@@ -190,6 +200,7 @@ int main( int argc, char** argv ){
 	  printf("     wiimote (wii)\n");
 	  printf("     3dfrom2d <id del dispositivo fuente>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
+	  printf("list -> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
 	  printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
