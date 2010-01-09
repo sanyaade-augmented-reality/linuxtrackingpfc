@@ -131,6 +131,12 @@ int main(int argc, char** argv)
    framen=0;
    sprintf(mensaje,"Press esc to exit\n");
 
+   char* trkname = (char*)"Tracker0@localhost";
+   // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
+   // se espera un nombre valido y libre, si no lo es, la aplicación fallara
+   if (argc>1)
+     trkname=argv[1];
+
    track = new TrackingPFC_client();
 
    glutInit(&argc, argv);
