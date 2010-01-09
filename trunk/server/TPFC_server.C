@@ -51,13 +51,16 @@ void settracker(TPFC_device* dev, const char* name, int nsensors = 1){
 
 
 // funcion auxiliar para pasar de str a int
+// (por Martin Gieseking, encontrada en http://bytes.com/topic/c/answers/132109-string-integer)
 int str2int (const string &str) {
   stringstream ss(str);
   int n;
   ss >> n;
   return n;
 }
+
 // funcion auxiliar para parsear la entrada
+// (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
 void StringExplode(string str, string separator, vector<string>* results){
     int found;
     found = str.find_first_of(separator);
@@ -200,6 +203,7 @@ int main( int argc, char** argv ){
     }
 
     // si se acaba el input (por ejemplo al hacer un ./tpfcserver <cfg )
+    // o al entrar en modo daemon, 
     // podemos llegar aqui con alive = true, este bucle se encarga
     // de que el servidor se siga ejecutando
     while (alive){
@@ -220,4 +224,5 @@ TO DO LIST:
 - Quitar la chapuza del if (d->camera()==0) cvWaitKey( 10 ); en el opencv
 - Ver por que mostrar 2 ventanas del facedetect acaba provocando un segfault
 - eliminar el mensaje de error de vrpn tracker cuando no se envian reports en >10 secs
+- añadir comandos load y save al servidor
 */
