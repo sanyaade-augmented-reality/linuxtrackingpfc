@@ -137,7 +137,7 @@ int main(int argc, char** argv)
    if (argc>1)
      trkname=argv[1];
 
-   track = new TrackingPFC_client();
+   track = new TrackingPFC_client(trkname);
 
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
