@@ -163,7 +163,7 @@ TrackingPFC_data::datachunk::datachunk(float* f, int c, bool r, datachunk* n){
 }
 // copiadora
 TrackingPFC_data::datachunk::datachunk(datachunk* d, int dsize){
-  if (data!=NULL){
+  if (d->data!=NULL){
     data = new float[dsize];
     for (int i =0; i<dsize;i++)
       data[i]=d->data[i];
