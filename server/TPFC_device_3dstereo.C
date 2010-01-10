@@ -6,12 +6,16 @@ TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_devi
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D);
 
+  lock = new pthread_mutex_t(); // inicializamos el semaforo
+
   // guardamos un puntero a las fuentes
   sources= new TPFC_device*[2];
   sources[0]= s1;
   sources[1]= s2;
   // y creamos un vector donde guardar los reports
-  lastdatas = new TrackingPFC_data::datachunk*[2];
+  lastdata = new TrackingPFC_data::datachunk*[2];
+  lastdata[0]=NULL;
+  lastdata[1]=NULL;
 
   // marcamos a falso el flag de calibrado
   calibrated = false;
@@ -28,25 +32,38 @@ TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_devi
 
 TPFC_device_3dstereo::~TPFC_device_3dstereo(){
   free(data);
-  if (lastdatas[0]!=NULL);
-    free(lastdatas[0]);
-  if (lastdatas[1]!=NULL);
-    free(lastdatas[1]);
+  if (lastdata[0]!=NULL);
+    free(lastdata[0]);
+  if (lastdata[1]!=NULL);
+    free(lastdata[1]);
 }
 
 void TPFC_device_3dstereo::calibrate(){
   calib_samples=500;
-  calib_dots=1;
+  calib_dots=2;
   int progressinc=calib_samples/50;// cada cuantos samples actualizar estado
 
   calib_lock = new pthread_mutex_t(); // inicializamos el semaforo
   // creamos el buffer de datos
   calib_data = (float*)malloc(calib_samples*calib_dots*4*sizeof(float));
+
+
+
   // inicializamos el indice
   calib_count=0;
-  printf("Pulsa enter para calibrar\n");
-  // activamos el flag de running para que report_from empiece a capturar datos
-  char trash= getchar();
+  printf("Preparando para calibrar en\n");
+  printf("5\n");
+  vrpn_SleepMsecs(1000);
+  printf("4\n");
+  vrpn_SleepMsecs(1000);
+  printf("3\n");
+  vrpn_SleepMsecs(1000);
+  printf("2\n");
+  vrpn_SleepMsecs(1000);
+  printf("1\n");
+  vrpn_SleepMsecs(1000);
+  printf("Adquiriendo datos\n");
+
   running=RUN;
   int progress=progressinc;
   while (calib_count < calib_samples){
@@ -57,35 +74,85 @@ void TPFC_device_3dstereo::calibrate(){
       fflush(stdout);
     }
   }
-  printf("\nyay!\n");
+  running=PAUSE;
+  printf("\nDatos obtenidos, procesando...\n");
 
-  // calibrar
+  float* samp;
+  float acum, max, min;
+  for (int d=0; d<calib_dots;d++){
+    for (int sn=0; sn<2;sn++){
+      for (int xy=0; xy<2;xy++){
+	acum=0.0;
+	samp=getsamples(xy, sn, d);
+	max=samp[0];
+	min=samp[0];
+	for (int i =0; i<calib_samples;i++){
+	  acum+=samp[i];
+	  if (samp[i]<min)
+	    min=samp[i];
+	  if (samp[i]>max)
+	    max=samp[i];
+	}
+	acum=acum/calib_samples;
+	printf("<%i,%i,%i> %f (%f, %f)\n", xy,sn,d, acum, max, min);
+      }
+    }
+  }
+
+
+
 
   calibrated = true;
   free(calib_data);
 }
 
-void TPFC_device_3dstereo::adddot(float x1, float y1, float x2, float y2, int dot){
+
+// funcion para añadir los datos de una muestra al buffer
+void TPFC_device_3dstereo::addsample(float* d){
   pthread_mutex_lock( calib_lock ); // obtenemos acceso exclusivo
   // comprobamos que no este lleno el buffer
   if (calib_count<calib_samples){
-    int desp=calib_count*calib_dots*4 + dot*4;
-    calib_data[desp]=x1;
-    calib_data[desp+1]=y1;
-    calib_data[desp+2]=x2;
-    calib_data[desp+3]=y2;
-    // si es el ultimo punto del report, aumentamos el indice
-    if ((dot+1)==calib_dots)
-      calib_count++;
+    // guardamos los datos en el orden adecuado
+    for (int i =0;i<calib_dots;i++){
+      calib_data[calib_samples*4*i+calib_count]=d[i*4];
+      calib_data[calib_samples*4*i+calib_samples+calib_count]=d[i*4+1];
+      calib_data[calib_samples*4*i+calib_samples*2+calib_count]=d[i*4+2];
+      calib_data[calib_samples*4*i+calib_samples*3+calib_count]=d[i*4+3];
+    }
+      
+    calib_count++;
   }
   pthread_mutex_unlock( calib_lock ); // liberamos el acceso exclusivo
+}
+
+// funcion para recuperar todas las muestras del bufer
+// no comprueba que el buffer este lleno
+float* TPFC_device_3dstereo::getsamples(int xy, int sn, int dot){
+  // devolvemos simplemente el puntero a la posicion necesaria
+  // al usarlo hay que tener cuidado de no pasar del rango 0..calib_samples-1
+  return &calib_data[calib_samples*4*dot+calib_samples*(2*sn+xy)];
+}
+
+// devuelve el indice interno de la fuente (si esta en sources[0] o sources[1]
+int TPFC_device_3dstereo::getsourcepos(TPFC_device* s){
+  if (s==sources[0])
+    return 0;
+  else
+    return 1;
 }
 
 void TPFC_device_3dstereo::report_from(TPFC_device* s){
   // comprobamos que no estemos en pausa
   if (working()){
-    //free(sourcedata);
-    TrackingPFC_data::datachunk* sourcedata= (s->getdata())->getlastdata();
+    // guardamos estos datos en su buffer
+    int sn = getsourcepos(s);
+    if (lastdata[sn]!=NULL){
+      // si habia datos, los eliminamos antes
+      free(lastdata[sn]);
+      lastdata[sn]=NULL;
+    }
+    lastdata[sn]= (s->getdata())->getlastdata();
+
     // comprobamos si los datos son validos
 
     if (calibrated){ // si ya esta el dispositivo calibrado
@@ -136,12 +203,27 @@ if (sourcedata->getvalid() == false){
 
 
     }else{ // si no esta calibrado (lo estamos haciendo)
-      adddot(0.0,0.0,0.0,0.0,1);
+      // si hay datos, son validos y tienen el numero adecuado de punto, los pasamos al buffer de calibrado
+      if (lastdata[0]!=NULL && lastdata[0]->getvalid() && lastdata[0]->size()==calib_dots &&
+	  lastdata[1]!=NULL && lastdata[1]->getvalid() && lastdata[1]->size()==calib_dots){
+	// creamos un vector auxiliar
+	float* aux = new float[4*calib_dots];
+	for (int i =0; i<calib_dots;i++){
+	  aux[i*4+0]=(lastdata[0]->getdata(i))[0];
+	  aux[i*4+1]=(lastdata[0]->getdata(i))[1];
+	  aux[i*4+2]=(lastdata[1]->getdata(i))[0];
+	  aux[i*4+3]=(lastdata[1]->getdata(i))[1];
+	}
+	addsample(aux);
+	// liberamos la memoria del vector
+	free(aux);
+      }
     }// if calibrated
   }// if workikg
 }
 
 void TPFC_device_3dstereo::nullreport_from(TPFC_device* s){
+  // redirigimos al report normal (ya se gestiona internamente la validez)
   report_from(s);
 }
 
