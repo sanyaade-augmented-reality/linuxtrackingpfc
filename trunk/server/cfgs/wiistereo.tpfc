@@ -1,0 +1,8 @@
+# Tracking PFC Server Sample Configuration file
+# 3d Tracking using 2 wiimotes with stereo capture
+
+device wiimote
+device wiimote
+device 3dstereo 0 1
+addtracker Tracker0 2
+daemon
