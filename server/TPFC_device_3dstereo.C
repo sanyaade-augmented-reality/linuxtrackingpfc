@@ -38,6 +38,18 @@ TPFC_device_3dstereo::~TPFC_device_3dstereo(){
     free(lastdata[1]);
 }
 
+// funcion auxiliar para comparar 2 floats, para usar con qsort
+int comparefloats (const void * a, const void * b)
+{
+  if (*(float*)a == *(float*)b)
+    return 0;
+  else if  (*(float*)a < *(float*)b)
+    return -1;
+  else
+    return 1;
+}
+
+
 void TPFC_device_3dstereo::calibrate(){
   calib_samples=500;
   calib_dots=2;
@@ -47,63 +59,96 @@ void TPFC_device_3dstereo::calibrate(){
   // creamos el buffer de datos
   calib_data = (float*)malloc(calib_samples*calib_dots*4*sizeof(float));
 
+  // y declaramos la matriz donde guardaremos temporalmente los datos para el calibrado
+  float angles[4][2][2];
+  int fase = 0; // conatador de fases en las que se divide el calibrado
 
-
-  // inicializamos el indice
-  calib_count=0;
-  printf("Preparando para calibrar en\n");
-  printf("5\n");
-  vrpn_SleepMsecs(1000);
-  printf("4\n");
-  vrpn_SleepMsecs(1000);
-  printf("3\n");
-  vrpn_SleepMsecs(1000);
-  printf("2\n");
-  vrpn_SleepMsecs(1000);
-  printf("1\n");
-  vrpn_SleepMsecs(1000);
-  printf("Adquiriendo datos\n");
-
-  running=RUN;
-  int progress=progressinc;
-  while (calib_count < calib_samples){
-    vrpn_SleepMsecs(1);
-    if (calib_count>=progress){
-      progress+=progressinc;
-      printf(".");
-      fflush(stdout);
-    }
-  }
-  running=PAUSE;
-  printf("\nDatos obtenidos, procesando...\n");
-
-  float* samp;
-  float acum, max, min;
-  for (int d=0; d<calib_dots;d++){
-    for (int sn=0; sn<2;sn++){
-      for (int xy=0; xy<2;xy++){
-	acum=0.0;
-	samp=getsamples(xy, sn, d);
-	max=samp[0];
-	min=samp[0];
-	for (int i =0; i<calib_samples;i++){
-	  acum+=samp[i];
-	  if (samp[i]<min)
-	    min=samp[i];
-	  if (samp[i]>max)
-	    max=samp[i];
-	}
-	acum=acum/calib_samples;
-	printf("<%i,%i,%i> %f (%f, %f)\n", xy,sn,d, acum, max, min);
+  while (fase*calib_dots<3){
+     // inicializamos el indice
+    calib_count=0;
+    // Mensajes de aviso con cuenta atrás para el usuario
+    printf("Preparando para obtener datos en...\n");
+    printf("5 ");fflush(stdout);
+    vrpn_SleepMsecs(1000);
+    printf("4 ");fflush(stdout);
+    vrpn_SleepMsecs(1000);
+    printf("3 ");fflush(stdout);
+    vrpn_SleepMsecs(1000);
+    printf("2 ");fflush(stdout);
+    vrpn_SleepMsecs(1000);
+    printf("1 ");fflush(stdout);
+    vrpn_SleepMsecs(1000);
+    printf("Adquiriendo datos\n");
+    // activamos el flag de running para que report_from empiece a recojer datos
+    running=RUN;
+    int progress=progressinc;
+    // este bucle espera a que se llene el buffer de datos
+    // si no se llena (los sensores no van), la aplicacion se quedará en un bucle infinito
+    // mientras funcione, aunque sea lentamente, irá imprimiendo un punto por cada 2% de buffer llenado
+    while (calib_count < calib_samples){
+      // sleep para no ocupar la cpu
+      vrpn_SleepMsecs(1);
+      // comprobamos que no haya que escribir un nuevo punto
+      if (calib_count>=progress){
+	// actualizamos el contador donde hay que escribir un nuevo punto
+	progress+=progressinc;
+	printf(".");
+	// flush para asegurar que el punto se escribe al momento
+	fflush(stdout);
       }
     }
-  }
+    // pausamos la recogida de datos para ahorrar cpu
+    running=PAUSE;
+    printf("\nDatos obtenidos, procesando...\n");
+
+    float* samp;
+    float acum, max, min, med;
+    // recorremos el buffer obteniendo todos los datos relativos a cada conjunto punto, mando, orientacion
+    for (int d=0; d<calib_dots;d++){
+      for (int sn=0; sn<2;sn++){
+	for (int xy=0; xy<2;xy++){
+	  // obtenemos el buffer correspondiente
+	  samp=getsamples(xy, sn, d);
+	  // reseteamos los contadores
+	  acum=0.0;
+	  max=samp[0];
+	  min=samp[0];
+	  // y recorremos los buffers sumando el valor al acumulador y actualizando max y min
+	  for (int i =0; i<calib_samples;i++){
+	    acum+=samp[i];
+	    if (samp[i]<min)
+	      min=samp[i];
+	    if (samp[i]>max)
+	      max=samp[i];
+	  }
+	  // por ultimo calculamos la media
+	  med=acum/calib_samples;
+	  // y la guardamos en la matriz de angulos
+	  angles[d+fase*calib_dots][sn][xy]=med;
+	  /*printf("<%i,%i,%i> %f (%f, %f)\n", xy,sn,d, med, max, min);
+	  if (d==0 && sn==0 && xy==0){
+	    for (int i =0; i<calib_samples;i++)
+	      printf("%f ", samp[i]);
+	    printf("\n");
+	    qsort(samp, calib_samples, sizeof(float), comparefloats);
+	    for (int i =0; i<calib_samples;i++)
+	      printf("%f ", samp[i]);
+	    printf("\n");
+	  }*/
+	  
+	}
+      }
+    }
+  fase++;// incrementamos el contador de fase
+  }// while (fase*calib_dots<3){
+  printf("Calibración finalizada\n");
 
 
 
 
   calibrated = true;
   free(calib_data);
+  running=RUN;
 }
 
 
