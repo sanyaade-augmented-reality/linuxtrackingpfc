@@ -30,7 +30,7 @@ class TPFC_device_3dstereo : public TPFC_device{
     // configuracion de la calibracion
     int calib_samples; // numero de muestras en cada punto para calibrar
     int calib_dots; // numero de puntos simultaneos durante el calibrado
-    int calib_discard; // % de las muestras a descartar al procesar los datos
+    //int calib_discard; // % de las muestras a descartar al procesar los datos
     void calibrate(); // funcion para calibrar
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device

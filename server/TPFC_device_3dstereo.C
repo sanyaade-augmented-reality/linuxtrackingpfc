@@ -51,9 +51,9 @@ int comparefloats (const void * a, const void * b)
 
 
 void TPFC_device_3dstereo::calibrate(){
-  calib_samples=500;
-  calib_dots=2;
-  int progressinc=calib_samples/50;// cada cuantos samples actualizar estado
+  calib_samples=500; // de 50 a 500
+  calib_dots=2; // de 1 a 3
+  int progressinc=calib_samples/50;// cada cuantos samples es un 2%
 
   calib_lock = new pthread_mutex_t(); // inicializamos el semaforo
   // creamos el buffer de datos
@@ -103,7 +103,7 @@ void TPFC_device_3dstereo::calibrate(){
 
     float* samp;
     float acum, max, min, med;
-    // recorremos el buffer obteniendo todos los datos relativos a cada conjunto punto, mando, orientacion
+    // recorremos el buffer obteniendo todos los datos relativos a cada conjunto punto, sensor, orientacion
     for (int d=0; d<calib_dots;d++){
       for (int sn=0; sn<2;sn++){
 	for (int xy=0; xy<2;xy++){
@@ -141,11 +141,10 @@ void TPFC_device_3dstereo::calibrate(){
     }
   fase++;// incrementamos el contador de fase
   }// while (fase*calib_dots<3){
+  printf("Calculando posición de los sensores\n");
+  
+  
   printf("Calibración finalizada\n");
-
-
-
-
   calibrated = true;
   free(calib_data);
   running=RUN;
@@ -153,17 +152,67 @@ void TPFC_device_3dstereo::calibrate(){
 
 
 // funcion para añadir los datos de una muestra al buffer
+//en d recibimos los datos en orden: d1(x1, y1, x2, y2), d2(x1, y1, x2, y2)...
 void TPFC_device_3dstereo::addsample(float* d){
   pthread_mutex_lock( calib_lock ); // obtenemos acceso exclusivo
   // comprobamos que no este lleno el buffer
   if (calib_count<calib_samples){
-    // guardamos los datos en el orden adecuado
-    for (int i =0;i<calib_dots;i++){
+    // version que no comprueba la ordenacion antes de insertar
+    /*for (int i =0;i<calib_dots;i++){
       calib_data[calib_samples*4*i+calib_count]=d[i*4];
       calib_data[calib_samples*4*i+calib_samples+calib_count]=d[i*4+1];
       calib_data[calib_samples*4*i+calib_samples*2+calib_count]=d[i*4+2];
       calib_data[calib_samples*4*i+calib_samples*3+calib_count]=d[i*4+3];
+    }*/
+    
+    //version que ordena
+    float* aux; // puntero auxiliar para escribir en el buffer
+    float dots[calib_dots][2]; // matriz auxiliar donde guardaremos temporalmente los puntos
+    int dm =0; // desplazamiento en d debido al sensor que queramos
+    for (int sn =0; sn<2; sn++){ // cada sensor individualmente
+      // primero cargamos todos los puntos en dots[][]
+      for (int dn=0; dn<calib_dots;dn++){
+	dots[dn][0]=d[dn*4+dm];
+	dots[dn][1]=d[dn*4+dm+1];
+      }
+      // si se esta calibrando con 2 o 3 puntos necesitaremos ordenarlos
+      // esta ordenación sera por el angulo horizontal (x), de mayor a menor
+      // y en caso de empate irá primero aquel con un angulo vertical mayor
+      if (calib_dots>1){
+	// ya que como maximo tenemos 2 o 3 puntos, usar condicionales será mas simple
+	// que usar algoritmos mas complejos
+	if (dots[1][0]>dots[0][0]){
+	  int temp;
+	  temp=dots[0][0];
+	  dots[0][0]=dots[1][0];
+	  dots[1][0]=temp;
+	}
+	if (calib_dots==3){
+	  if (dots[2][0]>dots[0][0]){
+	    int temp;
+	    temp=dots[0][0];
+	    dots[0][0]=dots[2][0];
+	    dots[2][0]=temp;
+	  }
+	  if (dots[2][0]>dots[1][0]){
+	    int temp;
+	    temp=dots[1][0];
+	    dots[1][0]=dots[2][0];
+	    dots[2][0]=temp;
+	  }
+	}
+      }
+      // guardamos los dots en el buffer
+      for (int dn=0; dn<calib_dots;dn++){
+	aux=getsamples(0,sn,dn);
+	aux[calib_count]=dots[dn][0];
+	aux=getsamples(1,sn,dn);
+	aux[calib_count]=dots[dn][1];
+      }
+      dm=2;// incrementamos antes de salir el desplazamiento necesario para acceder a los datos del sensor correcto
     }
+    // fin de la version que ordena
+
       
     calib_count++;
   }
@@ -172,6 +221,7 @@ void TPFC_device_3dstereo::addsample(float* d){
 
 // funcion para recuperar todas las muestras del bufer
 // no comprueba que el buffer este lleno
+// devuelve un puntero al buffer, no a una copia
 float* TPFC_device_3dstereo::getsamples(int xy, int sn, int dot){
   // devolvemos simplemente el puntero a la posicion necesaria
   // al usarlo hay que tener cuidado de no pasar del rango 0..calib_samples-1
