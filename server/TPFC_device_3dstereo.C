@@ -54,13 +54,18 @@ void TPFC_device_3dstereo::calibrate(){
   calib_samples=500; // de 50 a 500
   calib_dots=2; // de 1 a 3
   int progressinc=calib_samples/50;// cada cuantos samples es un 2%
+  // numero total de puntos usados en el calibrado
+  // si estamos usando las gafas u otro aparato con 2 marcadores
+  // al realizar la toma tendremos 4 puntos
+  // si usamos 3 marcadores o 1 solo marcador, solo tendremos 3, que son los minimos necesarios
+  int totaldots=(calib_dots==2)?4:3;
 
   calib_lock = new pthread_mutex_t(); // inicializamos el semaforo
   // creamos el buffer de datos
   calib_data = (float*)malloc(calib_samples*calib_dots*4*sizeof(float));
 
   // y declaramos la matriz donde guardaremos temporalmente los datos para el calibrado
-  float angles[4][2][2];
+  float angles[totaldots][2][2];
   int fase = 0; // conatador de fases en las que se divide el calibrado
 
   while (fase*calib_dots<3){
@@ -68,7 +73,12 @@ void TPFC_device_3dstereo::calibrate(){
     calib_count=0;
     // Mensajes de aviso con cuenta atrás para el usuario
     printf("Preparando para obtener datos en...\n");
-    printf("5 ");fflush(stdout);
+    for (int i =5; i>0;i--){
+      printf("%i ",i);
+      fflush(stdout);
+      vrpn_SleepMsecs(1000);
+    }
+    /*printf("5 ");fflush(stdout);
     vrpn_SleepMsecs(1000);
     printf("4 ");fflush(stdout);
     vrpn_SleepMsecs(1000);
@@ -77,7 +87,7 @@ void TPFC_device_3dstereo::calibrate(){
     printf("2 ");fflush(stdout);
     vrpn_SleepMsecs(1000);
     printf("1 ");fflush(stdout);
-    vrpn_SleepMsecs(1000);
+    vrpn_SleepMsecs(1000);*/
     printf("Adquiriendo datos\n");
     // activamos el flag de running para que report_from empiece a recojer datos
     running=RUN;
@@ -103,7 +113,7 @@ void TPFC_device_3dstereo::calibrate(){
 
     float* samp;
     float acum, max, min, med;
-    // recorremos el buffer obteniendo todos los datos relativos a cada conjunto punto, sensor, orientacion
+    // recorremos el buffer obteniendo todos los datos relativos a cada conjunto <punto, sensor, orientacion>
     for (int d=0; d<calib_dots;d++){
       for (int sn=0; sn<2;sn++){
 	for (int xy=0; xy<2;xy++){
@@ -125,23 +135,18 @@ void TPFC_device_3dstereo::calibrate(){
 	  med=acum/calib_samples;
 	  // y la guardamos en la matriz de angulos
 	  angles[d+fase*calib_dots][sn][xy]=med;
-	  /*printf("<%i,%i,%i> %f (%f, %f)\n", xy,sn,d, med, max, min);
-	  if (d==0 && sn==0 && xy==0){
-	    for (int i =0; i<calib_samples;i++)
-	      printf("%f ", samp[i]);
-	    printf("\n");
-	    qsort(samp, calib_samples, sizeof(float), comparefloats);
-	    for (int i =0; i<calib_samples;i++)
-	      printf("%f ", samp[i]);
-	    printf("\n");
-	  }*/
-	  
 	}
       }
     }
   fase++;// incrementamos el contador de fase
   }// while (fase*calib_dots<3){
+
   printf("Calculando posición de los sensores\n");
+  // llegados a este punto tenemos angles[3..4][2][2] llena, con
+  // los puntos ordenados de mayor a menos grado horizontal, y de mayor
+  // a menor vertical en caso de empate cuando tenemos 3 puntos
+  // o en caso de tener 4, los 2 primeros son los 2 superiores
+  
   
   
   printf("Calibración finalizada\n");
