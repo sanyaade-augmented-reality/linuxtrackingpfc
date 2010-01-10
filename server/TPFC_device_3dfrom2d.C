@@ -3,14 +3,12 @@
 
 TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* s):TPFC_device(ident){
   // creamos los datos
-  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI);
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D);
   // La opción de merge esta activada por defecto
   merge = true;
   // La opción por defecto es usar una profundidad fija
   deep=FIJA;
   dist = 1.0;
-  // por defecto el calculo de la orientacion
-  ori=NULA;
   // registramos este dispositivo en la lista de listeners del que vamos a usar como input
   s-> report_to(this);
   // guardamos un puntero a la fuente
@@ -75,7 +73,7 @@ void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
 // función auxiliar que añade los datos segun el tipo de deep
 // si new==true se usara setdata, si ==false, se usara setmoredata (no se empezara report nuevo)
 void TPFC_device_3dfrom2d::setdata(float x, float y, bool newrep){
-  float* aux= new float[7];
+  float* aux= new float[3];
 
   // Tipo de calculo de profundidad
   if (deep==FIJA){
@@ -83,11 +81,6 @@ void TPFC_device_3dfrom2d::setdata(float x, float y, bool newrep){
     aux[1]=tan(y);
     aux[2]=dist;
   }
-  //placeholder para el calculo de la orientacion
-  aux[3]=0;
-  aux[4]=0;
-  aux[5]=0;
-  aux[6]=0;
   // comprobamos si hay que empezar report nuevo o añadir al ya existente
   if (newrep)
     data->setnewdata(aux);
@@ -104,9 +97,6 @@ void TPFC_device_3dfrom2d::setmerge(bool m){
 void TPFC_device_3dfrom2d::setdeep(deeptype d, float di){
   deep=d;
   dist=di;
-}
-void TPFC_device_3dfrom2d::setori(oritype o){
-  ori=o;
 }
 
 // Informacion sobre el dispositivo

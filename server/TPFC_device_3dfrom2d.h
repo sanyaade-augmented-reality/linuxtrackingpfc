@@ -6,7 +6,7 @@
 class TPFC_device_3dfrom2d : public TPFC_device{
    public:
     enum deeptype {FIJA, ROTACION, APROXSIZE};// tipos de calculo de profundidad
-    enum oritype {DELANTE, CENTRO, NULA}; // tipos de calculo de orientacion
+
    private:
     TPFC_device* source;
     // flags de control
@@ -18,7 +18,6 @@ class TPFC_device_3dfrom2d : public TPFC_device{
 		// ROTACION -> radio de rotación
 		// APROXSIZE -> factor necesario para inferir la distancia dado un SIZE
 
-    oritype ori;
 
    // función auxiliar que añade los datos segun el tipo de deep
    // si new==true se usara setdata, si ==false, se usara setmoredata (no se empezara report nuevo)
@@ -34,7 +33,6 @@ class TPFC_device_3dfrom2d : public TPFC_device{
     // Opciones
     void setmerge(bool); // merge a cierto o falso
     void setdeep(deeptype, float); // inferencia de profundidad los parametros son (deep, dist)
-    void setori(oritype); // inferencia de la orientacion (el parametro fija ori)
 
     // funcion que devuelve en un string la información relativa al dispositivo
     string info();
