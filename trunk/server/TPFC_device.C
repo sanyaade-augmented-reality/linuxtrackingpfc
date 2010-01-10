@@ -40,11 +40,22 @@ void TPFC_device::report(){
       aux= d->getdata(i);
       position[0]=aux[0];
       position[1]=aux[1];
-      position[2]=aux[2];
-      quaternion[0]=aux[3];
-      quaternion[1]=aux[4];
-      quaternion[2]=aux[5];
-      quaternion[3]=aux[6];
+      // si el tipo de datos no tiene los 7 campos requeridos, rellenamos con 0
+      if (data->datasize()<3)
+	position[2]=aux[2];
+      else
+	position[2]=0.0;
+      if (data->datasize()<4){
+	quaternion[0]=aux[3];
+	quaternion[1]=aux[4];
+	quaternion[2]=aux[5];
+	quaternion[3]=aux[6];
+      }else{
+	quaternion[0]=0.0;
+	quaternion[1]=0.0;
+	quaternion[2]=0.0;
+	quaternion[3]=0.0;
+      }
       server->report_pose(i,current_time, position, quaternion);
     }
     server->mainloop();

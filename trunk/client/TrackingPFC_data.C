@@ -144,7 +144,7 @@ TrackingPFC_data::TPFCdatatype TrackingPFC_data::datatype(){
 }
 
 // devuelve el tamaño de los datos segun el tipo
-inline int TrackingPFC_data::datasize(){
+int TrackingPFC_data::datasize(){
   return dsize;
 }
 
