@@ -163,9 +163,13 @@ TrackingPFC_data::datachunk::datachunk(float* f, int c, bool r, datachunk* n){
 }
 // copiadora
 TrackingPFC_data::datachunk::datachunk(datachunk* d, int dsize){
-  data = new float[dsize];
-  for (int i =0; i<dsize;i++)
-    data[i]=d->data[i];
+  if (data!=NULL){
+    data = new float[dsize];
+    for (int i =0; i<dsize;i++)
+      data[i]=d->data[i];
+  }else{
+    data=NULL;
+  }
   time=d->time;
   tag= d->tag;
   count= d->count;
