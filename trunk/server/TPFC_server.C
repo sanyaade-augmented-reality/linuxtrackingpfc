@@ -252,23 +252,26 @@ int main( int argc, char** argv ){
 
 	// cargar un archivo de configuracion
 	if ( input[0].compare("load")==0){
-	  
+	  if (dev.size()>0){
+	    printf("No se pueden cargar archivos una vez se ha creado algun dispositivo.\n");
+	  }else{
 	  fstream indata; // indata is like cin
 	  
-	  char filename[200];
-	  // formateamos el nombre del archivo
-	  sprintf(filename, "%s/.trackingpfc/%s.tpfc",getenv ("HOME"),input[1].c_str());
-	  indata.open(filename); // abrimos
-	  if(!indata) { // Si no se puede abrir avisamos
-	      printf( "No se ha podido abrir el archivo '%s'.\n", filename);
-	  }else{ // si se puede...
-	    string l; // string auxiliar
-	    while ( !indata.eof() ) { //sigue leyendo hasta el EOF
-	      getline(indata,l); // obtenemos una linea
-	      loader.push_back(l); // la guardamos en el buffer 
+	    char filename[200];
+	    // formateamos el nombre del archivo
+	    sprintf(filename, "%s/.trackingpfc/%s.tpfc",getenv ("HOME"),input[1].c_str());
+	    indata.open(filename); // abrimos
+	    if(!indata) { // Si no se puede abrir avisamos
+		printf( "No se ha podido abrir el archivo '%s'.\n", filename);
+	    }else{ // si se puede...
+	      string l; // string auxiliar
+	      while ( !indata.eof() ) { //sigue leyendo hasta el EOF
+		getline(indata,l); // obtenemos una linea
+		loader.push_back(l); // la guardamos en el buffer 
+	      }
+	      indata.close();
+	      loaderit = loader.begin(); // colocamos el iterador al principio del vector
 	    }
-	    indata.close();
-	    loaderit = loader.begin(); // colocamos el iterador al principio del vector
 	  }
 	} else
 
