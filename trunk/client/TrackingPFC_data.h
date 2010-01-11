@@ -40,7 +40,7 @@ class TrackingPFC_data{
       int getcount(); // devuelve el numero de report
       bool getreal(); // los datos son reales o artificiales
       bool getvalid(); // los datos son validos, o el report es vacio
-      int size();  // cantidad de puntos en el report
+      int size();  // cantidad de puntos en el report (si no es valido devuelve 0)
       void setvalid(bool);
       void settag(int,int n = 0);
 

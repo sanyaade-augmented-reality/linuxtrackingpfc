@@ -248,14 +248,19 @@ bool getreal(); // los datos son reales o artificiales*/
 bool TrackingPFC_data::datachunk::getvalid(){
   return valid;
 }
+
 int TrackingPFC_data::datachunk::size(){
-  datachunk* aux= this;
-  int n =1;
-  while (aux->next!=NULL){
-    aux=aux->next;
-    n++;
+  if (valid){
+    datachunk* aux= this;
+    int n =1;
+    while (aux->next!=NULL){
+      aux=aux->next;
+      n++;
+    }
+    return n;
+  }else{
+    return 0;
   }
-  return n;
 }
 
 void TrackingPFC_data::datachunk::setvalid(bool v){
