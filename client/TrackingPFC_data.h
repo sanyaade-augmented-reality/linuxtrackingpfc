@@ -14,7 +14,7 @@ class TrackingPFC_data{
     // struct basico de la información relativa a un punto
     struct datachunk{
       private:
-      float* data; // float[] que guarda los datos de posicion y orientacion
+      double* data; // double[] que guarda los datos de posicion y orientacion
       clock_t time; // time
       int tag; // int reservado para que se puedan guardar estados
       int count; // numero de report (para facilitar la identificación de los datachunks);
@@ -25,7 +25,7 @@ class TrackingPFC_data{
       
       public:
       // constructora
-      datachunk(float* f, int c, bool r = true, datachunk* n=NULL);
+      datachunk(double* f, int c, bool r = true, datachunk* n=NULL);
       // copiadora
       datachunk(datachunk* d, int dsize);
       // destructora
@@ -34,7 +34,7 @@ class TrackingPFC_data{
       // consultoras y escritoras
       // las que tienen un argumento es porque son individuales de cada punto
       // las que no lo tienen es porque deberian ser identicas en todos los puntos
-      const float* getdata(int n =0); // devuelve los datos del punto n 
+      const double* getdata(int n =0); // devuelve los datos del punto n 
       clock_t gettime(int n =0); // devuelve el time
       int gettag(int n = 0); // devuelve el tag del punto n
       int getcount(); // devuelve el numero de report
@@ -77,15 +77,18 @@ class TrackingPFC_data{
     // consultoras y escritoras simples (para reports con 1 solo punto por report)
     // devuelve el vector de floats de posicion/orientacion de la ultima posicion reportada
     float* getlastpos();
+    double* getlastposd();
     // añade una nueva posición (copiando la orientación de la anterior posicion, si la hay)
-    // funciona tb para datos 2d, simplemente ignora el 3r float
-    void setnewpos(float, float, float f = 0.0);
+    // funciona tb para datos 2d, simplemente ignora el 3r parametro
+    void setnewpos(double, double, double f = 0.0);
     // añade un nuevo report con los datos de d, d debe tener tamaño dsize
     void setnewdata(float* d, bool real = true);
+    void setnewdata(double* d, bool real = true);
 
     // Escritoras avanzadas
     // añadir información de otro punto adicional al ultimo report
     void setmoredata(float* d, bool real = true);
+    void setmoredata(double* d, bool real = true);
     // añadir un nuevo report vacio y con el flag de datos no validos
     void setnodata(bool real = true);
 

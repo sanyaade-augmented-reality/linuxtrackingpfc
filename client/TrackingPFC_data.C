@@ -17,9 +17,9 @@ TrackingPFC_data::TrackingPFC_data(TPFCdatatype t, int s){
   data = new datachunk*[size]; // creamos el vector de apuntadores a los datachunks
   
   // ponemos los datos por defecto
-  // aunque para el tipo de datos se guarden menos de 7 floats, setnewdata se encarga de copiar
+  // aunque para el tipo de datos se guarden menos de 7 doubles, setnewdata se encarga de copiar
   // solo los necesarios
-  float* defaultdata = new float[7];
+  double* defaultdata = new double[7];
   defaultdata[0]=0.0;
   defaultdata[1]=0.0;
   defaultdata[2]=0.5;
@@ -39,12 +39,25 @@ TrackingPFC_data::~TrackingPFC_data(){
   free(data);
 }
 
-// consultora simple que devuelve un vector de floats con los datos de la ultima posicion (+orientacion)
+// consultora simple que devuelve un vector de doubles con los datos de la ultima posicion (+orientacion)
 float* TrackingPFC_data::getlastpos(){
   // creamos el vector que devolveremos
   float* res= new float[dsize];
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
-  const float* aux= data[ind]->getdata();
+  const double* aux= data[ind]->getdata();
+  // copiamos los datos
+  for (int i =0; i<dsize; i++){
+    res[i]=aux[i];
+  }
+  pthread_mutex_unlock( lock ); // liberamos el acceso
+  return res;
+}
+// consultora simple que devuelve un vector de doubles con los datos de la ultima posicion (+orientacion)
+double* TrackingPFC_data::getlastposd(){
+  // creamos el vector que devolveremos
+  double* res= new double[dsize];
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  const double* aux= data[ind]->getdata();
   // copiamos los datos
   for (int i =0; i<dsize; i++){
     res[i]=aux[i];
@@ -67,14 +80,14 @@ TrackingPFC_data::datachunk* TrackingPFC_data::getlastdata(){
 // copia la orientacion de los ultimos datos (si la hay), modificando la posición.
 // aunque está pensado para funcionar con datos de tamaño 3 o mas, funcionara con los de 2
 // ignorando el 3r argumento
-void TrackingPFC_data::setnewpos(float x, float y, float z){
-  float* aux;
+void TrackingPFC_data::setnewpos(double x, double y, double z){
+  double* aux;
   // si los datos tienen orientacion, obtenemos la ultima posición conocida para poder copiarla
   if (dsize>3)
-    aux = getlastpos();
+    aux = getlastposd();
   // si no, simplemente creamos un vector auxiliar (para no llamar a getlastpost, que bloquea el acceso a los datos)
   else 
-    aux = new float[dsize];
+    aux = new double[dsize];
   // y rellenamos el vector
   aux[0]=x;
   aux[1]=y;
@@ -96,7 +109,25 @@ void TrackingPFC_data::setnewdata(float* d, bool real){
   if (count>size)
     free(data[ind]);
   // creamos un nuevo vector para los datos
-  float* aux = new float[dsize];
+  double* aux = new double[dsize];
+  // y lo rellenamos
+  for (int i =0; i<dsize;i++)
+    aux[i]=d[i];
+  // creamos un datachunk nuevo insertandolo en el buffer
+  data[ind]= new datachunk(aux, count, real);
+  pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
+}
+void TrackingPFC_data::setnewdata(double* d, bool real){
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  // aumentamos el indice
+  ind=(ind+1)%size;
+  // incrementamos el contador
+  count++;
+  // destruimos el datachunk anterior
+  if (count>size)
+    free(data[ind]);
+  // creamos un nuevo vector para los datos
+  double* aux = new double[dsize];
   // y lo rellenamos
   for (int i =0; i<dsize;i++)
     aux[i]=d[i];
@@ -110,7 +141,21 @@ void TrackingPFC_data::setmoredata(float* d, bool real){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // no debemos incrementar ind ni count ya que estamos ante el mismo report.
   // creamos un nuevo vector para los datos
-  float* aux = new float[dsize];
+  double* aux = new double[dsize];
+  // y lo rellenamos
+  for (int i =0; i<dsize;i++)
+    aux[i]=d[i];
+  // creamos un datachunk nuevo insertandolo en el buffer, el datachunk que antes ocupaba
+  // data[ind] ahora esta en data[ind]->next
+  data[ind]= new datachunk(aux, count, real, data[ind]);
+  
+  pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
+}
+void TrackingPFC_data::setmoredata(double* d, bool real){
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  // no debemos incrementar ind ni count ya que estamos ante el mismo report.
+  // creamos un nuevo vector para los datos
+  double* aux = new double[dsize];
   // y lo rellenamos
   for (int i =0; i<dsize;i++)
     aux[i]=d[i];
@@ -152,7 +197,7 @@ int TrackingPFC_data::datasize(){
 
 // STRUCT DATACHUNK
 // constructora
-TrackingPFC_data::datachunk::datachunk(float* f, int c, bool r, datachunk* n){
+TrackingPFC_data::datachunk::datachunk(double* f, int c, bool r, datachunk* n){
   data= f;
   time=clock();
   count = c;
@@ -164,7 +209,7 @@ TrackingPFC_data::datachunk::datachunk(float* f, int c, bool r, datachunk* n){
 // copiadora
 TrackingPFC_data::datachunk::datachunk(datachunk* d, int dsize){
   if (d->data!=NULL){
-    data = new float[dsize];
+    data = new double[dsize];
     for (int i =0; i<dsize;i++)
       data[i]=d->data[i];
   }else{
@@ -191,7 +236,7 @@ TrackingPFC_data::datachunk::~datachunk(){
 }
 
 // Consultoras y escritoras
-const float* TrackingPFC_data::datachunk::getdata(int n){
+const double* TrackingPFC_data::datachunk::getdata(int n){
   datachunk* aux = getchunk(n);
   return aux->data;
 }
