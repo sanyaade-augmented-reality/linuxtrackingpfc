@@ -99,7 +99,15 @@ int main( int argc, char** argv ){
 
     bool readinput = true; // flag que marca que debemos seguir leyendo de la entrada
 
-    //if (argc>1){
+    // comprobamos si teniamos como parametro un nombre de archivo
+    if (argc>1){
+      // en vez de abrir el archivo, cargamos la instruccion "load <archivo>" en loader
+      // para que el load lo haga el bucle principal
+      s="load ";
+      s.append(argv[1]);
+      loader.push_back(s); // cargamos en loader
+      loaderit=loader.begin(); // inicializamos el iterador
+    }
     
     // bucle principal, lee una linea del input a no ser que se haya recibido la orden de parar
     while (alive && readinput && (loader.size()>0 || getline(cin, s)) ){
@@ -259,6 +267,7 @@ int main( int argc, char** argv ){
 	  // si es una peticion de ayuda, imprimimos la lista de comandos
 	  printf("Ayuda de TPFCServer, lista de comandos:\n");
 	  printf("help (?, h) -> muestra la lista de comandos disponibles.\n");
+	  printf("load <nombre> -> carga el script ~./trackingpfc/nombre.tpfc");
 	  printf("device (dev) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
 	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("     wiimote (wii)\n");
