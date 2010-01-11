@@ -77,7 +77,33 @@ void StringExplode(string str, string separator, vector<string>* results){
     }
 }
 
+// funcion auxiliar para comprobar si un archivo existe
+// (encontrada en http://www.techbytes.ca/techbyte103.html)
+#include <sys/stat.h>
 
+bool FileExists(string strFilename) {
+  struct stat stFileInfo;
+  bool blnReturn;
+  int intStat;
+
+  // Attempt to get the file attributes
+  intStat = stat(strFilename.c_str(),&stFileInfo);
+  if(intStat == 0) {
+    // We were able to get the file attributes
+    // so the file obviously exists.
+    blnReturn = true;
+  } else {
+    // We were not able to get the file attributes.
+    // This may mean that we don't have permission to
+    // access the folder which contains this file. If you
+    // need to do that level of checking, lookup the
+    // return values of stat which will give you
+    // more details on why stat failed.
+    blnReturn = false;
+  }
+  
+  return(blnReturn);
+}
 
 
 
@@ -254,9 +280,10 @@ int main( int argc, char** argv ){
 	if ( input[0].compare("load")==0){
 	  if (dev.size()>0){
 	    printf("No se pueden cargar archivos una vez se ha creado algun dispositivo.\n");
+	  }else if (input.size()==1){
+	    printf("El comando load requiere el nombre de archivo a abrir.\n");
 	  }else{
-	  fstream indata; // indata is like cin
-	  
+	    fstream indata; // indata is like cin
 	    char filename[200];
 	    // formateamos el nombre del archivo
 	    sprintf(filename, "%s/.trackingpfc/%s.tpfc",getenv ("HOME"),input[1].c_str());
@@ -272,6 +299,43 @@ int main( int argc, char** argv ){
 	      indata.close();
 	      loaderit = loader.begin(); // colocamos el iterador al principio del vector
 	    }
+	  }
+	} else
+
+	// Guardar un archivo de configuracion
+	if ( input[0].compare("save")==0){
+	  if (input.size()==1){
+	    printf("El comando save requiere el nombre con el que quieres guardar la configuracion\n");
+	  }else if (commands.size()==0){
+	    printf("No se han introducido comandos relevantes validos por el momento, No hay nada que guardar\n");
+	  }else{
+	    ofstream outdata; // indata is like cin
+	    char filename[200];
+	    // formateamos el nombre del archivo
+	    sprintf(filename, "%s/.trackingpfc/%s.tpfc",getenv ("HOME"),input[1].c_str());
+	    bool overwrite = true; // flag de escritura
+	    if (FileExists(filename)){
+	      printf( "Ya existe el archivo '%s'. Deseas sobreescribirlo? (y/n)\n", filename);
+	      char r='a';
+	      while (r!='y' && r != 'n')
+		r=getchar();
+	      if (r=='n')
+		overwrite=false;
+	    }
+	    if (overwrite){// si vamos a escribir el archivo
+	      outdata.open(filename); // abrimos
+	      if(!outdata) { // Si no se puede abrir avisamos
+		  printf( "No se ha podido abrir el archivo '%s'.\n", filename);
+	      }else{
+		for (int i =0; i<commands.size();i++){
+		  outdata << commands[i];
+		  outdata << "\n";
+		}
+		outdata.close();
+		printf( "Configuracion guardada el archivo '%s'.\n", filename);
+	      }
+	    }
+	    
 	  }
 	} else
 
@@ -295,6 +359,7 @@ int main( int argc, char** argv ){
 	  printf("Ayuda de TPFCServer, lista de comandos:\n");
 	  printf("help (?, h) -> muestra la lista de comandos disponibles.\n");
 	  printf("load <nombre> -> carga el script ~./trackingpfc/nombre.tpfc");
+	  printf("save <nombre> -> guarda el script ~./trackingpfc/nombre.tpfc");
 	  printf("device (dev) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
 	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("     wiimote (wii)\n");
