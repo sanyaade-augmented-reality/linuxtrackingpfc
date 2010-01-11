@@ -2,16 +2,27 @@
 #define TPFC_DEVICE_3DSTEREO_
 
 #include "TPFC_device.h"
+#define TPFCPI 3.14159265
 
 class TPFC_device_3dstereo : public TPFC_device{
    private:
+    // Puntero a los 2 device fuente
     TPFC_device** sources;
+    // los datachunks del ultimo report de cada fuente
     TrackingPFC_data::datachunk** lastdata;
+    // semaforo para exclusion mutua en el acceso a lastdata
     pthread_mutex_t* lock;
+
+    int left; // indice del sensor izquierdo
 
     // funcion que encuentra el indice interno de la fuente (si esta en sources[0] o sources[1]
     int getsourcepos(TPFC_device* s);
+    // funcion que convierte el angulo del device fuente apuntado por sources[2o parametro]
+    // a un angulo usable para coordenar (el angulo interior del triangulo usado)
+    float angleconversion(float, int);
     
+
+    // variables usadas en la calibracion
     bool calibrated; // flag de calibrado
     float* calib_data; // buffer que se usa durante el calibrado. los datos estan almacenados
 		       // en tramos de calib_sample longitud, en este orden:
