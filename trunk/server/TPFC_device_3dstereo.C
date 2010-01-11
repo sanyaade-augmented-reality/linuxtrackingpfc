@@ -51,8 +51,10 @@ int comparefloats (const void * a, const void * b)
 
 
 void TPFC_device_3dstereo::calibrate(){
-  calib_samples=500; // de 50 a 500
+  calib_samples=100; // de 50 a 500
   calib_dots=2; // de 1 a 3
+  int camdist=0.036; // las 2 camaras son paralelas y estan a 3,6 cm de distancia
+
   int progressinc=calib_samples/50;// cada cuantos samples es un 2%
   // numero total de puntos usados en el calibrado
   // si estamos usando las gafas u otro aparato con 2 marcadores
@@ -78,16 +80,6 @@ void TPFC_device_3dstereo::calibrate(){
       fflush(stdout);
       vrpn_SleepMsecs(1000);
     }
-    /*printf("5 ");fflush(stdout);
-    vrpn_SleepMsecs(1000);
-    printf("4 ");fflush(stdout);
-    vrpn_SleepMsecs(1000);
-    printf("3 ");fflush(stdout);
-    vrpn_SleepMsecs(1000);
-    printf("2 ");fflush(stdout);
-    vrpn_SleepMsecs(1000);
-    printf("1 ");fflush(stdout);
-    vrpn_SleepMsecs(1000);*/
     printf("Adquiriendo datos\n");
     // activamos el flag de running para que report_from empiece a recojer datos
     running=RUN;
@@ -130,7 +122,9 @@ void TPFC_device_3dstereo::calibrate(){
 	      min=samp[i];
 	    if (samp[i]>max)
 	      max=samp[i];
+	    //printf("%f ", samp[i]);
 	  }
+	  //printf("\n");
 	  // por ultimo calculamos la media
 	  med=acum/calib_samples;
 	  // y la guardamos en la matriz de angulos
@@ -146,6 +140,42 @@ void TPFC_device_3dstereo::calibrate(){
   // los puntos ordenados de mayor a menos grado horizontal, y de mayor
   // a menor vertical en caso de empate cuando tenemos 3 puntos
   // o en caso de tener 4, los 2 primeros son los 2 superiores
+  
+  // estos datos deberian leerse de tpfc.cfg
+  // distancias en milimetros
+  float scrx=0.520;
+  float scry=0.320;
+  float sens=0.170;
+  
+  if (totaldots==4){ // usando configuracion de 4 puntos
+    float realpos[4][3];
+    //X
+    realpos[0][0]=sens/2.0;
+    realpos[1][0]=-sens/2.0;
+    realpos[2][0]=sens/2.0;
+    realpos[3][0]=-sens/2.0;
+    //Y
+    realpos[0][1]=scry/2.0;
+    realpos[1][1]=scry/2.0;
+    realpos[2][1]=-scry/2.0;
+    realpos[3][1]=-scry/2.0;
+    //Z
+    realpos[0][2]=0.5;
+    realpos[1][2]=0.5;
+    realpos[2][2]=0.5;
+    realpos[3][2]=0.5;
+
+    for (int dot=0;dot<4;dot++){
+      printf("Punto %i\n",dot);
+      printf("  sensor 0: %f %f\n",angles[dot][0][0],angles[dot][0][1]);
+      printf("  sensor 1: %f %f\n",angles[dot][1][0],angles[dot][1][1]);
+    }
+      
+    
+    
+  }else{ // usando configuracion de 3 puntos
+    
+  }
   
   
   
@@ -179,34 +209,28 @@ void TPFC_device_3dstereo::addsample(float* d){
       for (int dn=0; dn<calib_dots;dn++){
 	dots[dn][0]=d[dn*4+dm];
 	dots[dn][1]=d[dn*4+dm+1];
+	//printf("%f %f ", dots[dn][0], dots[dn][1]);
       }
+      //printf("\n");
       // si se esta calibrando con 2 o 3 puntos necesitaremos ordenarlos
       // esta ordenación sera por el angulo horizontal (x), de mayor a menor
       // y en caso de empate irá primero aquel con un angulo vertical mayor
-      if (calib_dots>1){
-	// ya que como maximo tenemos 2 o 3 puntos, usar condicionales será mas simple
-	// que usar algoritmos mas complejos
-	if (dots[1][0]>dots[0][0]){
-	  int temp;
-	  temp=dots[0][0];
-	  dots[0][0]=dots[1][0];
-	  dots[1][0]=temp;
-	}
-	if (calib_dots==3){
-	  if (dots[2][0]>dots[0][0]){
-	    int temp;
-	    temp=dots[0][0];
-	    dots[0][0]=dots[2][0];
-	    dots[2][0]=temp;
-	  }
-	  if (dots[2][0]>dots[1][0]){
-	    int temp;
-	    temp=dots[1][0];
-	    dots[1][0]=dots[2][0];
-	    dots[2][0]=temp;
+      // como calib_dots siempre sera <= 3 un algoritmo burbuja es suficiente para ordenar
+      for (int i=0;i<calib_dots;i++){
+	for (int j=i+1;j<calib_dots;j++){
+	  if (dots[j][0]>dots[i][0]){
+	    int tmp = dots[j][0];
+	    dots[j][0]=dots[i][0];
+	    dots[i][0]=tmp;
+	    tmp = dots[j][1];
+	    dots[j][1]=dots[i][1];
+	    dots[i][1]=tmp;
 	  }
 	}
       }
+      /*for (int dn=0; dn<calib_dots;dn++){
+	printf("%f %f ", dots[dn][0], dots[dn][1]);
+      }printf(" ***\n");*/
       // guardamos los dots en el buffer
       for (int dn=0; dn<calib_dots;dn++){
 	aux=getsamples(0,sn,dn);
