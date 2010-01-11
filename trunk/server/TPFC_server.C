@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <iostream>
-
+#include <fstream>
 
 using namespace std;
 
@@ -78,7 +78,14 @@ void StringExplode(string str, string separator, vector<string>* results){
 }
 
 
+
+
+
+
+
+
 int main( int argc, char** argv ){
+
     // incializaciones
     connection=NULL;
     alive = true;
@@ -86,11 +93,25 @@ int main( int argc, char** argv ){
 
     string s; // buffer para el string la entrada
     vector<string> input; // buffer para los tonkens resultantes de procesar la entrada
+    vector<string> loader; // buffer que sustituye a la entrada cuando se lee de un fichero
+    vector<string>::iterator loaderit; // iterador sobre loader
+
 
     bool readinput = true; // flag que marca que debemos seguir leyendo de la entrada
+
+    //if (argc>1){
     
     // bucle principal, lee una linea del input a no ser que se haya recibido la orden de parar
-    while (alive && readinput && getline(cin, s)){
+    while (alive && readinput && (loader.size()>0 || getline(cin, s)) ){
+      // comprobamos si habia algo que leer en loader
+      if (loader.size()>0){
+	//printf("lol %i\n",loader.size());
+	s=*loaderit; // actualizamos la string de entrada
+	loaderit++; // incrementamos el iterador
+	if (loaderit==loader.end()){ // si hemos llegado al final, borramos loader
+	  loader.clear();
+	}
+      }
       
       // ignorar la linea si es un comentario (empieza por #) o esta vacia
       if ( (s.substr(0,1)).compare("#")==0 || s.compare("")==0){
@@ -197,6 +218,27 @@ int main( int argc, char** argv ){
 	    printf("Device %i; %s\n",i,(dev[i]->info()).c_str() );
 	} else
 
+	// cargar un archivo de configuracion
+	if ( input[0].compare("load")==0){
+	  
+	  fstream indata; // indata is like cin
+	  
+	  char filename[200];
+	  // formateamos el nombre del archivo
+	  sprintf(filename, "%s/.trackingpfc/%s.tpfc",getenv ("HOME"),input[1].c_str());
+	  indata.open(filename); // abrimos
+	  if(!indata) { // Si no se puede abrir avisamos
+	      printf( "No se ha podido abrir el archivo '%s'.\n", filename);
+	  }else{ // si se puede...
+	    string l; // string auxiliar
+	    while ( !indata.eof() ) { //sigue leyendo hasta el EOF
+	      getline(indata,l); // obtenemos una linea
+	      loader.push_back(l); // la guardamos en el buffer 
+	    }
+	    indata.close();
+	    loaderit = loader.begin(); // colocamos el iterador al principio del vector
+	  }
+	} else
 
 	// Fin de programa
 	if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
