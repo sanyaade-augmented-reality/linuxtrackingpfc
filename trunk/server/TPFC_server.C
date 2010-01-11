@@ -95,6 +95,7 @@ int main( int argc, char** argv ){
     vector<string> input; // buffer para los tonkens resultantes de procesar la entrada
     vector<string> loader; // buffer que sustituye a la entrada cuando se lee de un fichero
     vector<string>::iterator loaderit; // iterador sobre loader
+    vector<string> commands; // buffer que guarda los comandos introducidos hasta el momento
 
 
     bool readinput = true; // flag que marca que debemos seguir leyendo de la entrada
@@ -132,6 +133,7 @@ int main( int argc, char** argv ){
 
 	// Nuevos devices
 	if ( input[0].compare("device")==0 || input[0].compare("dev")==0){
+	  bool devadded=false; //flag de dispositivo añadido
 	  if (input.size()<2){
 	    printf("No se ha especificado el tipo de dispositivo a crear.\n");
 	  }else
@@ -142,6 +144,7 @@ int main( int argc, char** argv ){
 	    }else{
 	      dev.push_back( new TPFC_device_opencv_face(dev.size(),str2int(input[2]) ) );
 	      printf("Añadido dispositivo %i: OpenCV Facedetect\n",dev.size()-1);
+	      devadded=true;
 	    }
 	  }else
 
@@ -159,6 +162,7 @@ int main( int argc, char** argv ){
 		dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[source]) );
 		//((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
 		printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
+		devadded=true;
 	      }
 	    }
 	  }else
@@ -178,6 +182,7 @@ int main( int argc, char** argv ){
 	      }else{ //si lo son, creamos el nuevo dispositivo
 		dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
 		printf("Añadido dispositivo %i: 3dstereo con fuentes %i %i\n",dev.size()-1, source1, source2);
+		devadded = true;
 	      }
 	    }
 	  }else
@@ -186,11 +191,17 @@ int main( int argc, char** argv ){
 	  if ( input[1].compare("wiimote")==0 || input[1].compare("wii")==0){
 	    dev.push_back( new TPFC_device_wiimote(dev.size()) );
 	    printf("Añadido dispositivo %i: Wiimote\n",dev.size()-1);
+	    devadded=true;
 
 
-	  }else
-	  
+	  }else{
 	    printf("'%s' no es un tipo de dispositivo valido.\n", input[1].c_str() );
+	  }
+	  // si hemos llegado aqui y devadded==true, es que el comando ha creado un dev
+	  // lo guardamos en commands
+	  if (devadded){
+	    commands.push_back(s);
+	  }
 	  
 	}else
 	
@@ -211,10 +222,23 @@ int main( int argc, char** argv ){
 	      else // si tenemos 3, incluimos el parametro
 		settracker(dev[dev.size()-1], input[1].c_str() , str2int(input[2]) );
 	      printf("Añadido tracker, con nombre '%s'\n", input[1].c_str() );
+	      // añadimos el comando a commands
+	      commands.push_back(s);
 	    }
 	  }
 	}else
 	
+	// Listar comandos
+	if ( input[0].compare("commands")==0){
+	  if (commands.size()==0)
+	    printf("No se han introducido comandos relevantes validos por el momento.\n");
+	  else
+	    printf("%i comandosintroducidos:\n", commands.size());
+	  for (int i =0 ; i<commands.size();i++){
+	    printf("%s\n",commands[i].c_str() );
+	  }
+
+	} else
 
 	// Listar dispositivos
 	if ( input[0].compare("list")==0){
@@ -276,6 +300,7 @@ int main( int argc, char** argv ){
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list -> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
+	  printf("commands -> lista todos los comandos relevantes realizados hasta el momento.\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
 	  printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
 	  printf("Leyenda: (alias de los comandos), <parametros obligatorios>, [<parametros opcionales>].\n");
