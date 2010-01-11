@@ -257,7 +257,7 @@ void TPFC_device_3dstereo::addsample(float* d){
       for (int i=0;i<calib_dots;i++){
 	for (int j=i+1;j<calib_dots;j++){
 	  if (dots[j][0]>dots[i][0]){
-	    int tmp = dots[j][0];
+	    float tmp = dots[j][0];
 	    dots[j][0]=dots[i][0];
 	    dots[i][0]=tmp;
 	    tmp = dots[j][1];
