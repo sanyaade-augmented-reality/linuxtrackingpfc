@@ -41,11 +41,11 @@ void TPFC_device::report(){
       position[0]=aux[0];
       position[1]=aux[1];
       // si el tipo de datos no tiene los 7 campos requeridos, rellenamos con 0
-      if (data->datasize()<3)
+      if (data->datasize()>=3)
 	position[2]=aux[2];
       else
 	position[2]=0.0;
-      if (data->datasize()<4){
+      if (data->datasize()>=4){
 	quaternion[0]=aux[3];
 	quaternion[1]=aux[4];
 	quaternion[2]=aux[5];
