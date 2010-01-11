@@ -33,12 +33,12 @@ void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
     }else{// si son validos...
       // obtenemos el numero de puntos del report
       int n = sourcedata->size();
-      const float* aux;
+      const double* aux;
 
       if (merge){ // Hay que unificar todos los datos
 	// acumuladores
-	float acumx=0;
-	float acumy=0;
+	double acumx=0;
+	double acumy=0;
 	// recorremos los puntos sumando los datos
 	for (int i =0; i<n; i++){
 	  aux = sourcedata->getdata(i);
@@ -72,8 +72,8 @@ void TPFC_device_3dfrom2d::report_from(TPFC_device* s){
 
 // función auxiliar que añade los datos segun el tipo de deep
 // si new==true se usara setdata, si ==false, se usara setmoredata (no se empezara report nuevo)
-void TPFC_device_3dfrom2d::setdata(float x, float y, bool newrep){
-  float* aux= new float[3];
+void TPFC_device_3dfrom2d::setdata(double x, double y, bool newrep){
+  double* aux= new double[3];
 
   // Tipo de calculo de profundidad
   if (deep==FIJA){
@@ -94,7 +94,7 @@ void TPFC_device_3dfrom2d::setdata(float x, float y, bool newrep){
 void TPFC_device_3dfrom2d::setmerge(bool m){
   merge = m;
 }
-void TPFC_device_3dfrom2d::setdeep(deeptype d, float di){
+void TPFC_device_3dfrom2d::setdeep(deeptype d, double di){
   deep=d;
   dist=di;
 }

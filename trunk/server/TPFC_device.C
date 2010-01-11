@@ -35,7 +35,7 @@ void TPFC_device::report(){
 
     TrackingPFC_data::datachunk* d = data->getlastdata();
     vrpn_gettimeofday(&current_time, NULL);
-    const float* aux;
+    const double* aux;
     for (int i =0; i<d->size() && i<sensors;i++){
       aux= d->getdata(i);
       position[0]=aux[0];

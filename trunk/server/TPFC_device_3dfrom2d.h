@@ -13,7 +13,7 @@ class TPFC_device_3dfrom2d : public TPFC_device{
     bool merge; // a cierto -> unificar todos los datos de un report y hacer la media
 		// falso -> enviar cada dato de un report como un sensor diferente
     deeptype deep; // como se infiere la profundidad?
-    float dist; // variable auxiliar para el calculo de profundidad, distinto uso segun deep
+    double dist; // variable auxiliar para el calculo de profundidad, distinto uso segun deep
 		// FIJA -> distancia al plano de la pantalla, en metros
 		// ROTACION -> radio de rotación
 		// APROXSIZE -> factor necesario para inferir la distancia dado un SIZE
@@ -21,7 +21,7 @@ class TPFC_device_3dfrom2d : public TPFC_device{
 
    // función auxiliar que añade los datos segun el tipo de deep
    // si new==true se usara setdata, si ==false, se usara setmoredata (no se empezara report nuevo)
-   void setdata(float, float, bool newrep = true);
+   void setdata(double, double, bool newrep = true);
 
    public:
     // consctructora y creadora
@@ -32,7 +32,7 @@ class TPFC_device_3dfrom2d : public TPFC_device{
     
     // Opciones
     void setmerge(bool); // merge a cierto o falso
-    void setdeep(deeptype, float); // inferencia de profundidad los parametros son (deep, dist)
+    void setdeep(deeptype, double); // inferencia de profundidad los parametros son (deep, dist)
 
     // funcion que devuelve en un string la información relativa al dispositivo
     string info();

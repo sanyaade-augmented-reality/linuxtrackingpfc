@@ -38,12 +38,12 @@ TPFC_device_3dstereo::~TPFC_device_3dstereo(){
     free(lastdata[1]);
 }
 
-// funcion auxiliar para comparar 2 floats, para usar con qsort
-int comparefloats (const void * a, const void * b)
+// funcion auxiliar para comparar 2 doubles, para usar con qsort
+int comparedoubles (const void * a, const void * b)
 {
-  if (*(float*)a == *(float*)b)
+  if (*(double*)a == *(double*)b)
     return 0;
-  else if  (*(float*)a < *(float*)b)
+  else if  (*(double*)a < *(double*)b)
     return -1;
   else
     return 1;
@@ -53,7 +53,7 @@ int comparefloats (const void * a, const void * b)
 void TPFC_device_3dstereo::calibrate(){
   calib_samples=100; // de 50 a 500
   calib_dots=2; // de 1 a 3
-  float camdist=0.036; // las 2 camaras son paralelas y estan a 3,6 cm de distancia
+  double camdist=0.036; // las 2 camaras son paralelas y estan a 3,6 cm de distancia
 
   int progressinc=calib_samples/50;// cada cuantos samples es un 2%
   // numero total de puntos usados en el calibrado
@@ -64,11 +64,11 @@ void TPFC_device_3dstereo::calibrate(){
 
   calib_lock = new pthread_mutex_t(); // inicializamos el semaforo
   // creamos el buffer de datos
-  calib_data = (float*)malloc(calib_samples*calib_dots*4*sizeof(float));
+  calib_data = (double*)malloc(calib_samples*calib_dots*4*sizeof(double));
 
   // y declaramos la matriz donde guardaremos temporalmente los datos para el calibrado
   // angles[dotn][sn][xy];
-  float angles[totaldots][2][2];
+  double angles[totaldots][2][2];
   int fase = 0; // conatador de fases en las que se divide el calibrado
 
   while (fase*calib_dots<3){
@@ -104,8 +104,8 @@ void TPFC_device_3dstereo::calibrate(){
     running=PAUSE;
     printf("\nDatos obtenidos, procesando...\n");
 
-    float* samp;
-    float acum, max, min, med;
+    double* samp;
+    double acum, max, min, med;
     // recorremos el buffer obteniendo todos los datos relativos a cada conjunto <punto, sensor, orientacion>
     for (int d=0; d<calib_dots;d++){
       for (int sn=0; sn<2;sn++){
@@ -142,13 +142,13 @@ void TPFC_device_3dstereo::calibrate(){
   
   // estos datos deberian leerse de tpfc.cfg
   // distancias en milimetros
-  float scrx=0.520;
-  float scry=0.320;
-  float sens=0.170;
+  double scrx=0.520;
+  double scry=0.320;
+  double sens=0.170;
   
   if (totaldots==4){ // usando configuracion de 4 puntos
     // realpos[dotn][xyz]
-    float realpos[4][3];
+    double realpos[4][3];
     //X
     realpos[0][0]=sens/2.0;
     realpos[1][0]=-sens/2.0;
@@ -197,8 +197,8 @@ void TPFC_device_3dstereo::calibrate(){
   // si por el contrario,todo ha ido correctamente, continuamos con el proceso
   if (sideok){
     // variables para las posiciones de los puntos
-    float x,y,z;
-    float ang0, ang1;
+    double x,y,z;
+    double ang0, ang1;
     for (int dn =0; dn<totaldots;dn++){
       // calculo de la profundidad
       // pasamos los angulos al sistema de referencia necesario
@@ -210,7 +210,7 @@ void TPFC_device_3dstereo::calibrate(){
       z= camdist / ( ( tan(ang0)+tan(ang1) ) / ( tan(ang0)*tan(ang1) ) );
 
       // calculo de la posición horizontal
-      printf("Punto %i a %f / %f\n",dn, z/tan(ang0),z/tan(ang1),z/tan(ang0)-z/tan(ang1));
+      printf("Punto %i a %f / %f (%f)\n",dn, z/tan(ang0),z/tan(ang1),z/tan(ang0)+z/tan(ang1));
 
       printf("Punto %i a %f\n",dn,z);
     }
@@ -225,9 +225,9 @@ void TPFC_device_3dstereo::calibrate(){
 }
 
 
-float TPFC_device_3dstereo::angleconversion(float original, int sensor){
+double TPFC_device_3dstereo::angleconversion(double original, int sensor){
   // en un principio un angulo de 0 es un angulo recto
-  float converted=(TPFCPI/2.0);
+  double converted=(TPFCPI/2.0);
   // dependiendo del sensor en el que estamos, sumamos o restamos el angulo original
   if (sensor==left){
     converted+=original;
@@ -239,13 +239,13 @@ float TPFC_device_3dstereo::angleconversion(float original, int sensor){
 
 // funcion para añadir los datos de una muestra al buffer
 //en d recibimos los datos en orden: d1(x1, y1, x2, y2), d2(x1, y1, x2, y2)...
-void TPFC_device_3dstereo::addsample(float* d){
+void TPFC_device_3dstereo::addsample(double* d){
   pthread_mutex_lock( calib_lock ); // obtenemos acceso exclusivo
   // comprobamos que no este lleno el buffer
   if (calib_count<calib_samples){
     
-    float* aux; // puntero auxiliar para escribir en el buffer
-    float dots[calib_dots][2]; // matriz auxiliar donde guardaremos temporalmente los puntos
+    double* aux; // puntero auxiliar para escribir en el buffer
+    double dots[calib_dots][2]; // matriz auxiliar donde guardaremos temporalmente los puntos
     int dm =0; // desplazamiento en d debido al sensor que queramos
     for (int sn =0; sn<2; sn++){ // cada sensor individualmente
       // primero cargamos todos los puntos en dots[][]
@@ -260,7 +260,7 @@ void TPFC_device_3dstereo::addsample(float* d){
       for (int i=0;i<calib_dots;i++){
 	for (int j=i+1;j<calib_dots;j++){
 	  if (dots[j][0]>dots[i][0]){
-	    float tmp = dots[j][0];
+	    double tmp = dots[j][0];
 	    dots[j][0]=dots[i][0];
 	    dots[i][0]=tmp;
 	    tmp = dots[j][1];
@@ -292,7 +292,7 @@ void TPFC_device_3dstereo::addsample(float* d){
 // funcion para recuperar todas las muestras del bufer
 // no comprueba que el buffer este lleno
 // devuelve un puntero al buffer, no a una copia
-float* TPFC_device_3dstereo::getsamples(int xy, int sn, int dot){
+double* TPFC_device_3dstereo::getsamples(int xy, int sn, int dot){
   // devolvemos simplemente el puntero a la posicion necesaria
   // al usarlo hay que tener cuidado de no pasar del rango 0..calib_samples-1
   return &calib_data[calib_samples*4*dot+calib_samples*(2*sn+xy)];
@@ -332,12 +332,12 @@ if (sourcedata->getvalid() == false){
 }else{// si son validos...
   // obtenemos el numero de puntos del report
   int n = sourcedata->size();
-  const float* aux;
+  const double* aux;
 
   if (merge){ // Hay que unificar todos los datos
     // acumuladores
-    float acumx=0;
-    float acumy=0;
+    double acumx=0;
+    double acumy=0;
     // recorremos los puntos sumando los datos
     for (int i =0; i<n; i++){
       aux = sourcedata->getdata(i);
@@ -373,7 +373,7 @@ if (sourcedata->getvalid() == false){
       if (lastdata[0]!=NULL && lastdata[0]->getvalid() && lastdata[0]->size()==calib_dots &&
 	  lastdata[1]!=NULL && lastdata[1]->getvalid() && lastdata[1]->size()==calib_dots){
 	// creamos un vector auxiliar
-	float* aux = new float[4*calib_dots];
+	double* aux = new double[4*calib_dots];
 	for (int i =0; i<calib_dots;i++){
 	  aux[i*4+0]=(lastdata[0]->getdata(i))[0];
 	  aux[i*4+1]=(lastdata[0]->getdata(i))[1];

@@ -43,13 +43,13 @@ void TPFC_device_wiimote::callback(cwiid_wiimote_t *wiimote, int mesg_count,
 	    if (mesg[i].ir_mesg.src[j].valid) {
 	      // aumentamos el contador de fuentes validas
 	      valid_source++;
-	      float* aux= new float[2];
+	      double* aux= new double[2];
 	      // el factor de 1280 se ha inferido a partir de las observaciones en
 	      // las mediciones de calibración.
 	      // el wiimote tiene una camara de 1024x768
 	      // con el punto 0,0 en la esquina inferior izquierda
-	      aux[0]=atan( (512.0-mesg[i].ir_mesg.src[j].pos[CWIID_X]) /1280.0 );
-	      aux[1]=atan( (mesg[i].ir_mesg.src[j].pos[CWIID_Y]-384.0) /1280.0 );
+	      aux[0]=atan( (double) ((512.0-mesg[i].ir_mesg.src[j].pos[CWIID_X]) /1280.0) );
+	      aux[1]=atan( (double) ((mesg[i].ir_mesg.src[j].pos[CWIID_Y]-384.0) /1280.0) );
 	      if (valid_source==1) // es el primer punto
 		dev->getdata()->setnewdata(aux);
 	      else // no es el primer punto, debemos usar el report existente
