@@ -198,17 +198,20 @@ void TPFC_device_3dstereo::calibrate(){
   if (sideok){
     // variables para las posiciones de los puntos
     float x,y,z;
+    float ang0, ang1;
     for (int dn =0; dn<totaldots;dn++){
       // calculo de la profundidad
-      float ang0 = angleconversion(angles[dn][0][0],0);
-      float ang1 = angleconversion(angles[dn][1][0],1);
-      printf("Angulos %f -> %f , %f -> %f\n", angles[dn][0][0], ang0, angles[dn][1][0], ang1);
+      // pasamos los angulos al sistema de referencia necesario
+      ang0 = angleconversion(angles[dn][0][0],0);
+      ang1 = angleconversion(angles[dn][1][0],1);
+      
+      // los 2 calculos son equivalentes, pero el de abajo tiene una division menos
       //z= camdist/( (1.0/tan(ang0) ) + (1.0/tan(ang1) ));
-      float tan0= tan(ang0);
-      float tan1= tan(ang1);
-      float aux=(tan0+tan1)/(tan0*tan1);
-      printf("%f %f %f\n", tan0, tan1, aux);
-      z = camdist/aux;
+      z= camdist / ( ( tan(ang0)+tan(ang1) ) / ( tan(ang0)*tan(ang1) ) );
+
+      // calculo de la posición horizontal
+      printf("Punto %i a %f / %f (%f)\n",dn, z/tan(ang0),z/tan(ang1),z/tan(ang0)-z/tan(ang1));
+
       printf("Punto %i a %f\n",dn,z);
     }
     
