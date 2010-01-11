@@ -183,7 +183,11 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
 	  aux[0]=x;
 	  aux[1]=y;
 	  aux[2]=z;
-	  data->setnewdata(aux);
+	  if (dn==0) // estamos en un nuevo report
+	    data->setnewdata(aux);
+	  else
+	    data->setmoredata(aux);
+	  free(aux);
 	}//for (int dn =0; dn<totaldots;dn++)
       }// sideok
     } // needreport
