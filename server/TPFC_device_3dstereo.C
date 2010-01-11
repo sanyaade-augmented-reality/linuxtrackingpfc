@@ -210,7 +210,7 @@ void TPFC_device_3dstereo::calibrate(){
       z= camdist / ( ( tan(ang0)+tan(ang1) ) / ( tan(ang0)*tan(ang1) ) );
 
       // calculo de la posición horizontal
-      printf("Punto %i a %f / %f (%f)\n",dn, z/tan(ang0),z/tan(ang1),z/tan(ang0)-z/tan(ang1));
+      printf("Punto %i a %f / %f\n",dn, z/tan(ang0),z/tan(ang1),z/tan(ang0)-z/tan(ang1));
 
       printf("Punto %i a %f\n",dn,z);
     }
