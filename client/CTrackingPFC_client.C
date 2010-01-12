@@ -30,7 +30,7 @@ CTrackingPFC_client* tpfcclient(const char* tname){
 
 void tpfccdelete(CTrackingPFC_client* c){
   TrackingPFC_client* client = (TrackingPFC_client*)c;
-  free(c);
+  delete(client);
 }
 
 float tpfccgetDisplaySizex(CTrackingPFC_client* c){
