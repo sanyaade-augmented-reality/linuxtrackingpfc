@@ -520,8 +520,6 @@ float tpfcmywindow(float x1, float x2, float y1, float y2, float n, float f, int
 		float* lastpos;
 		
 		// cosas que faltan en esta funcion:
-		// ajustar obsz restando el fov original
-		// ampliar zfar si estamos mas atras, para evitar cortar el modelo por atras
 		// saber la posicion de la ventana y ajustar obsx y obsy antes de calcular el frustum
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

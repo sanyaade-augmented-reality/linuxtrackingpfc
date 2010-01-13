@@ -66,7 +66,10 @@ struct BME_Glob;
 // PFC Mod Ends here
 typedef struct Global {
 	// PFC Mod Starts here
+	// modificamos la estructura global añadiendole un puntero para el cliente
 	CTrackingPFC_client* tpfcc;
+	// y un flag para saber cuando activamos el HT
+	int htactive;
 	// PFC Mod Ends here
 	/* active pointers */
 	struct View3D *vd;
