@@ -1756,7 +1756,16 @@ void setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
 		// PFC Mod starts here
 		// original code:
 		//else mywindow(x1, x2, y1, y2, clipsta, clipend);
-		else tpfcmywindow(x1, x2, y1, y2, clipsta, clipend, winx, winy);
+		// fin del codigo original
+		// Si estamos en este if es porque no estamos en perspectiva ortogonal
+		// pero solo queremos activar el HT si no estamos mirando desde una camara
+		// asi que copiamos el if de setviewmatrixview3d, y si hay camara llamamos
+		// a la funcion original, si no la hay, llamamos a la modificada
+		else if(G.vd->persp==V3D_CAMOB) {/* obs/camera */
+		  mywindow(x1, x2, y1, y2, clipsta, clipend);
+		}else{
+		  tpfcmywindow(x1, x2, y1, y2, clipsta, clipend, winx, winy);
+		}
 		// PFC Mod ends here
 	}
 
@@ -1813,6 +1822,7 @@ void obmat_to_viewmat(Object *ob, short smooth)
 void setviewmatrixview3d()
 {
 	if(G.vd->persp==V3D_CAMOB) {	    /* obs/camera */
+		printf("no2\n");
 		if(G.vd->camera) {
 			where_is_object(G.vd->camera);	
 			obmat_to_viewmat(G.vd->camera, 0);
@@ -1823,6 +1833,7 @@ void setviewmatrixview3d()
 		}
 	}
 	else {
+		printf("si2\n");
 		
 		QuatToMat4(G.vd->viewquat, G.vd->viewmat);
 		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist;
