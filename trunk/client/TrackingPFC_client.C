@@ -70,11 +70,74 @@ float* TrackingPFC_client::getlastpos(){
   return data->getlastpos();
 }
 float TrackingPFC_client::getDisplaySizex(){
-  return 0.52; // placeholder!!!
+  // llamamos a la funcion auxiliar
+  return getDisplaySize(0);
 }
 float TrackingPFC_client::getDisplaySizey(){
-  return 0.32; // placeholder!!!
+  // llamamos a la funcion auxiliar
+  return getDisplaySize(1);
 }
+// funcion auxiliar para parsear la entrada
+// (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
+void StringExplode(string str, string separator, vector<string>* results){
+    int found;
+    found = str.find_first_of(separator);
+    while(found != string::npos){
+        if(found > 0){
+            results->push_back(str.substr(0,found));
+        }
+        str = str.substr(found+1);
+        found = str.find_first_of(separator);
+    }
+    if(str.length() > 0){
+        results->push_back(str);
+    }
+}
+// funcion auxiliar para pasar de str a int
+// (por Martin Gieseking, encontrada en http://bytes.com/topic/c/answers/132109-string-integer)
+int str2int (const string &str) {
+  stringstream ss(str);
+  int n;
+  ss >> n;
+  return n;
+}
+// funcion auxiliar para los otros get display sizes
+// xy = 0 -> queremos la horizontal (x), =1 -> la vertical (y)
+float TrackingPFC_client::getDisplaySize(int xy){
+  
+  string target = (xy==0)?"screensizex":"screensizey";
+  float res=0;
+
+  fstream indata;
+  char filename[200];
+  // formateamos el nombre del archivo
+  sprintf(filename, "%s/.trackingpfc/tpfc.cfg",getenv ("HOME"));
+  indata.open(filename); // abrimos
+  if(!indata) { // Si no se puede abrir avisamos
+      fprintf(stderr, "No se ha podido leer la configuracion en '%s'.\n", filename);
+      exit(-1);
+  }else{ // si se puede...
+    string l; // string auxiliar
+    vector<string> t;
+    bool notfound = true;
+    while ( !indata.eof() && notfound ) { //sigue leyendo hasta el EOF
+      getline(indata,l); // obtenemos una linea
+      t.clear();
+      StringExplode(l, " ", &t);
+      if (t[0].compare(target)==0){ // hemos encontrado la opcion que buscabamos
+	res = (float)str2int(t[1])/1000.0;
+	notfound=false;
+      }
+    }
+    indata.close();
+    if (notfound){
+      fprintf(stderr,"El archivo de configuracion %s no contiene datos sobre el tamaño de la pantalla\n",filename);
+      exit(-1);
+    }
+  }
+  return res;
+}
+
 // consultoras
 int TrackingPFC_client::isalive(){
   return alive;
