@@ -25,6 +25,7 @@ extern "C" {
 CTrackingPFC_client* tpfcclient(const char* tname);
 void tpfccdelete(CTrackingPFC_client* c);
 float tpfccgetDisplaySizex(CTrackingPFC_client* c);
+float tpfccgetDisplaySizey(CTrackingPFC_client* c);
 float* tpfccgetlastpos(CTrackingPFC_client* c);
 
 #ifdef __cplusplus
