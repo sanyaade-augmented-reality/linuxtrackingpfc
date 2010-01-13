@@ -82,18 +82,30 @@ float TrackingPFC_client::getDisplaySizey(){
 // Devuelven la altura y el alto de la resolucion de la pantalla por defecto del display por defecto
 // segun la informacion del servidor de las X
 int TrackingPFC_client::getDisplayWidth(){
-    return DisplayWidth(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)));  
+    Display * disp = XOpenDisplay(NULL);
+    int res = DisplayWidth(disp,XDefaultScreen(disp));  
+    XCloseDisplay(disp);
+    return res;
 }
 int TrackingPFC_client::getDisplayHeight(){
-    return DisplayHeight(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)));  
+    Display * disp = XOpenDisplay(NULL);
+    int res = DisplayHeight(disp,XDefaultScreen(disp));  
+    XCloseDisplay(disp);
+    return res;
 }
 // Devuelven la altura y el alto (en metros) de la pantalla por defecto del display por defecto
 // segun la informacion del servidor de las X
 float TrackingPFC_client::getDisplayWidthMM(){
-    return (float)DisplayWidthMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;  
+    Display * disp = XOpenDisplay(NULL);
+    float res = (float)DisplayWidthMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;
+    XCloseDisplay(disp);
+    return res;
 }
 float TrackingPFC_client::getDisplayHeightMM(){
-    return (float)DisplayHeightMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;  
+    Display * disp = XOpenDisplay(NULL);
+    float res = (float)DisplayHeightMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;
+    XCloseDisplay(disp);
+    return res;
 }
 
 
