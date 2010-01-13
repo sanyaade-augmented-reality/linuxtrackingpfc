@@ -283,7 +283,7 @@ int main( int argc, char** argv ){
 	  }else if (input.size()==1){
 	    printf("El comando load requiere el nombre de archivo a abrir.\n");
 	  }else{
-	    fstream indata; // indata is like cin
+	    fstream indata;
 	    char filename[200];
 	    // formateamos el nombre del archivo
 	    sprintf(filename, "%s/.trackingpfc/%s.tpfc",getenv ("HOME"),input[1].c_str());

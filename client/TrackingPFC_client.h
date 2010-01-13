@@ -9,6 +9,10 @@
 #include "TrackingPFC_data.h"
 #define RADFACTOR 3.14159265/180.0
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 #include <vector>
 using namespace std;
 
@@ -39,6 +43,9 @@ class TrackingPFC_client{
     static void *mainloop_executer(void * );
     //  Callback que actualiza los datos
     static void TrackingPFC_client_callback(void *, const vrpn_TRACKERCB);
+    
+    // funcion auxiliar para getDisplaySizex() y getDisplaySizey()
+    float getDisplaySize(int);
 
   public:
     // placeholder para el callback personalizado (si es necesario)
