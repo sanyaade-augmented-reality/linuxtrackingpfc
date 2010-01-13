@@ -39,6 +39,12 @@ float tpfccgetDisplaySizex(CTrackingPFC_client* c){
 float tpfccgetDisplaySizey(CTrackingPFC_client* c){
   return ((TrackingPFC_client*)c)->getDisplaySizey();
 }
+int tpfccgetDisplayWidth(CTrackingPFC_client* c){
+  return ((TrackingPFC_client*)c)->getDisplayWidth();
+}
+int tpfccgetDisplayHeight(CTrackingPFC_client* c){
+  return ((TrackingPFC_client*)c)->getDisplayHeight();
+}
 
 float* tpfccgetlastpos(CTrackingPFC_client* c){
   return ((TrackingPFC_client*)c)->getlastpos();

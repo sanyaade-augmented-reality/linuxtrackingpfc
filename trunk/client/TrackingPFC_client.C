@@ -69,6 +69,8 @@ void* TrackingPFC_client::mainloop_executer(void * t){
 float* TrackingPFC_client::getlastpos(){
   return data->getlastpos();
 }
+
+// Devuelven el tamaño guardado en el archivo de configuracion
 float TrackingPFC_client::getDisplaySizex(){
   // llamamos a la funcion auxiliar
   return getDisplaySize(0);
@@ -77,6 +79,24 @@ float TrackingPFC_client::getDisplaySizey(){
   // llamamos a la funcion auxiliar
   return getDisplaySize(1);
 }
+// Devuelven la altura y el alto de la resolucion de la pantalla por defecto del display por defecto
+// segun la informacion del servidor de las X
+int TrackingPFC_client::getDisplayWidth(){
+    return DisplayWidth(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)));  
+}
+int TrackingPFC_client::getDisplayHeight(){
+    return DisplayHeight(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)));  
+}
+// Devuelven la altura y el alto (en metros) de la pantalla por defecto del display por defecto
+// segun la informacion del servidor de las X
+float TrackingPFC_client::getDisplayWidthMM(){
+    return (float)DisplayWidthMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;  
+}
+float TrackingPFC_client::getDisplayHeightMM(){
+    return (float)DisplayHeightMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;  
+}
+
+
 // funcion auxiliar para parsear la entrada
 // (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
 void StringExplode(string str, string separator, vector<string>* results){
@@ -101,8 +121,10 @@ int str2int (const string &str) {
   ss >> n;
   return n;
 }
+
 // funcion auxiliar para los otros get display sizes
 // xy = 0 -> queremos la horizontal (x), =1 -> la vertical (y)
+// si no hay archivo de configuracion o falla la lectura, se devuelven los valores de las X
 float TrackingPFC_client::getDisplaySize(int xy){
   
   string target = (xy==0)?"screensizex":"screensizey";
@@ -114,8 +136,7 @@ float TrackingPFC_client::getDisplaySize(int xy){
   sprintf(filename, "%s/.trackingpfc/tpfc.cfg",getenv ("HOME"));
   indata.open(filename); // abrimos
   if(!indata) { // Si no se puede abrir avisamos
-      fprintf(stderr, "No se ha podido leer la configuracion en '%s'.\n", filename);
-      exit(-1);
+      fprintf(stderr, "No se ha podido leer la configuracion en '%s', Se devuelven valores del servidor X (pueden no ser correctos).\n", filename);
   }else{ // si se puede...
     string l; // string auxiliar
     vector<string> t;
@@ -131,11 +152,17 @@ float TrackingPFC_client::getDisplaySize(int xy){
     }
     indata.close();
     if (notfound){
-      fprintf(stderr,"El archivo de configuracion %s no contiene datos sobre el tamaño de la pantalla\n",filename);
-      exit(-1);
+      fprintf(stderr,"El archivo de configuracion %s no contiene datos sobre el tamaño de la pantalla. Se devuelven valores del servidor X (pueden no ser correctos).\n",filename);
     }
   }
-  return res;
+  if (res>0){
+    return res;
+  }else if (xy==0){
+     return getDisplayWidthMM();
+  }else{
+     return getDisplayHeightMM();
+  }
+    
 }
 
 // consultoras

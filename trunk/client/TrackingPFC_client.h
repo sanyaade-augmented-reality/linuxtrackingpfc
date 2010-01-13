@@ -13,6 +13,8 @@
 #include <fstream>
 #include <sstream>
 
+# include <X11/Xlib.h>
+
 #include <vector>
 using namespace std;
 
@@ -58,9 +60,15 @@ class TrackingPFC_client{
     TrackingPFC_client(const char* tname="Tracker0@localhost", void(TrackingPFC_client*)=NULL);
     ~TrackingPFC_client();
     
-    // Devuelve el tamaño de la pantalla (en metros)
+    // Devuelve el tamaño de la pantalla (en metros), leida del archivo de configuracion
     float getDisplaySizex();
     float getDisplaySizey();
+    // Devuelve el tamaño de la pantalla en pixeles (leido del servidor X)
+    int getDisplayWidth();
+    int getDisplayHeight();
+    // Devuelve el tamaño de la pantalla en metros (leido del servidor X)
+    float getDisplayWidthMM();
+    float getDisplayHeightMM();
 
     // consultoras y escritoras de los datos
     float* getlastpos();
