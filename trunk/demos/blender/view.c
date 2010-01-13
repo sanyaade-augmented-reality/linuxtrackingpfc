@@ -1729,9 +1729,14 @@ void setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
 	rctf viewplane;
 	float clipsta, clipend, x1, y1, x2, y2;
 	int orth;
+	// PFC Mod starts here
+	// flag para saber si se ha activado el HT
+	int ht; //
+	ht=0;
+	// PFC Mod ends here
 	
 	orth= get_view3d_viewplane(winx, winy, &viewplane, &clipsta, &clipend, NULL);
-//	printf("%d %d %f %f %f %f %f %f\n", winx, winy, viewplane.xmin, viewplane.ymin, viewplane.xmax, viewplane.ymax, clipsta, clipend);
+
 	x1= viewplane.xmin;
 	y1= viewplane.ymin;
 	x2= viewplane.xmax;
@@ -1764,10 +1769,27 @@ void setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
 		else if(G.vd->persp==V3D_CAMOB) {/* obs/camera */
 		  mywindow(x1, x2, y1, y2, clipsta, clipend);
 		}else{
+		  // si no lo teniamos, activamos el handler de animacion
+		  if (!has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) )
+		    add_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM, 6);
+		  // llamamos a la funcion mywindow modificada
 		  tpfcmywindow(x1, x2, y1, y2, clipsta, clipend, winx, winy);
+		  // marcamos tanto el flag global como el local de uso de ht a cierto
+		  ht=1;
+		  G.htactive=1;
 		}
 		// PFC Mod ends here
 	}
+	// PFC Mod starts here
+	// si no estamos usando HT, comprobamos que no tengamos el handler de animacion
+	// y el flag global activos
+	if (ht==0){
+	  if (has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) && G.htactive==1){
+	    rem_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM);
+	    G.htactive=0;
+	  }
+	}
+	// PFC Mod ends here
 
 	/* not sure what this was for? (ton) */
 	glMatrixMode(GL_PROJECTION);

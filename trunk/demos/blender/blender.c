@@ -232,7 +232,10 @@ void initglobals(void)
 	G.charmin = 0x0000;
 	G.charmax = 0xffff;
 	// PFC Mod starts here
+	// inicializamos el cliente
 	G.tpfcc = tpfcclient("Tracker0@localhost");
+	// marcamos el flag a falso
+	G.htactive=0;
 	// PFC Mod ends here
 }
 
