@@ -1724,15 +1724,19 @@ int get_view3d_viewplane(int winxi, int winyi, rctf *viewplane, float *clipsta, 
 }
 
 /* important to not set windows active in here, can be renderwin for example */
-void setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
+//PFC Mod Starts here
+//void setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
+// ahora esta funcion devuelve un tpfcinfo como resultado
+tpfcinfo setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
+// PFC Mod ends here
 {
 	rctf viewplane;
 	float clipsta, clipend, x1, y1, x2, y2;
 	int orth;
 	// PFC Mod starts here
-	// flag para saber si se ha activado el HT
-	int ht; //
-	ht=0;
+	int ht; // flag local para saber si se ha activado el HT
+	tpfcinfo res; // resultado (originalz)
+	ht=0; // el flag en un principio esta a 0
 	// PFC Mod ends here
 	
 	orth= get_view3d_viewplane(winx, winy, &viewplane, &clipsta, &clipend, NULL);
@@ -1773,7 +1777,7 @@ void setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
 		  if (!has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) )
 		    add_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM, 6);
 		  // llamamos a la funcion mywindow modificada
-		  tpfcmywindow(x1, x2, y1, y2, clipsta, clipend, winx, winy);
+		  res.originalz =tpfcmywindow(x1, x2, y1, y2, clipsta, clipend, winx, winy);
 		  // marcamos tanto el flag global como el local de uso de ht a cierto
 		  ht=1;
 		  G.htactive=1;
@@ -1795,6 +1799,10 @@ void setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for picking */
 	glMatrixMode(GL_PROJECTION);
 	mygetmatrix(curarea->winmat);
 	glMatrixMode(GL_MODELVIEW);
+	// PFC Mod starts here
+	res.htactive=ht; // copiamos el flag local en el resultado
+	return res; // devolvemos
+	// PFC Mod starts here
 }
 
 void obmat_to_viewmat(Object *ob, short smooth)
@@ -1844,7 +1852,6 @@ void obmat_to_viewmat(Object *ob, short smooth)
 void setviewmatrixview3d()
 {
 	if(G.vd->persp==V3D_CAMOB) {	    /* obs/camera */
-		printf("no2\n");
 		if(G.vd->camera) {
 			where_is_object(G.vd->camera);	
 			obmat_to_viewmat(G.vd->camera, 0);
@@ -1855,7 +1862,6 @@ void setviewmatrixview3d()
 		}
 	}
 	else {
-		printf("si2\n");
 		
 		QuatToMat4(G.vd->viewquat, G.vd->viewmat);
 		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist;
@@ -1876,7 +1882,48 @@ void setviewmatrixview3d()
 		else i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
 	}
 }
+// PFC Mod starts here
+/* dont set windows active in in here, is used by renderwin too */
+// Version modificada de setviewmatrixview3d que acepta un tpfcinfo como parametro
+void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
+{
+	if (htinfo.htactive==1)
+	printf("tpfcsetviewmatrixview3d ha de modificar la camara\n");
+	else
+	printf("tpfcsetviewmatrixview3d NO ha de modificar la camara\n");
 
+	if(G.vd->persp==V3D_CAMOB) {	    /* obs/camera */
+		if(G.vd->camera) {
+			where_is_object(G.vd->camera);	
+			obmat_to_viewmat(G.vd->camera, 0);
+		}
+		else {
+			QuatToMat4(G.vd->viewquat, G.vd->viewmat);
+			G.vd->viewmat[3][2]-= G.vd->dist;
+		}
+	}
+	else {
+
+		QuatToMat4(G.vd->viewquat, G.vd->viewmat);
+		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist;
+		if(G.vd->ob_centre) {
+			Object *ob= G.vd->ob_centre;
+			float vec[3];
+			
+			VECCOPY(vec, ob->obmat[3]);
+			if(ob->type==OB_ARMATURE && G.vd->ob_centre_bone[0]) {
+				bPoseChannel *pchan= get_pose_channel(ob->pose, G.vd->ob_centre_bone);
+				if(pchan) {
+					VECCOPY(vec, pchan->pose_mat[3]);
+					Mat4MulVecfl(ob->obmat, vec);
+				}
+			}
+			i_translate(-vec[0], -vec[1], -vec[2], G.vd->viewmat);
+		}
+		else i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
+	}
+}
+// PFC Mod ends here
 void setcameratoview3d(void)
 {
 	Object *ob;

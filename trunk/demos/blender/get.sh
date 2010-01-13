@@ -8,4 +8,5 @@ cp sources/src/usiblender.c ./
 
 cp sources/include/BIF_mywindow.h ./
 cp sources/src/mywindow.c ./
+cp sources/include/BSE_view.h ./
 cp sources/src/view.c ./
