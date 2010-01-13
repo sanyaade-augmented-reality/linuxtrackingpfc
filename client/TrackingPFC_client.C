@@ -72,6 +72,9 @@ float* TrackingPFC_client::getlastpos(){
 float TrackingPFC_client::getDisplaySizex(){
   return 0.52; // placeholder!!!
 }
+float TrackingPFC_client::getDisplaySizey(){
+  return 0.32; // placeholder!!!
+}
 // consultoras
 int TrackingPFC_client::isalive(){
   return alive;
@@ -119,7 +122,7 @@ void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float
   if (originalfov != m_dFov || aspectratio !=AspectRatio){
     aspectratio= AspectRatio;
     originalfov = m_dFov;
-    float scry= getDisplaySizex()/AspectRatio;
+    float scry= getDisplaySizey();
     float radfov=m_dFov*RADFACTOR;
     zadjustment = (scry/2.0)/tan(radfov/2.0);
     //printf("Z adjustment2 %f %f %f\n", zadjustment,scry/2.0,radfov/2.0);
@@ -132,7 +135,7 @@ void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDist
   float frleft, frright, frup,frdown, scrx, scry, fact;
   // tamaños del display
   scrx= getDisplaySizex();
-  scry= scrx/AspectRatio;
+  scry= getDisplaySizey();
 
   float* lastpos= data->getlastpos();
   float obsx, obsy, obsz;

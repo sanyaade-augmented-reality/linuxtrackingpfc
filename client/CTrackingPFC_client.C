@@ -36,6 +36,10 @@ void tpfccdelete(CTrackingPFC_client* c){
 float tpfccgetDisplaySizex(CTrackingPFC_client* c){
   return ((TrackingPFC_client*)c)->getDisplaySizex();
 }
+float tpfccgetDisplaySizey(CTrackingPFC_client* c){
+  return ((TrackingPFC_client*)c)->getDisplaySizey();
+}
+
 float* tpfccgetlastpos(CTrackingPFC_client* c){
   return ((TrackingPFC_client*)c)->getlastpos();
 }
