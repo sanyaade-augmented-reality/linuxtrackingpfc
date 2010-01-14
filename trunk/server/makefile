@@ -26,7 +26,7 @@ tpfcdev.o : TPFC_device.C TPFC_device.h
 
 tpfcserver : TPFC_server.C tpfcdev.o tpfcdevopencvface.o tpfcdev3df2d.o tpfcdev3dstereo.o tpfcdevwii.o
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $^ $(LIBRARIES)
-	mkdir -p ~/trackingpfc
+	mkdir -p ~/.trackingpfc
 	cp cfgs/*.tpfc ~/.trackingpfc
 	cp cfgs/*.cfg ~/.trackingpfc
 
