@@ -1735,7 +1735,7 @@ tpfcinfo setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for pickin
 	int orth;
 	// PFC Mod starts here
 	int ht; // flag local para saber si se ha activado el HT
-	tpfcinfo res; // resultado (originalz)
+	tpfcinfo res; // resultado (originalz y flag ht)
 	ht=0; // el flag en un principio esta a 0
 	// PFC Mod ends here
 	
@@ -1773,14 +1773,10 @@ tpfcinfo setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for pickin
 		else if(G.vd->persp==V3D_CAMOB) {/* obs/camera */
 		  mywindow(x1, x2, y1, y2, clipsta, clipend);
 		}else{
-		  // si no lo teniamos, activamos el handler de animacion
-		  if (!has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) )
-		    add_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM, 6);
-		  // llamamos a la funcion mywindow modificada
+		  // llamamos a la funcion mywindow modificada y lo guardamos en el resultado
 		  res.originalz =tpfcmywindow(x1, x2, y1, y2, clipsta, clipend, winx, winy);
 		  // marcamos tanto el flag global como el local de uso de ht a cierto
 		  ht=1;
-		  
 		}
 		// PFC Mod ends here
 	}
@@ -1888,32 +1884,23 @@ void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 		}
 	}
 	else {
-		// creo que mas que abajo el quid de la cuestion esta en esta llamada
-		// aunque la de abajo no entiendo del todo lo que hace tampoco
-		// esto resetea viewmat con los valores de viewquat, pero viewquat es solo
-		// una rotacion, no?
-		//printf("Hola!\n %f %f %f %f\n", G.vd->viewquat[0], G.vd->viewquat[1], G.vd->viewquat[2], G.vd->viewquat[3]);
-		//int i;
-		QuatToMat4(G.vd->viewquat, G.vd->viewmat); // Esto resetea viewmat haya lo que haya
-		/*for (i =0; i<4; i++){
-		  printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
-		}printf("\n");*/
-
-		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist; // esta es la distancia de la camara
-		// Ajuste de camara
+		QuatToMat4(G.vd->viewquat, G.vd->viewmat);
+		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist;
+		// Ajuste de camara si estamos usando HT
 		if (htinfo.htactive==1){
+		  // en htinfo tenemos la distancia a la que deberia estar la camara original
+		  // para obtener el fov original, de ahi podemos obtener la escala modelo/realidad
 		  float mdl2scr = G.vd->dist/htinfo.originalz;
+		  // obtenemos los datos del cliente
 		  float* lastpos= tpfccgetlastpos(G.tpfcc);
+		  // y modificamos la matriz de la vista
 		  G.vd->viewmat[3][0]-= lastpos[0]*mdl2scr;
 		  G.vd->viewmat[3][1]-= lastpos[1]*mdl2scr;
+		  // para la z, restamos la distancia original, ya que la que nos da el cliente es desde
+		  // la pantalla
 		  G.vd->viewmat[3][2]-= (lastpos[2]-htinfo.originalz)*mdl2scr;
 		}
-		/*for (i =0; i<4; i++){
-		  printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
-		}
-		printf("\n");*/
-
-		if(G.vd->ob_centre) { //printf ("OJO!\n");
+		if(G.vd->ob_centre) {
 			Object *ob= G.vd->ob_centre;
 			float vec[3];
 			
@@ -1926,20 +1913,7 @@ void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 				}
 			}
 			i_translate(-vec[0], -vec[1], -vec[2], G.vd->viewmat);
-		}else{
-		  if (htinfo.htactive==0){
-		    i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
-		  }else{
-		    //printf("tpfcsetviewmatrixview3d ha de modificar la camara\n");
-		    //printf("%f %f %f\n",G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2]);
-		    i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
-		    /*for (i =0; i<4; i++){
-		      printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
-		    }
-		    printf("\n");*/
-		    
-		  }
-		}
+		}else i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
 	}
 }
 // PFC Mod ends here

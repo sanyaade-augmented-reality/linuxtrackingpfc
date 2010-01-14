@@ -513,25 +513,23 @@ void mywindow(float x1, float x2, float y1, float y2, float n, float f)
 // PFC Mod starts here
 float tpfcmywindow(float x1, float x2, float y1, float y2, float n, float f, int winx, int winy)
 {// el mywndow original simplemente llama a bwin_frustum añadiendo un parametro
-// para simplificar codigo, se aplica inlining
+// para simplificar codigo, se evita ese paso
 	bWindow *win= bwin_from_winid(curswin);
 	if(win) {
 		float frleft, frright, frup,frdown, scrx, scry, fact, aspectratio, obsx, obsy, obsz, originalz, zfar_fix;
 		float* lastpos;
 		
-		// cosas que faltan en esta funcion:
-		// saber la posicion de la ventana y ajustar obsx y obsy antes de calcular el frustum
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 
 		//obtenemos el aspect ratio
 		aspectratio=(float)winx/(float)winy;
 		// tamaños del display, obtenemos del cliente el tamaño y la resolucion horizontales
-		// con eso y el tamaño horizontal de la ventana, obtenemos el tamaño de nuestra ventana
+		// con eso y el tamaño horizontal del area, obtenemos el tamaño de nuestra area
 		scrx= winx*tpfccgetDisplaySizex(G.tpfcc)/tpfccgetDisplayWidth(G.tpfcc);
 		// para el tamaño vertical, usamos aspectratio
 		scry= scrx/aspectratio;
-		//printf("Tamaño de la ventana: %f x %f\n", scrx, scry);
+		//printf("Tamaño real de la ventana: %f x %f\n", scrx, scry);
 
 		// obtenemos la ultima posicion del cliente
 		lastpos= tpfccgetlastpos(G.tpfcc);
@@ -541,6 +539,7 @@ float tpfcmywindow(float x1, float x2, float y1, float y2, float n, float f, int
 
 		// obtenemos el factor znear_display/mundo real
 		fact=n/obsz;
+
 		// calculamos los parametros del frustum
 		frleft= fact*((-scrx/2.0)-obsx);
 		frright= fact*((scrx/2.0)-obsx);
@@ -568,13 +567,14 @@ float tpfcmywindow(float x1, float x2, float y1, float y2, float n, float f, int
 		// provocarian fallos de precision en el zbuffer, por lo tanto, solo
 		// ajustaremos zfar, el ajuste aplicado será el siguiente:
 		zfar_fix = (obsz>originalz)?obsz-originalz:0.0;
-		//printf("%f %f\n", originalz, zfar_fix);
 
-		//glFrustum(x1, x2, y1, y2, n, f);
+		//glFrustum(x1, x2, y1, y2, n, f); // parametros originales
 		glFrustum(frleft, frright, frup, frdown, n, f+zfar_fix);
 
 		glGetFloatv(GL_PROJECTION_MATRIX, (float *)win->winmat);
 		glMatrixMode(GL_MODELVIEW);
+		// por ultimo, devolvemos la distancia original de la camara, para poder usarla despues
+		// para calcular el ratio modelo/realidad
 		return originalz;
 	}
 	return 0;
