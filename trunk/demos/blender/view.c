@@ -1887,11 +1887,6 @@ void setviewmatrixview3d()
 // Version modificada de setviewmatrixview3d que acepta un tpfcinfo como parametro
 void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 {
-	if (htinfo.htactive==1)
-	printf("tpfcsetviewmatrixview3d ha de modificar la camara\n");
-	else
-	printf("tpfcsetviewmatrixview3d NO ha de modificar la camara\n");
-
 	if(G.vd->persp==V3D_CAMOB) {	    /* obs/camera */
 		if(G.vd->camera) {
 			where_is_object(G.vd->camera);	
@@ -1903,10 +1898,32 @@ void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 		}
 	}
 	else {
+		// creo que mas que abajo el quid de la cuestion esta en esta llamada
+		// aunque la de abajo no entiendo del todo lo que hace tampoco
+		// esto resetea viewmat con los valores de viewquat, pero viewquat es solo
+		// una rotacion, no?
+		printf("Hola!\n %f %f %f %f\n", G.vd->viewquat[0], G.vd->viewquat[1], G.vd->viewquat[2], G.vd->viewquat[3]);
+		int i;
+		QuatToMat4(G.vd->viewquat, G.vd->viewmat); // Esto resetea viewmat haya lo que haya
+		for (i =0; i<4; i++){
+		  printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
+		}printf("\n");
 
-		QuatToMat4(G.vd->viewquat, G.vd->viewmat);
-		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist;
-		if(G.vd->ob_centre) {
+		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist; // esta es la distancia de la camara
+		// Ajuste de camara
+		if (htinfo.htactive==1){
+		  float mdl2scr = G.vd->dist/htinfo.originalz;
+		  float* lastpos= tpfccgetlastpos(G.tpfcc);
+		  G.vd->viewmat[3][0]-= lastpos[0]*mdl2scr;
+		  G.vd->viewmat[3][1]-= lastpos[1]*mdl2scr;
+		  G.vd->viewmat[3][2]-= (lastpos[2]-htinfo.originalz)*mdl2scr;
+		}
+		for (i =0; i<4; i++){
+		  printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
+		}
+		printf("\n");
+
+		if(G.vd->ob_centre) { printf ("OJO!\n");
 			Object *ob= G.vd->ob_centre;
 			float vec[3];
 			
@@ -1919,8 +1936,20 @@ void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 				}
 			}
 			i_translate(-vec[0], -vec[1], -vec[2], G.vd->viewmat);
+		}else{
+		  if (htinfo.htactive==0){
+		    i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
+		  }else{
+		    printf("tpfcsetviewmatrixview3d ha de modificar la camara\n");
+		    printf("%f %f %f\n",G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2]);
+		    i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
+		    for (i =0; i<4; i++){
+		      printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
+		    }
+		    printf("\n");
+		    
+		  }
 		}
-		else i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
 	}
 }
 // PFC Mod ends here
