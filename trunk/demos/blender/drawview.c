@@ -3259,7 +3259,20 @@ void drawview3dspace(ScrArea *sa, void *spacedata)
 	//setviewmatrixview3d();	/* note: calls where_is_object for camera... */// Fin de codigo original
 	// la version modificada de setwinmatrixview3d devuelve datos que se necesitan para
 	// llamar a tpfcsetviewmatrixview3d
-	tpfcsetviewmatrixview3d(setwinmatrixview3d(sa->winx, sa->winy, NULL));
+	tpfcinfo htinfo = setwinmatrixview3d(sa->winx, sa->winy, NULL);
+	tpfcsetviewmatrixview3d(htinfo);
+	// segun el flag de htinfo, activamos o desactivamos el flag global y el handler
+	if (htinfo.htactive==0){
+	  if (has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) && G.htactive==1){
+	    rem_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM);
+	  }
+	  G.htactive=0;
+	}else{
+	  if (!has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) )
+	    add_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM, 6);  
+	  G.htactive=1;
+	}
+	
 	// PFC MOD ends here
 	
 

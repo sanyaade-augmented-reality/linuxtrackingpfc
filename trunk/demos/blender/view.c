@@ -1780,20 +1780,10 @@ tpfcinfo setwinmatrixview3d(int winx, int winy, rctf *rect)		/* rect: for pickin
 		  res.originalz =tpfcmywindow(x1, x2, y1, y2, clipsta, clipend, winx, winy);
 		  // marcamos tanto el flag global como el local de uso de ht a cierto
 		  ht=1;
-		  G.htactive=1;
+		  
 		}
 		// PFC Mod ends here
 	}
-	// PFC Mod starts here
-	// si no estamos usando HT, comprobamos que no tengamos el handler de animacion
-	// y el flag global activos
-	if (ht==0){
-	  if (has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) && G.htactive==1){
-	    rem_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM);
-	    G.htactive=0;
-	  }
-	}
-	// PFC Mod ends here
 
 	/* not sure what this was for? (ton) */
 	glMatrixMode(GL_PROJECTION);
@@ -1902,12 +1892,12 @@ void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 		// aunque la de abajo no entiendo del todo lo que hace tampoco
 		// esto resetea viewmat con los valores de viewquat, pero viewquat es solo
 		// una rotacion, no?
-		printf("Hola!\n %f %f %f %f\n", G.vd->viewquat[0], G.vd->viewquat[1], G.vd->viewquat[2], G.vd->viewquat[3]);
-		int i;
+		//printf("Hola!\n %f %f %f %f\n", G.vd->viewquat[0], G.vd->viewquat[1], G.vd->viewquat[2], G.vd->viewquat[3]);
+		//int i;
 		QuatToMat4(G.vd->viewquat, G.vd->viewmat); // Esto resetea viewmat haya lo que haya
-		for (i =0; i<4; i++){
+		/*for (i =0; i<4; i++){
 		  printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
-		}printf("\n");
+		}printf("\n");*/
 
 		if(G.vd->persp==V3D_PERSP) G.vd->viewmat[3][2]-= G.vd->dist; // esta es la distancia de la camara
 		// Ajuste de camara
@@ -1918,12 +1908,12 @@ void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 		  G.vd->viewmat[3][1]-= lastpos[1]*mdl2scr;
 		  G.vd->viewmat[3][2]-= (lastpos[2]-htinfo.originalz)*mdl2scr;
 		}
-		for (i =0; i<4; i++){
+		/*for (i =0; i<4; i++){
 		  printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
 		}
-		printf("\n");
+		printf("\n");*/
 
-		if(G.vd->ob_centre) { printf ("OJO!\n");
+		if(G.vd->ob_centre) { //printf ("OJO!\n");
 			Object *ob= G.vd->ob_centre;
 			float vec[3];
 			
@@ -1940,13 +1930,13 @@ void tpfcsetviewmatrixview3d(tpfcinfo htinfo)
 		  if (htinfo.htactive==0){
 		    i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
 		  }else{
-		    printf("tpfcsetviewmatrixview3d ha de modificar la camara\n");
-		    printf("%f %f %f\n",G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2]);
+		    //printf("tpfcsetviewmatrixview3d ha de modificar la camara\n");
+		    //printf("%f %f %f\n",G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2]);
 		    i_translate(G.vd->ofs[0], G.vd->ofs[1], G.vd->ofs[2], G.vd->viewmat);
-		    for (i =0; i<4; i++){
+		    /*for (i =0; i<4; i++){
 		      printf("   %f %f %f %f\n", G.vd->viewmat[i][0], G.vd->viewmat[i][1], G.vd->viewmat[i][2], G.vd->viewmat[i][3]);
 		    }
-		    printf("\n");
+		    printf("\n");*/
 		    
 		  }
 		}
