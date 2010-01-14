@@ -214,3 +214,12 @@ string TPFC_device_3dstereo::info(){
   sprintf(aux, "3dstereo (usando de fuente los dispositivo %i y %i)", sources[0]->idnum(), sources[1]->idnum());
   return aux;
 }
+
+// funcion que comprueba si el dispositivo s es una fuente valida para este dispositivo
+// devuelve "ok" si es correcta, o una string con la informacion relevante si no lo es
+string TPFC_device_3dstereo::checksource(TPFC_device* s){
+  string ret = "ok";
+  if (s->getdata()->datatype()!=TrackingPFC_data::TPFCDATA2D && s->getdata()->datatype()!=TrackingPFC_data::TPFCDATA2DSIZE)
+    ret ="El tipo de datos de la fuente no es el adecuado: debe ser un dispositivo 2d (tenga o no estimacion de tamaño).\n";
+  return ret;
+}

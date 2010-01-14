@@ -33,6 +33,12 @@ class TPFC_device_opencv_face : public TPFC_device{
 
     // funcion que devuelve en un string la información relativa al dispositivo
     string info();
+
+    // funcion que comprueba si el dispositivo s es una fuente valida para este dispositivo
+    // devuelve "ok" si es correcta, o una string con la informacion relevante si no lo es
+    // debe ser definida por todas las clases que hereden de device
+    // (aunque no se puede hacer virtual ya que es estatica)
+    static string checksource(TPFC_device*);
 };
 
 

@@ -165,3 +165,10 @@ int TPFC_device_opencv_face::camera(){
 string TPFC_device_opencv_face::info(){
   return "OpenCV Facedetect";
 }
+
+// funcion que comprueba si el dispositivo s es una fuente valida para este dispositivo
+// devuelve "ok" si es correcta, o una string con la informacion relevante si no lo es
+string TPFC_device_opencv_face::checksource(TPFC_device*){
+  string ret = "Este dispositivo no acepta fuentes.";
+  return ret;
+}

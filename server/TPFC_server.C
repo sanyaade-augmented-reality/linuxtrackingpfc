@@ -181,14 +181,20 @@ int main( int argc, char** argv ){
 	      printf("Los dispositivos 3dfrom2d requieren el numero de id del dispositivo fuente\n");
 	    }else{
 	      int source = str2int( input[2] );
-	      // comprobamos que sea valido
+	      // comprobamos que el id sea valido
 	      if (source<0 || source >=dev.size()){
 		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n", source);
-	      }else{ //si lo es, creamos el nuevo dispositivo
-		dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[source]) );
-		//((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
-		printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
-		devadded=true;
+	      }else{ //si lo es, comprobamos que el tipo sea valido
+		string sourceok=TPFC_device_3dfrom2d::checksource(dev[source]);
+		if (sourceok.compare("ok")!=0){
+		  // si no lo es, devolvemos el error
+		  printf("%s",sourceok.c_str());
+		}else{// si lo es, creamos el dispositivo
+		  dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[source]) );
+		  //((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
+		  printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
+		  devadded=true;
+		}
 	      }
 	    }
 	  }else
@@ -200,15 +206,26 @@ int main( int argc, char** argv ){
 	    }else{
 	      int source1 = str2int( input[2] );
 	      int source2 = str2int( input[3] );
-	      // comprobamos que sean validos y diferentes
+	      // comprobamos que los ids sean validos y diferentes
 	      if (source1<0 || source1 >=dev.size()){
 		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n",source1);
 	      }else if (source2<0 || source2 >=dev.size()){
 		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n",source2);
-	      }else{ //si lo son, creamos el nuevo dispositivo
-		dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
-		printf("Añadido dispositivo %i: 3dstereo con fuentes %i %i\n",dev.size()-1, source1, source2);
-		devadded = true;
+	      }else{ //si lo son, comprobamos que los tipos de fuente sean correctos
+		string sourceok1=TPFC_device_3dstereo::checksource(dev[source1]);
+		string sourceok2=TPFC_device_3dstereo::checksource(dev[source2]);
+		bool ok1=(sourceok1.compare("ok")==0);
+		bool ok2=(sourceok2.compare("ok")==0);
+		// si alguno no lo es, devolvemos el error
+		if (!ok1){
+		  printf("%s",sourceok1.c_str());
+		}else if (!ok2){
+		  printf("%s",sourceok2.c_str());
+		}else{// si ambos son correctos, añadimos el dispositivo
+		  dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
+		  printf("Añadido dispositivo %i: 3dstereo con fuentes %i %i\n",dev.size()-1, source1, source2);
+		  devadded = true;
+		}
 	      }
 	    }
 	  }else
