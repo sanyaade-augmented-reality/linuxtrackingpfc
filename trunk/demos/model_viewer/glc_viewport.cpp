@@ -148,7 +148,7 @@ void GLC_Viewport::updateProjectionMat(TrackingPFC_client*& t) const
 	// Calculate The Aspect Ratio Of The Window
 	double AspectRatio;
 	AspectRatio= static_cast<double>(m_nWinHSize)/static_cast<double>(m_nWinVSize);
-	t->htgluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
+	t->htgluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax, m_nWinHSize, m_nWinVSize);
 
 	glMatrixMode(GL_MODELVIEW);							// select The Modelview Matrix
 	glLoadIdentity();

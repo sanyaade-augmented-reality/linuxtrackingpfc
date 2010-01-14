@@ -173,7 +173,7 @@ void display(void)
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
    
-   track->htadjustPerspective(1.6, znear, zfar);
+   track->htadjustPerspective(znear, zfar);
    glMatrixMode (GL_MODELVIEW);
    
 

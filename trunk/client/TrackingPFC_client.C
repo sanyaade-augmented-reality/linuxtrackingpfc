@@ -218,7 +218,7 @@ void TrackingPFC_client::setvirtualdisplaydistance(float d){
 }
 
 
-void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
+void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float m_dCamDistMin, float m_dCamDistMax, int winx, int winy){
   // descomentar esto y comentar el resto para hacer que la función sea transparente
   //gluPerspective(m_dFov, AspectRatio, m_dCamDistMin, m_dCamDistMax);
   if (originalfov != m_dFov || aspectratio !=AspectRatio){
@@ -229,16 +229,18 @@ void TrackingPFC_client::htgluPerspective(float m_dFov, float AspectRatio, float
     zadjustment = (scry/2.0)/tan(radfov/2.0);
     //printf("Z adjustment2 %f %f %f\n", zadjustment,scry/2.0,radfov/2.0);
   }
-  htadjustPerspective(AspectRatio, m_dCamDistMin, m_dCamDistMax);
+  htadjustPerspective(m_dCamDistMin, m_dCamDistMax, winx, winy);
 }
 
-void TrackingPFC_client::htadjustPerspective(float AspectRatio, float m_dCamDistMin, float m_dCamDistMax){
+void TrackingPFC_client::htadjustPerspective(float m_dCamDistMin, float m_dCamDistMax, int winx, int winy){
   // en un principio asumiremos que estamos en full screen, por lo tanto el tamaño horizontal del display es el 100% del reportado
   float frleft, frright, frup,frdown, scrx, scry, fact;
   // tamaños del display
-  scrx= getDisplaySizex();
-  scry= getDisplaySizey();
-
+  // obtenemos del cliente el tamaño y la resolucion
+  // con eso y el tamaño del area, obtenemos el tamaño de nuestra area
+  scrx= winx*getDisplaySizex()/getDisplayWidth();
+  scry= winy*getDisplaySizey()/getDisplayHeight();
+  
   float* lastpos= data->getlastpos();
   float obsx, obsy, obsz;
   obsx=lastpos[0];

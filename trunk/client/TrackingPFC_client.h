@@ -47,7 +47,7 @@ class TrackingPFC_client{
     static void TrackingPFC_client_callback(void *, const vrpn_TRACKERCB);
     
     // funcion auxiliar para getDisplaySizex() y getDisplaySizey()
-    float getDisplaySize(int);
+    static float getDisplaySize(int);
 
   public:
     // placeholder para el callback personalizado (si es necesario)
@@ -61,14 +61,14 @@ class TrackingPFC_client{
     ~TrackingPFC_client();
     
     // Devuelve el tamaño de la pantalla (en metros), leida del archivo de configuracion
-    float getDisplaySizex();
-    float getDisplaySizey();
+    static float getDisplaySizex();
+    static float getDisplaySizey();
     // Devuelve el tamaño de la pantalla en pixeles (leido del servidor X)
-    int getDisplayWidth();
-    int getDisplayHeight();
+    static int getDisplayWidth();
+    static int getDisplayHeight();
     // Devuelve el tamaño de la pantalla en metros (leido del servidor X)
-    float getDisplayWidthMM();
-    float getDisplayHeightMM();
+    static float getDisplayWidthMM();
+    static float getDisplayHeightMM();
 
     // consultoras y escritoras de los datos
     float* getlastpos();
@@ -80,8 +80,8 @@ class TrackingPFC_client{
     
     // llamadas glut y GL modificadas para usar tracking
     void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
-    void htgluPerspective(float, float, float, float);
-    void htadjustPerspective(float, float, float); // como la anterior, pero sin fov
+    void htgluPerspective(float, float, float, float, int x = getDisplayWidth(), int y = getDisplayHeight());
+    void htadjustPerspective(float, float, int x = getDisplayWidth(), int y = getDisplayHeight()); // como la anterior, pero sin fov ni aspect ratio originales
 
     // TO DO && BRAINSTORM
     // pause/unpause/togglepause (que se quede con la ultima posicion)
