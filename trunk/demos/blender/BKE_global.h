@@ -68,8 +68,8 @@ typedef struct Global {
 	// PFC Mod Starts here
 	// modificamos la estructura global añadiendole un puntero para el cliente
 	CTrackingPFC_client* tpfcc;
-	// y un flag para saber cuando activamos el HT
-	int htactive;
+	// y una lista para guardar las areas con HT activo
+	void* htlist[128];
 	// PFC Mod Ends here
 	/* active pointers */
 	struct View3D *vd;

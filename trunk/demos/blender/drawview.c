@@ -3263,14 +3263,41 @@ void drawview3dspace(ScrArea *sa, void *spacedata)
 	tpfcsetviewmatrixview3d(htinfo);
 	// segun el flag de htinfo, activamos o desactivamos el flag global y el handler
 	if (htinfo.htactive==0){
-	  if (has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) && G.htactive==1){
+	  // comprobamos que ademas de haber un handler, esta sea la unica area en la lista)
+	  // si no hay ninguna, estariamos parando la animacion de bender
+	  if (has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) && G.htlist[0]==G.vd && G.htlist[1]==NULL){
 	    rem_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM);
 	  }
-	  G.htactive=0;
+
+	  // si esta area estaba en la lista HT, la eliminamos
+	  int i =0;
+	  int j=-1;
+	  // al salir del bucle j apuntará a la posicion de G.vd (o sera -1),
+	  // al primer null o sera 128 si la lista esta llena
+	  while (i<128 && G.htlist[i]!=NULL ){
+	    if (G.htlist[i]==G.vd) j=i;
+	    i++;
+	  }
+	  // si hemos encontrado la posicion, eliminamos el puntero y lo cambiamos por la ultima
+	  // posicion antes de null
+	  if (j!=-1){
+	    G.htlist[j]=G.htlist[i-1];
+	    G.htlist[i-1]=NULL;
+	  }
 	}else{
+	  // si no hay handler de animacion, lo añadimos
 	  if (!has_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM) )
 	    add_screenhandler(G.curscreen, SCREEN_HANDLER_ANIM, 6);  
-	  G.htactive=1;
+	  // si no estaba en la lista de HT, lo añadimos
+	  int i =0;
+	  // al salir del bucle i apuntará a la posicion de G.vd, al primer null o sera 128 si la lista esta llena
+	  while (i<128 && G.htlist[i]!=NULL && G.htlist[i]!=G.vd ){
+	    i++;
+	  }
+	  // si la lista no esta llena y estamos en una posicion de null copiamos el puntero a esta View3d en esa posicion
+	  if (i<128&& G.htlist[i]==NULL){
+	    G.htlist[i]=G.vd;
+	  }
 	}
 	
 	// PFC MOD ends here

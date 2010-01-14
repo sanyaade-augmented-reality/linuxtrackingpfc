@@ -234,8 +234,10 @@ void initglobals(void)
 	// PFC Mod starts here
 	// inicializamos el cliente
 	G.tpfcc = tpfcclient("Tracker0@localhost");
-	// marcamos el flag a falso
-	G.htactive=0;
+	// inicializamos la lista a null
+	int aux;
+	for (aux=0;aux<128;aux++)
+	  G.htlist[aux]=NULL;
 	// PFC Mod ends here
 }
 
