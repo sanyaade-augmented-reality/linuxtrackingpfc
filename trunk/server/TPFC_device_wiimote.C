@@ -135,3 +135,10 @@ void TPFC_device_wiimote::set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char r
 string TPFC_device_wiimote::info(){
   return "Wiimote";
 }
+
+// funcion que comprueba si el dispositivo s es una fuente valida para este dispositivo
+// devuelve "ok" si es correcta, o una string con la informacion relevante si no lo es
+string TPFC_device_wiimote::checksource(TPFC_device*){
+  string ret = "Este dispositivo no acepta fuentes.";
+  return ret;
+}
