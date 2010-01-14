@@ -1,9 +1,9 @@
-#include "TPFC_device_3dstereo.h" 
+#include "TPFC_device_3dmod.h" 
 
 
-TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_device* s2):TPFC_device(ident){
+TPFC_device_3dmod::TPFC_device_3dmod(int ident, TPFC_device* s):TPFC_device(ident){
 
-  // creamos los datos
+  /*// creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D);
 
   lock = new pthread_mutex_t(); // inicializamos el semaforo
@@ -27,18 +27,18 @@ TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_devi
   s2-> report_to(this);
 
   // calibramos
-  calibrate();
+  calibrate();*/
 }
 
-TPFC_device_3dstereo::~TPFC_device_3dstereo(){
+TPFC_device_3dmod::~TPFC_device_3dmod(){
   free(data);
-  if (lastdata[0]!=NULL);
+  /*if (lastdata[0]!=NULL);
     free(lastdata[0]);
   if (lastdata[1]!=NULL);
-    free(lastdata[1]);
+    free(lastdata[1]);*/
 }
 
-// funcion auxiliar para comparar 2 floats, para usar con qsort
+/*// funcion auxiliar para comparar 2 floats, para usar con qsort
 int comparefloats (const void * a, const void * b)
 {
   if (*(float*)a == *(float*)b)
@@ -169,7 +169,7 @@ void TPFC_device_3dstereo::calibrate(){
       printf("Punto %i\n",dot);
       printf("  sensor 0: %f %f\n",angles[dot][0][0],angles[dot][0][1]);
       printf("  sensor 1: %f %f\n",angles[dot][1][0],angles[dot][1][1]);
-    }*/
+    }* /
   }else{ // usando configuracion de 3 puntos
       // inicializar realpos con lo que toque
   }
@@ -271,7 +271,7 @@ void TPFC_device_3dstereo::addsample(float* d){
       }
       /*for (int dn=0; dn<calib_dots;dn++){
 	printf("%f %f ", dots[dn][0], dots[dn][1]);
-      }printf(" ***\n");*/
+      }printf(" ***\n");* /
       // guardamos los dots en el buffer
       for (int dn=0; dn<calib_dots;dn++){
 	aux=getsamples(0,sn,dn);
@@ -305,11 +305,11 @@ int TPFC_device_3dstereo::getsourcepos(TPFC_device* s){
   else
     return 1;
 }
-
+*/
 // sobrecarga del handler de los reports
-void TPFC_device_3dstereo::report_from(TPFC_device* s){
+void TPFC_device_3dmod::report_from(TPFC_device* s){
   // comprobamos que no estemos en pausa
-  if (working()){
+/*  if (working()){
     // guardamos estos datos en su buffer
     int sn = getsourcepos(s);
     if (lastdata[sn]!=NULL){
@@ -322,49 +322,6 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
     // comprobamos si los datos son validos
 
     if (calibrated){ // si ya esta el dispositivo calibrado
-
-
-/*// obtenemos los datos
-if (sourcedata->getvalid() == false){
-  // si no son validos guardamos un chunk no valido en nuestros datos y damos un nullreport
-  data->setnodata();
-  nullreport();
-}else{// si son validos...
-  // obtenemos el numero de puntos del report
-  int n = sourcedata->size();
-  const float* aux;
-
-  if (merge){ // Hay que unificar todos los datos
-    // acumuladores
-    float acumx=0;
-    float acumy=0;
-    // recorremos los puntos sumando los datos
-    for (int i =0; i<n; i++){
-      aux = sourcedata->getdata(i);
-      acumx+=aux[0];
-      acumy+=aux[1];
-    }
-    // obtenemos la media
-    acumx=acumx/n;
-    acumy=acumy/n;
-    // guardamos los datos
-    setdata(acumx, acumy);
-  }else{ // Los datos se envian como sensores separados
-    // obtenemos el primer punto
-    aux = sourcedata->getdata();
-    // y lo guardamos en un nuevo report
-    setdata(aux[0], aux[1]);
-    // recorremos los siguientes puntos (si los hay)
-    for (int i =1; i<n; i++){
-      // obtenemos y guardamos los datos de los puntos, pero añadiendolos al report existente
-      aux = sourcedata->getdata(i);
-      setdata(aux[0], aux[1], false);
-    }
-  }
-  // sea cual sea la opción, una vez escritos los datos, reportamos
-  report();
-}*/
-
 
 
 
@@ -385,18 +342,27 @@ if (sourcedata->getvalid() == false){
 	free(aux);
       }
     }// if calibrated
-  }// if workikg
+  }// if workikg*/
 }
 
 // sobrecarga del handler de los reports nulos
-void TPFC_device_3dstereo::nullreport_from(TPFC_device* s){
+void TPFC_device_3dmod::nullreport_from(TPFC_device* s){
   // redirigimos al report normal (ya se gestiona internamente la validez)
   report_from(s);
 }
 
 // Informacion sobre el dispositivo
-string TPFC_device_3dstereo::info(){
+string TPFC_device_3dmod::info(){
   char aux[64]; // si se crean MUCHOS dispositivos nos saldremos del buffer... dudo que sea un problema
-  sprintf(aux, "3dstereo (usando de fuente los dispositivo %i y %i)", sources[0]->idnum(), sources[1]->idnum());
+  sprintf(aux, "3dmod (usando de fuente el dispositiv %i)", source->idnum());
   return aux;
+}
+
+// funcion que comprueba si el dispositivo s es una fuente valida para este dispositivo
+// devuelve "ok" si es correcta, o una string con la informacion relevante si no lo es
+string TPFC_device_3dmod::checksource(TPFC_device* s){
+  string ret = "ok";
+  if (s->getdata()->datatype()!=TrackingPFC_data::TPFCDATA3D && s->getdata()->datatype()!=TrackingPFC_data::TPFCDATA3DORI)
+    ret ="El tipo de datos de la fuente no es el adecuado: debe ser un dispositivo 3d (tenga o no orientacion).\n";
+  return ret;
 }
