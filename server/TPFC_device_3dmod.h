@@ -1,14 +1,14 @@
-#ifndef TPFC_DEVICE_3DSTEREO_
-#define TPFC_DEVICE_3DSTEREO_
+#ifndef TPFC_DEVICE_3DMOD_
+#define TPFC_DEVICE_3DMOD_
 
 #include "TPFC_device.h"
-#define TPFCPI 3.14159265
 
-class TPFC_device_3dstereo : public TPFC_device{
+
+class TPFC_device_3dmod : public TPFC_device{
    private:
     // Puntero a los 2 device fuente
-    TPFC_device** sources;
-    // los datachunks del ultimo report de cada fuente
+    TPFC_device* source;
+    /* // los datachunks del ultimo report de cada fuente
     TrackingPFC_data::datachunk** lastdata;
     // semaforo para exclusion mutua en el acceso a lastdata
     pthread_mutex_t* lock;
@@ -32,17 +32,17 @@ class TPFC_device_3dstereo : public TPFC_device{
     pthread_mutex_t* calib_lock;
     void addsample(float*); // funcion para añadir los datos de una muestra al bufer
     float* getsamples(int, int, int); // funcion para recuperar todos los samples del buffer
-
+*/
     public:
     // consctructora y creadora
-    TPFC_device_3dstereo(int ident, TPFC_device*,TPFC_device*);
-    ~TPFC_device_3dstereo();
+    TPFC_device_3dmod(int ident, TPFC_device*);
+    ~TPFC_device_3dmod();
 
-    // configuracion de la calibracion
+    /*// configuracion de la calibracion
     int calib_samples; // numero de muestras en cada punto para calibrar
     int calib_dots; // numero de puntos simultaneos durante el calibrado
     //int calib_discard; // % de las muestras a descartar al procesar los datos
-    void calibrate(); // funcion para calibrar
+    void calibrate(); // funcion para calibrar*/
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
     void report_from(TPFC_device*);
@@ -58,4 +58,4 @@ class TPFC_device_3dstereo : public TPFC_device{
     static string checksource(TPFC_device*);
 };
 
-#endif /*TPFC_DEVICE_3DSTEREO_*/
+#endif /*TPFC_DEVICE_3DMOD_*/
