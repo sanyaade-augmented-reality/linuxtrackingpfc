@@ -182,6 +182,10 @@ void TrackingPFC_data::setnodata(bool real){
   data[ind]->setvalid(false);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
+// añadir tag a algun datachunk del ultimo report
+void TrackingPFC_data::settag(int tag, int n){
+  data[ind]->settag(tag,n);
+}
 
 // devuelve el tipo
 TrackingPFC_data::TPFCdatatype TrackingPFC_data::datatype(){

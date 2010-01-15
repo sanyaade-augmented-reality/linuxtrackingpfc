@@ -91,6 +91,8 @@ class TrackingPFC_data{
     void setmoredata(const double* d, bool real = true);
     // añadir un nuevo report vacio y con el flag de datos no validos
     void setnodata(bool real = true);
+    // añadir tag a algun datachunk del ultimo report
+    void settag(int tag, int n=0);
 
     // Consultoras avanzadas
     // devuelve una copia del ultimo datachunk 
