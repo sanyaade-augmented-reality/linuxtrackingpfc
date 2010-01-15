@@ -1,0 +1,19 @@
+# Tracking PFC Server Sample Configuration file
+# Esta configuracion prepara 2 wiimotes y despues crea 3 servidores
+# 1 con la vision en stereo, y uno con cada mando con deduccion de profundidad segun el tamaño
+
+d wii
+d wii
+
+d stereo 0 1
+addt Tracker0 4
+
+d 3f2 0
+addt Tracker1 4
+deep onlysize 170
+
+d 3f2 1
+addt Tracker2 4
+deep onlysize 170
+
+daemon
