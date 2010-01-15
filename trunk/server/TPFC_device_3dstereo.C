@@ -76,7 +76,7 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
     // tabla auxiliar para ordenar los datos de los puntos
     // dots[sn][dn][xy]
     int totaldots = lastdata[sn]->size();
-    double dots[totaldots][2][2];
+    double dots[2][totaldots][2];
     // flag de si hay que reportar o no
     bool needreport=false;
     // comprobamos si los datos son validos y el numero de puntos coincide
@@ -134,7 +134,7 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
       // recorremos el resto de puntos comprobando que coincida
       int izq2;
       for (int dn =1; dn<totaldots;dn++){
-	izq2 = ( dots[0][dn][0]<dots[0][dn][0] )?0:1;
+	izq2 = ( dots[0][dn][0]<dots[1][dn][0] )?0:1;
 	// si no lo hace, marcamos sideok a falso
 	if (izq!=izq2){
 	  sideok=false;
@@ -152,7 +152,7 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
 	if (fails >20){ // si llevamos 20 fallos consecutivos, entendemos que la deteccion anterior era erronea
 	  fails=0; // resteamos los contadores
 	  left=izq; // cambiamos la izquierda
-	  printf("3dstereo: Detectados 20 errores de deteccion consecutivos, reseteando...\n");
+	  printf("3dstereo: Detectados 20 errores de deteccion consecutivos. Cambiando izquierdo a dispositivo %i\n", sources[left]->idnum());
 	}else{
 	  sideok=false; // si no lo es, marcamos la congruencia como erronea
 	  printf("3dstereo: la colocacion detectada no coincide con la de los anteriores reports (%i).\n", fails);
