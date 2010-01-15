@@ -82,13 +82,13 @@ class TrackingPFC_data{
     // funciona tb para datos 2d, simplemente ignora el 3r parametro
     void setnewpos(double, double, double f = 0.0);
     // añade un nuevo report con los datos de d, d debe tener tamaño dsize
-    void setnewdata(float* d, bool real = true);
-    void setnewdata(double* d, bool real = true);
+    void setnewdata(const float* d, bool real = true);
+    void setnewdata(const double* d, bool real = true);
 
     // Escritoras avanzadas
     // añadir información de otro punto adicional al ultimo report
-    void setmoredata(float* d, bool real = true);
-    void setmoredata(double* d, bool real = true);
+    void setmoredata(const float* d, bool real = true);
+    void setmoredata(const double* d, bool real = true);
     // añadir un nuevo report vacio y con el flag de datos no validos
     void setnodata(bool real = true);
 
