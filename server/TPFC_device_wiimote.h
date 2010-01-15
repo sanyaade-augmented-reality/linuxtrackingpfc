@@ -13,6 +13,7 @@ class TPFC_device_wiimote : public TPFC_device{
   private:
     // wiimote handle 
     cwiid_wiimote_t *wiimote;
+    bdaddr_t bdaddr;// direccion BT del wiimote
     
     // estructura que contiene la información de los wiimotes
     // para poder usar mas de 1 (el callback no sabe a que device esta
@@ -40,7 +41,7 @@ class TPFC_device_wiimote : public TPFC_device{
 
   public:
     // consctructora y creadora
-    TPFC_device_wiimote(int ident);
+    TPFC_device_wiimote(int ident, string bta="");
     ~TPFC_device_wiimote();
 
     // callback del wiimote
@@ -48,6 +49,9 @@ class TPFC_device_wiimote : public TPFC_device{
 
     // funcion que devuelve en un string la información relativa al dispositivo
     string info();
+
+    // funcion que devuelve en un string la direccion Bluetooth del wiimote
+    string btaddress();
 
     // funcion que comprueba si el dispositivo s es una fuente valida para este dispositivo
     // devuelve "ok" si es correcta, o una string con la informacion relevante si no lo es

@@ -77,14 +77,20 @@ void TPFC_device_wiimote::callback(cwiid_wiimote_t *wiimote, int mesg_count,
 
 
 // Creadora del device
-TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
+TPFC_device_wiimote::TPFC_device_wiimote(int ident, string bta):TPFC_device(ident){
   // creamos el bufer de datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2D);
   // sobreescribimos el mensaje de error por defecto con el nuestro, para evitar spam
   cwiid_set_err(err);
 
-  // conectarse al primer wiimote que se encuentre
-  bdaddr_t bdaddr = *BDADDR_ANY;// bluetooth device address
+  // comprobamos si tenemos una direccion asignada
+  if (bta.compare("")==0){
+    // conectarse al primer wiimote que se encuentre
+    bdaddr = *BDADDR_ANY;// bluetooth device address
+  }else{
+    // conectarse al wiimote con direccion == bta
+    str2ba(bta.c_str(), &bdaddr);
+  }
 
   // Conectar los wiimotes
   printf("Pon el wiimote en modo discoverable (pulsa 1+2)...\n");
@@ -110,9 +116,8 @@ TPFC_device_wiimote::TPFC_device_wiimote(int ident):TPFC_device(ident){
   toggle_bit(rpt_mode, CWIID_RPT_IR);
   set_rpt_mode(wiimote, rpt_mode);
 
-  
   printf("Wiimote conectado!\n");
-  
+
 }
 
 // Destructora
@@ -132,6 +137,13 @@ void TPFC_device_wiimote::set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char r
 }
 
 // Informacion sobre el dispositivo
+string TPFC_device_wiimote::btaddress(){
+  char aux[100];
+  ba2str(&bdaddr, aux); 
+  return aux;
+}
+
+// Informacion sobre el dispositivo
 string TPFC_device_wiimote::info(){
   return "Wiimote";
 }
@@ -142,3 +154,5 @@ string TPFC_device_wiimote::checksource(TPFC_device*){
   string ret = "Este dispositivo no acepta fuentes.";
   return ret;
 }
+
+  

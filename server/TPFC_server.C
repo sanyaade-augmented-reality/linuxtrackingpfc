@@ -237,9 +237,20 @@ int main( int argc, char** argv ){
 
 
 	  if ( input[1].compare("wiimote")==0 || input[1].compare("wii")==0){
-	    dev.push_back( new TPFC_device_wiimote(dev.size()) );
-	    printf("Añadido dispositivo %i: Wiimote\n",dev.size()-1);
+	    if (input.size()==2){ // no tenemos direccion BT
+	      dev.push_back( new TPFC_device_wiimote(dev.size()) );
+	    }else{ // tenemos direccion BT
+	      dev.push_back( new TPFC_device_wiimote(dev.size(), input[2]) );
+	    }
+	    string btaux = ( (TPFC_device_wiimote*)dev[dev.size()-1] )->btaddress();
+	    printf("Añadido dispositivo %i: Wiimote (%s)\n",dev.size()-1, btaux.c_str());
 	    devadded=true;
+	    // por ultimo, si se habia llamado sin direccion, añadimos a la lista de comandos
+	    // el comando que se deberia usar para volver a conectar ese wiimote
+	    if (input.size()==2){
+	      commands.push_back("# Version alternativa para volver a conectar el mismo mando:");
+	      commands.push_back("# device wiimote "+btaux);
+	    }
 	  }else{
 
 
