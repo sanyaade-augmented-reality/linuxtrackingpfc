@@ -164,7 +164,7 @@ int main( int argc, char** argv ){
 	StringExplode(s, " ", &input);
 
 	// Nuevos devices
-	if ( input[0].compare("device")==0 || input[0].compare("dev")==0){
+	if ( input[0].compare("device")==0 || input[0].compare("dev")==0|| input[0].compare("d")==0){
 	  bool devadded=false; //flag de dispositivo añadido
 	  if (input.size()<2){
 	    printf("No se ha especificado el tipo de dispositivo a crear.\n");
@@ -429,11 +429,11 @@ int main( int argc, char** argv ){
 	  printf("help (?, h) -> muestra la lista de comandos disponibles.\n");
 	  printf("load <nombre> -> carga el script ~./trackingpfc/nombre.tpfc");
 	  printf("save <nombre> -> guarda el script ~./trackingpfc/nombre.tpfc");
-	  printf("device (dev) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
+	  printf("device (dev, d) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
 	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("     wiimote (wii)\n");
 	  printf("     3dfrom2d (3f2) <id del dispositivo fuente>\n");
-	  printf("         setdeep (deep) <fija, rotacion, size> <distancia> -> cambia la forma de calcular la profundidad\n");
+	  printf("         setdeep (deep) <fija, rotacion, size> <distancia en cm.> -> cambia la forma de calcular la profundidad\n");
 	  printf("     3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list -> lista los dispositivos configurados en el servidor.\n");
