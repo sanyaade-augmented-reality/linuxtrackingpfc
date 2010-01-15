@@ -5,6 +5,7 @@
 #include "TPFC_device_wiimote.h"
 #include "TPFC_device_3dfrom2d.h"
 #include "TPFC_device_3dstereo.h"
+#include "TPFC_device_3dmod.h"
 
 #include <vector>
 
@@ -182,7 +183,6 @@ int main( int argc, char** argv ){
 
 	  if ( input[1].compare("3dfrom2d")==0 || input[1].compare("3f2")==0){
 	    // comprobamos que tengamos el parametro adicional necesario
-	    // comprobamos que exista
 	    if (input.size()!=3){
 	      printf("Los dispositivos 3dfrom2d requieren el numero de id del dispositivo fuente\n");
 	    }else{
@@ -240,9 +240,33 @@ int main( int argc, char** argv ){
 	    dev.push_back( new TPFC_device_wiimote(dev.size()) );
 	    printf("Añadido dispositivo %i: Wiimote\n",dev.size()-1);
 	    devadded=true;
-
-
 	  }else{
+
+
+	  if ( input[1].compare("3dmod")==0 || input[1].compare("mod")==0){
+	    // comprobamos que tengamos el parametro adicional necesario
+	    if (input.size()!=3){
+	      printf("Los dispositivos 3dmod requieren el numero de id del dispositivo fuente\n");
+	    }else{
+	      int source = str2int( input[2] );
+	      // comprobamos que el id sea valido
+	      if (source<0 || source >=dev.size()){
+		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n", source);
+	      }else{ //si lo es, comprobamos que el tipo sea valido
+		string sourceok=TPFC_device_3dmod::checksource(dev[source]);
+		if (sourceok.compare("ok")!=0){
+		  // si no lo es, devolvemos el error
+		  printf("%s",sourceok.c_str());
+		}else{// si lo es, creamos el dispositivo
+		  dev.push_back( new TPFC_device_3dmod(dev.size(),dev[source]) );
+		  printf("Añadido dispositivo %i: 3dmod con fuente %i\n",dev.size()-1, source);
+		  devadded=true;
+		}
+	      }
+	    }
+	  }else
+
+
 	    printf("'%s' no es un tipo de dispositivo valido.\n", input[1].c_str() );
 	  }
 	  // si hemos llegado aqui y devadded==true, es que el comando ha creado un dev
@@ -272,15 +296,19 @@ int main( int argc, char** argv ){
 	      if (input[1].compare("fija")==0){
 		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::FIJA, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("rotacion")==0){
 		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ROTACION, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("size")==0){
 		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::APROXSIZE, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("onlysize")==0){
 		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ONLYSIZE, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
 	      }else{
 		printf("La opcion '%s' no es valida para setdeep, opciones posibles: fija, rotacion, size, onlysize\n",input[1].c_str());
 	      }
@@ -306,9 +334,11 @@ int main( int argc, char** argv ){
 	      if (input[1].compare("on")==0){
 		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setmerge(true);
 		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("off")==0){
 		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setmerge(false);
 		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
 	      }else{
 		printf("La opcion '%s' no es valida para setmerge, opciones posibles: on, off\n",input[1].c_str());
 	      }

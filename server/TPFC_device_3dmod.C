@@ -2,7 +2,13 @@
 
 
 TPFC_device_3dmod::TPFC_device_3dmod(int ident, TPFC_device* s):TPFC_device(ident){
-
+  // creamos los datos
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,100);
+  // guardamos un puntero a la fuente
+  source=s;
+  // registramos este dispositivo en la lista de listeners del que vamos a usar como input
+  s-> report_to(this);
+  
 }
 
 TPFC_device_3dmod::~TPFC_device_3dmod(){
