@@ -18,6 +18,7 @@ class TPFC_device_3dpattern : public TPFC_device{
     keepothersoptions keepothers; // incluir los puntos que no pertenecen al patron
     float tolerance; // % de error aceptado
     double* lastpattern; // numero de dato que contiene el ultimo pattern registrado
+    bool anypattern; // flag para evitar buscar concordancias con patrones viejos si no los hay
 
     // funcion auxiliar que calcula la distancia entre 2 puntos
     double dotdist(const double*,const double*);
