@@ -80,7 +80,7 @@ TrackingPFC_data::datachunk* TrackingPFC_data::getlastdata(){
 // copia la orientacion de los ultimos datos (si la hay), modificando la posición.
 // aunque está pensado para funcionar con datos de tamaño 3 o mas, funcionara con los de 2
 // ignorando el 3r argumento
-void TrackingPFC_data::setnewpos(double x, double y, double z){
+int TrackingPFC_data::setnewpos(double x, double y, double z){
   double* aux;
   // si los datos tienen orientacion, obtenemos la ultima posición conocida para poder copiarla
   if (dsize>3)
@@ -95,11 +95,12 @@ void TrackingPFC_data::setnewpos(double x, double y, double z){
     aux[2]=z;
   // por ultimo, guardamos esos nuevos datos
   setnewdata(aux);
+  return count;
 }
 
 // añade un nuevo chunk a los datos, con tiempo actual y los datos de d
 // no comprueba que los datos sean del tamaño correcto (que debe ser ==dsize)
-void TrackingPFC_data::setnewdata(const float* d, bool real){
+int TrackingPFC_data::setnewdata(const float* d, bool real){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // aumentamos el indice
   ind=(ind+1)%size;
@@ -116,8 +117,9 @@ void TrackingPFC_data::setnewdata(const float* d, bool real){
   // creamos un datachunk nuevo insertandolo en el buffer
   data[ind]= new datachunk(aux, count, real);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
+  return count;
 }
-void TrackingPFC_data::setnewdata(const double* d, bool real){
+int TrackingPFC_data::setnewdata(const double* d, bool real){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // aumentamos el indice
   ind=(ind+1)%size;
@@ -134,6 +136,7 @@ void TrackingPFC_data::setnewdata(const double* d, bool real){
   // creamos un datachunk nuevo insertandolo en el buffer
   data[ind]= new datachunk(aux, count, real);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
+  return count;
 }
 
 // añade informacion sobre otro punto al ultimo report
@@ -167,7 +170,7 @@ void TrackingPFC_data::setmoredata(const double* d, bool real){
 }
 
 // añade un nuevo chunk a los datos, vacio y con el flag de datos no validos
-void TrackingPFC_data::setnodata(bool real){
+int TrackingPFC_data::setnodata(bool real){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // aumentamos el indice
   ind=(ind+1)%size;
@@ -181,6 +184,7 @@ void TrackingPFC_data::setnodata(bool real){
   // y marcamos el flag de valid
   data[ind]->setvalid(false);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
+  return count;
 }
 // añadir tag a algun datachunk del ultimo report
 void TrackingPFC_data::settag(int tag, int n){
