@@ -245,14 +245,24 @@ const double* TrackingPFC_data::datachunk::getdata(int n){
   return aux->data;
 }
 
-//clock_t gettime(int n =0); // devuelve el time
+// devuelve el time
+clock_t TrackingPFC_data::datachunk::gettime(int n){
+  datachunk* aux = getchunk(n);
+  return aux->time;
+}
 // devuelve el tag del punto n
 int TrackingPFC_data::datachunk::gettag(int n){
   datachunk* aux = getchunk(n);
   return aux->tag;
 }
-//int getcount(); // devuelve el numero de report
-//bool getreal(); // los datos son reales o artificiales
+// devuelve el numero de report
+int TrackingPFC_data::datachunk::getcount(){
+  return count;
+}
+//los datos son reales o artificialesç
+bool TrackingPFC_data::datachunk::getreal(){
+  return real;
+}
 bool TrackingPFC_data::datachunk::getvalid(){
   return valid;
 }
