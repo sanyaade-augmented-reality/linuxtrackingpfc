@@ -27,6 +27,22 @@ TPFC_device_3dpattern::~TPFC_device_3dpattern(){
 
 // sobrecarga del handler de los reports
 void TPFC_device_3dpattern::report_from(TPFC_device* s){
+  // comprobamos que no estemos en pausa
+  if (working()){
+    // obtenemos los datos
+    TrackingPFC_data::datachunk* sourcedata= (s->getdata())->getlastdata();
+    // comprobamos si los datos son validos
+    if (sourcedata->getvalid() == false){
+      // si no son validos guardamos un chunk no valido en nuestros datos y damos un nullreport
+      data->setnodata();
+      nullreport();
+    }else{// si son validos...
+      // obtenemos el numero de puntos del report
+      int n = sourcedata->size();
+
+
+    }// validos
+  }//working
 }
 
 
