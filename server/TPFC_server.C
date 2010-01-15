@@ -11,6 +11,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <typeinfo>
+
 using namespace std;
 
 vrpn_Connection * connection;
@@ -137,7 +139,12 @@ int main( int argc, char** argv ){
     }
     
     // bucle principal, lee una linea del input a no ser que se haya recibido la orden de parar
-    while (alive && readinput && (loader.size()>0 || getline(cin, s)) ){
+    // si es necesario, imprimimos ">" para que el usuario sepa que esperamos su entrada
+      if (alive && loader.size()==0){
+	printf(">");
+	fflush(stdout);
+      }
+      while (alive && readinput && (loader.size()>0 || getline(cin, s)) ){
       // comprobamos si habia algo que leer en loader
       if (loader.size()>0){
 	//printf("lol %i\n",loader.size());
@@ -394,6 +401,11 @@ int main( int argc, char** argv ){
 	}else{ // si hemos llegado aqui sin reconocer la orden avisamos de que es incorrecta
 	  printf("'%s' no es una orden valida. Escribe '?' para obtener ayuda.\n",s.c_str());
 	}
+      }
+      // si es necesario, imprimimos ">" para que el usuario sepa que esperamos su entrada
+      if (alive && loader.size()==0){
+	printf(">");
+	fflush(stdout);
       }
     }
 
