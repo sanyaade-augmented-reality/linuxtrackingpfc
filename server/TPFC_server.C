@@ -294,6 +294,8 @@ int main( int argc, char** argv ){
 		if (sourceok.compare("ok")!=0){
 		  // si no lo es, devolvemos el error
 		  printf("%s",sourceok.c_str());
+		}else if ( str2int(input[3])!=2 && str2int(input[3])!=3){ // comprobamos que el numero de puntos sea valido
+		  printf("El numero de puntos seleccionado no es valido, debe ser 2 o 3\n");
 		}else{// si lo es, creamos el dispositivo
 		  dev.push_back( new TPFC_device_3dpattern(dev.size(),dev[source], str2int( input[3] ), (float)str2int( input[4] )/1000) );
 		  printf("Añadido dispositivo %i: 3dmod con fuente %i ",dev.size()-1, source);
@@ -536,6 +538,7 @@ int main( int argc, char** argv ){
 	  printf("     setmerge (merge) <on, off> -> Activa o desactiva la opcion de juntar los puntos\n");
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
+	  printf("dev 3dpattern (3dpat, pattern, pat) <id de la fuente> <numero de puntos> <distancia entre los puntos (mm)>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list (l)-> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
