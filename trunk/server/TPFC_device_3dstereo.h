@@ -15,6 +15,7 @@ class TPFC_device_3dstereo : public TPFC_device{
 
     double camdist; // distancia entre ambos sensores
     int left; // indice del sensor izquierdo
+    int fails; // contador de fallos consecutivos al encontrar el lado correcto
 
     // funcion que encuentra el indice interno de la fuente (si esta en sources[0] o sources[1]
     int getsourcepos(TPFC_device* s);
