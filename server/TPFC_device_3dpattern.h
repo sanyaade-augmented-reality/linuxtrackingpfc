@@ -14,6 +14,10 @@ class TPFC_device_3dpattern : public TPFC_device{
     int tag; // tag a usar
     bool all; // se requieren todos los puntos para dar el report?
     bool keepothers; // incluir los puntos que no pertenecen al patron
+    float tolerance; // % de error aceptado
+
+    // funcion auxiliar que calcula la distancia entre 2 puntos
+    double dotdist(const double*,const double*);
 
   public:
     // consctructora y creadora
