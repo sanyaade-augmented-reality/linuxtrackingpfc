@@ -279,7 +279,35 @@ int main( int argc, char** argv ){
 		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::APROXSIZE, (float)str2int(input[2])/100 );
 		commands.push_back(s);
 	      }else{
-		printf("La opcion '%s' no es valida para set deep, opciones posibles: fija, rotacion, size\n",input[1].c_str());
+		printf("La opcion '%s' no es valida para setdeep, opciones posibles: fija, rotacion, size\n",input[1].c_str());
+	      }
+	    }
+	  }
+	}else
+
+	// Opciones de merge
+	if ( input[0].compare("setmerge")==0 || input[0].compare("merge")==0){
+	  // comprobamos que el ultimo dispositivo sea valido
+	  if (dev.size()==0){
+	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
+	  }else
+	  // comprobamos el numero de parametros
+	  if (input.size()!=2){
+	    printf("El comando setmerge requiere un parametro (on, off).\n");
+	  }else{
+	    string aux = dev[dev.size()-1]->info();
+	    if ( (aux.substr(0,8)).compare("3dfrom2d")!=0){
+	      printf("No se puede aplicar setmerge al ultimo dispositivo, no es del tipo 3dfrom2d\n");
+	    }else {
+	      // llamamos con la opcion adecuada:
+	      if (input[1].compare("on")==0){
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setmerge(true);
+		commands.push_back(s);
+	      }else if (input[1].compare("off")==0){
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setmerge(false);
+		commands.push_back(s);
+	      }else{
+		printf("La opcion '%s' no es valida para setmerge, opciones posibles: on, off\n",input[1].c_str());
 	      }
 	    }
 	  }
@@ -430,11 +458,12 @@ int main( int argc, char** argv ){
 	  printf("load <nombre> -> carga el script ~./trackingpfc/nombre.tpfc");
 	  printf("save <nombre> -> guarda el script ~./trackingpfc/nombre.tpfc");
 	  printf("device (dev, d) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
-	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
-	  printf("     wiimote (wii)\n");
-	  printf("     3dfrom2d (3f2) <id del dispositivo fuente>\n");
-	  printf("         setdeep (deep) <fija, rotacion, size> <distancia en cm.> -> cambia la forma de calcular la profundidad\n");
-	  printf("     3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
+	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
+	  printf("dev wiimote (wii)\n");
+	  printf("dev 3dfrom2d (3f2) <id del dispositivo fuente>\n");
+	  printf("     setdeep (deep) <fija, rotacion, size> <distancia en cm.> -> cambia la forma de calcular la profundidad\n");
+	  printf("     setmerge (merge) <on, off> -> Activa o desactiva la opcion de juntar los puntos\n");
+	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list -> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
