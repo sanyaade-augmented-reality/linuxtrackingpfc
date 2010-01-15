@@ -5,7 +5,7 @@
 
 class TPFC_device_3dfrom2d : public TPFC_device{
    public:
-    enum deeptype {FIJA, ROTACION, APROXSIZE};// tipos de calculo de profundidad
+    enum deeptype {FIJA, ROTACION, APROXSIZE, ONLYSIZE};// tipos de calculo de profundidad
 
    private:
     TPFC_device* source;
@@ -17,11 +17,12 @@ class TPFC_device_3dfrom2d : public TPFC_device{
 		// FIJA -> distancia al plano de la pantalla, en metros
 		// ROTACION -> radio de rotación
 		// APROXSIZE -> factor necesario para inferir la distancia dado un SIZE
+    double lastvaliddist; // variable que guarda la ultima distancia valida calculada con APROXSIZE
 
 
    // función auxiliar que añade los datos segun el tipo de deep
    // si new==true se usara setdata, si ==false, se usara setmoredata (no se empezara report nuevo)
-   void setdata(double, double, bool newrep = true);
+   void setdata(double, double, bool newrep = true, double obssize=0.0);
 
    public:
     // consctructora y creadora

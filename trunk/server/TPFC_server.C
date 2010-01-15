@@ -262,7 +262,7 @@ int main( int argc, char** argv ){
 	  }else
 	  // comprobamos el numero de parametros
 	  if (input.size()!=3){
-	    printf("El comando setdeep requiere como parametros el tipo (fija, rotacion, size) y el valor de la distancia (o el parametro de size).\n");
+	    printf("El comando setdeep requiere como parametros el tipo (fija, rotacion, size, onlysize) y el valor de la distancia (o el parametro de size).\n");
 	  }else{
 	    string aux = dev[dev.size()-1]->info();
 	    if ( (aux.substr(0,8)).compare("3dfrom2d")!=0){
@@ -270,16 +270,19 @@ int main( int argc, char** argv ){
 	    }else {
 	      // llamamos con la opcion adecuada:
 	      if (input[1].compare("fija")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::FIJA, (float)str2int(input[2])/100 );
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::FIJA, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
 	      }else if (input[1].compare("rotacion")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ROTACION, (float)str2int(input[2])/100 );
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ROTACION, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
 	      }else if (input[1].compare("size")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::APROXSIZE, (float)str2int(input[2])/100 );
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::APROXSIZE, (float)str2int(input[2])/1000 );
+		commands.push_back(s);
+	      }else if (input[1].compare("onlysize")==0){
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ONLYSIZE, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
 	      }else{
-		printf("La opcion '%s' no es valida para setdeep, opciones posibles: fija, rotacion, size\n",input[1].c_str());
+		printf("La opcion '%s' no es valida para setdeep, opciones posibles: fija, rotacion, size, onlysize\n",input[1].c_str());
 	      }
 	    }
 	  }
@@ -336,7 +339,7 @@ int main( int argc, char** argv ){
 	}else
 	
 	// Listar comandos
-	if ( input[0].compare("commands")==0){
+	if ( input[0].compare("commands")==0 || input[0].compare("c")==0){
 	  if (commands.size()==0)
 	    printf("No se han introducido comandos relevantes validos por el momento.\n");
 	  else
@@ -348,7 +351,7 @@ int main( int argc, char** argv ){
 	} else
 
 	// Listar dispositivos
-	if ( input[0].compare("list")==0){
+	if ( input[0].compare("list")==0 ||input[0].compare("l")==0){
 	  if (dev.size()==0)
 	    printf("No hay dispositivos que listar.\n");
 	  else
@@ -461,13 +464,13 @@ int main( int argc, char** argv ){
 	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("dev wiimote (wii)\n");
 	  printf("dev 3dfrom2d (3f2) <id del dispositivo fuente>\n");
-	  printf("     setdeep (deep) <fija, rotacion, size> <distancia en cm.> -> cambia la forma de calcular la profundidad\n");
+	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm> -> cambia la forma de calcular la profundidad\n");
 	  printf("     setmerge (merge) <on, off> -> Activa o desactiva la opcion de juntar los puntos\n");
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
-	  printf("list -> lista los dispositivos configurados en el servidor.\n");
+	  printf("list (l)-> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
-	  printf("commands -> lista todos los comandos relevantes realizados hasta el momento.\n");
+	  printf("commands (c) -> lista todos los comandos relevantes realizados hasta el momento.\n");
 	  printf("pause (p) -> Pone en pausa los dispositivos creados hasta el momento.\n");
 	  printf("unpause (u, run, r) -> quita la pausa (pone en funcionamiento) todos los devices creados hasta el momento\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
