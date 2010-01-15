@@ -9,10 +9,15 @@ class TPFC_device_3dpattern : public TPFC_device{
     // Puntero a los 2 device fuente
     TPFC_device* source;
 
+    int dots; // puntos a buscar
+    float dist; // distancia entre puntos
+    int tag; // tag a usar
+    bool all; // se requieren todos los puntos para dar el report?
+    bool keepothers; // incluir los puntos que no pertenecen al patron
 
   public:
     // consctructora y creadora
-    TPFC_device_3dpattern(int ident, TPFC_device*);
+    TPFC_device_3dpattern(int ident, TPFC_device* s, int dot, float dis, bool al = false, int t = 1, bool others = true);
     ~TPFC_device_3dpattern();
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
