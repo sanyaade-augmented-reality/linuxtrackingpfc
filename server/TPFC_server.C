@@ -325,28 +325,31 @@ int main( int argc, char** argv ){
 	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
 	  }else
 	  // comprobamos el numero de parametros
-	  if (input.size()!=3){
+	  if (input.size()>4){
 	    printf("El comando setdeep requiere como parametros el tipo (fija, rotacion, size, onlysize) y el valor de la distancia (o el parametro de size).\n");
 	  }else{
-	    string aux = dev[dev.size()-1]->info();
+	    // Seleccionamos la id del device
+	    int auxid = (input.size()==4)?str2int(input[3]):dev.size()-1;
+	    // y comprobamos que sea del tipo adecuado como fuente
+	    string aux = dev[auxid]->info();
 	    if ( (aux.substr(0,8)).compare("3dfrom2d")!=0){
 	      printf("No se puede aplicar setdeep al ultimo dispositivo, no es del tipo 3dfrom2d\n");
 	    }else {
 	      // llamamos con la opcion adecuada:
 	      if (input[1].compare("fija")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::FIJA, (float)str2int(input[2])/1000 );
+		((TPFC_device_3dfrom2d*)dev[auxid])->setdeep(TPFC_device_3dfrom2d::FIJA, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
 		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("rotacion")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ROTACION, (float)str2int(input[2])/1000 );
+		((TPFC_device_3dfrom2d*)dev[auxid])->setdeep(TPFC_device_3dfrom2d::ROTACION, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
 		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("size")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::APROXSIZE, (float)str2int(input[2])/1000 );
+		((TPFC_device_3dfrom2d*)dev[auxid])->setdeep(TPFC_device_3dfrom2d::APROXSIZE, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
 		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("onlysize")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ONLYSIZE, (float)str2int(input[2])/1000 );
+		((TPFC_device_3dfrom2d*)dev[auxid])->setdeep(TPFC_device_3dfrom2d::ONLYSIZE, (float)str2int(input[2])/1000 );
 		commands.push_back(s);
 		printf("Opcion cambiada correctamente\n");
 	      }else{
@@ -363,20 +366,23 @@ int main( int argc, char** argv ){
 	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
 	  }else
 	  // comprobamos el numero de parametros
-	  if (input.size()!=2){
-	    printf("El comando setmerge requiere un parametro (on, off).\n");
+	  if (input.size()>3){
+	    printf("El comando setmerge requiere un parametro (on, off), o dos (si se quiere aplicar a otro dispositivo)\n");
 	  }else{
-	    string aux = dev[dev.size()-1]->info();
+	    // Seleccionamos la id del device
+	    int auxid = (input.size()==3)?str2int(input[2]):dev.size()-1;
+	    // y comprobamos que sea del tipo correcto
+	    string aux = dev[auxid]->info();
 	    if ( (aux.substr(0,8)).compare("3dfrom2d")!=0){
 	      printf("No se puede aplicar setmerge al ultimo dispositivo, no es del tipo 3dfrom2d\n");
 	    }else {
 	      // llamamos con la opcion adecuada:
 	      if (input[1].compare("on")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setmerge(true);
+		((TPFC_device_3dfrom2d*)dev[auxid])->setmerge(true);
 		commands.push_back(s);
 		printf("Opcion cambiada correctamente\n");
 	      }else if (input[1].compare("off")==0){
-		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setmerge(false);
+		((TPFC_device_3dfrom2d*)dev[auxid])->setmerge(false);
 		commands.push_back(s);
 		printf("Opcion cambiada correctamente\n");
 	      }else{
@@ -534,8 +540,8 @@ int main( int argc, char** argv ){
 	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("dev wiimote (wii)\n");
 	  printf("dev 3dfrom2d (3f2) <id del dispositivo fuente>\n");
-	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm> -> cambia la forma de calcular la profundidad\n");
-	  printf("     setmerge (merge) <on, off> -> Activa o desactiva la opcion de juntar los puntos\n");
+	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm> [id del dispositivo, el ultimo por defecto]-> cambia la forma de calcular la profundidad\n");
+	  printf("     setmerge (merge) <on, off> [id del dispositivo, el ultimo por defecto] -> Activa o desactiva la opcion de juntar los puntos\n");
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
 	  printf("dev 3dpattern (3dpat, pattern, pat) <id de la fuente> <numero de puntos> <distancia entre los puntos (mm)>\n");
@@ -547,7 +553,7 @@ int main( int argc, char** argv ){
 	  printf("unpause (u, run, r) -> quita la pausa (pone en funcionamiento) todos los devices creados hasta el momento\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
 	  printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
-	  printf("Leyenda: (alias de los comandos), <parametros obligatorios>, [<parametros opcionales>].\n");
+	  printf("Leyenda: (alias de los comandos), <parametros obligatorios>, [parametros opcionales].\n");
 	  printf("Se pueden encontrar ejemplos de uso en las configuraciones de ejemplo en la carpeta cfg.\n");
 	  printf("\n");
 	}else{ // si hemos llegado aqui sin reconocer la orden avisamos de que es incorrecta
