@@ -1,9 +1,19 @@
 #include "TPFC_device_3dpattern.h" 
 
 
-TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s):TPFC_device(ident){
+TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot, float dis, 
+					     bool al, int t, bool others)
+					     :TPFC_device(ident){
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,100);
+
+  // guardamos los parametros
+  dots=dot;
+  dist=dis;
+  all=al;
+  tag=t;
+  keepothers=others;
+  
   // guardamos un puntero a la fuente
   source=s;
   // registramos este dispositivo en la lista de listeners del que vamos a usar como input

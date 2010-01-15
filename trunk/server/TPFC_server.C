@@ -6,6 +6,7 @@
 #include "TPFC_device_3dfrom2d.h"
 #include "TPFC_device_3dstereo.h"
 #include "TPFC_device_3dmod.h"
+#include "TPFC_device_3dpattern.h"
 
 #include <vector>
 
@@ -271,6 +272,32 @@ int main( int argc, char** argv ){
 		}else{// si lo es, creamos el dispositivo
 		  dev.push_back( new TPFC_device_3dmod(dev.size(),dev[source]) );
 		  printf("Añadido dispositivo %i: 3dmod con fuente %i\n",dev.size()-1, source);
+		  devadded=true;
+		}
+	      }
+	    }
+	  }else
+
+
+	  if ( input[1].compare("3dpattern")==0 || input[1].compare("3dpat")==0 ||
+	       input[1].compare("pattern")==0 || input[1].compare("pat")==0){
+	    // comprobamos que tengamos los parametro adicional necesario
+	    if (input.size()!=5){
+	      printf("Los dispositivos 3dpattern requieren el numero de id del dispositivo fuente, el numero de puntos a buscar y la distancia que los separa\n");
+	    }else{
+	      int source = str2int( input[2] );
+	      // comprobamos que el id sea valido
+	      if (source<0 || source >=dev.size()){
+		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n", source);
+	      }else{ //si lo es, comprobamos que el tipo sea valido
+		string sourceok=TPFC_device_3dpattern::checksource(dev[source]);
+		if (sourceok.compare("ok")!=0){
+		  // si no lo es, devolvemos el error
+		  printf("%s",sourceok.c_str());
+		}else{// si lo es, creamos el dispositivo
+		  dev.push_back( new TPFC_device_3dpattern(dev.size(),dev[source], str2int( input[3] ), (float)str2int( input[4] )/1000) );
+		  printf("Añadido dispositivo %i: 3dmod con fuente %i ",dev.size()-1, source);
+		  printf("(%i puntos, %i mm)\n",str2int(input[3]), str2int(input[4]) );
 		  devadded=true;
 		}
 	      }
