@@ -1,0 +1,8 @@
+# Tracking PFC Server Sample Configuration file
+# Simpre configuracion de un wiimote con deteccion de distancia por tamaño
+
+d wii
+d 3f2 0
+addt Tracker0 4
+deep onlysize 170
+daemon
