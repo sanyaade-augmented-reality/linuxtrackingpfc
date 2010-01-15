@@ -2,7 +2,7 @@
 
 
 TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot, float dis, 
-					     bool al, int t, bool others)
+					     bool al, int t, keepothersoptions others)
 					     :TPFC_device(ident){
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,100);
@@ -15,6 +15,9 @@ TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot,
   keepothers=others;
 
   tolerance=0.2;// 20%
+  // posiciones del ultimo patron encontrado
+  // { 0{xyz} 1{xyz} [2{xyz}] }
+  lastpattern= new double[3*dots];
   
   // guardamos un puntero a la fuente
   source=s;
@@ -47,7 +50,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	included[n]=false;
       
       bool foundpattern=false; // flag que dice si el report tiene datos validos
-      if (n>=dots){
+      if (n>=dots || all==false){// si requerimos todos los puntos y no hay suficientes, no entramos
 	// creamos matriz n*n
 	bool distances[n][n];
 	// y un contador de pares de puntos que estan a la distancia correcta
@@ -79,10 +82,10 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    }
 	  }
 	}
-	// si dots=2 deberia haber 2(1) ciertos en la matriz
-	// si dots=3 deberia haber 6 (3) ciertos en la matriz
+	// si dots=2 deberia haber 2(distok=1) ciertos en la matriz
+	// si dots=3 deberia haber 6 (distok=3) ciertos en la matriz
 	// si el numero es el esperado, hemos encontrado el patron
-	if ( (dots==2 && distok==1) || (dots==3 && distok==3)){
+	if ( (dots==2 && distok==1) || (dots==3 && distok==3) ){
 	  double* newdot = new double[7];
 	  newdot[0]=0;
 	  newdot[1]=0;
@@ -108,14 +111,23 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	  newdot[6]=0;
 	  // guardamos el punto
 	  data->setnewdata(newdot);
+	  // y lo marcamos
+	  data->settag(tag);
 	  //liberamos el vector auxiliar
 	  free (newdot);
 	  // marcamos el flag a cierto ya que hemos incluido datos
 	  foundpattern = true;
+	} // hay suficientes numeros para el patron
+	// si no hemos encontrado el patron completo, pero tenemos la opcion all=false
+	// buscamos coincidencias parciales
+	// solo entramos aqui si el problema no es que hemos encontrado puntos DE MAS
+	// no entramos si aun no hemos encontrado un pattern en ningun report anterior
+	if ( !foundpattern && !all &&  ( (dots==2 && distok==0) || (dots==3 && distok<3) )){
+	  //TrackingPFC_data::datachunk* aux = (s->getdata())->getdatabycount(lastpattern);
 	}
-      } //if (n>=dots){
+      } //if (n>=dots || all=false
       // si hay que incluir los puntos que no pertenezcan al patron, los guardamos en data
-      if (foundpattern && keepothers){
+      if ( (foundpattern && keepothers==WITHPATTERN) ||  keepothers==ALWAYS){
 	const double* dotdata;
 	// recorremos el vector de incluidos
 	for (int dn =0; dn<n; dn++){
@@ -133,7 +145,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
       }//if (keepothers){
 
       // por ultimo, reportamos
-      if (foundpattern){
+      if (foundpattern ||  keepothers==ALWAYS){
 	report();
       }else{
 	data->setnodata();
