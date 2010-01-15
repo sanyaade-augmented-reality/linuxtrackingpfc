@@ -23,7 +23,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 // Informacion sobre el dispositivo
 string TPFC_device_3dpattern::info(){
   char aux[64]; // si se crean MUCHOS dispositivos nos saldremos del buffer... dudo que sea un problema
-  sprintf(aux, "3dpattern (usando de fuente el dispositiv %i)", source->idnum());
+  sprintf(aux, "3dpattern (usando de fuente el dispositivo %i)", source->idnum());
   return aux;
 }
 

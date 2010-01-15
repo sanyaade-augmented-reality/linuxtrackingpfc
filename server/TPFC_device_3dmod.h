@@ -8,6 +8,7 @@ class TPFC_device_3dmod : public TPFC_device{
   private:
     // Puntero a los 2 device fuente
     TPFC_device* source;
+
   public:
     // consctructora y creadora
     TPFC_device_3dmod(int ident, TPFC_device*);
