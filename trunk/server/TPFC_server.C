@@ -484,7 +484,7 @@ int main( int argc, char** argv ){
 		  outdata << "\n";
 		}
 		outdata.close();
-		printf( "Configuracion guardada el archivo '%s'.\n", filename);
+		printf( "Configuracion guardada en el archivo '%s'.\n", filename);
 	      }
 	    }
 	    
