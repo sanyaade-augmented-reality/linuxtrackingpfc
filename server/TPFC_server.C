@@ -399,15 +399,18 @@ int main( int argc, char** argv ){
 	    printf("Para usar addtracker, primero se debe haber añadido un dispositivo.\n");
 	  }else{
 	    // comprobamos que el numero sea el esperado
-	    if (input.size()==1 || input.size()>3){
-	      printf("addtracker necesita 1 o 2 parametros adicionales: el nombre del tracker y el numero de sensores.\n");
+	    if (input.size()<2 || input.size()>4){
+	      printf("addtracker necesita de 1 a 3 parametros adicionales: el nombre del tracker, el numero maximo de sensores y el dispositivo en el que se instala.\n");
 	    }else{
+	      // calculamos la id del dispositivo segun el numero de parametros
+	      int auxid = (input.size()==4)?str2int(input[3]):dev.size()-1;
 	      // si solo tenemos 2 parametros llamamos a la funcion default
 	      if (input.size()==2)
-		settracker(dev[dev.size()-1], input[1].c_str() );
-	      else // si tenemos 3, incluimos el parametro
-		settracker(dev[dev.size()-1], input[1].c_str() , str2int(input[2]) );
-	      printf("Añadido tracker, con nombre '%s'\n", input[1].c_str() );
+		settracker(dev[auxid], input[1].c_str() );
+	      else{ // si tenemos 3 o 4, incluimos el parametro
+		settracker(dev[auxid], input[1].c_str() , str2int(input[2]) );
+	      }
+	      printf("Añadido tracker, con nombre '%s al dispositivo %i'\n", input[1].c_str() , auxid);
 	      // añadimos el comando a commands
 	      commands.push_back(s);
 	    }
@@ -545,7 +548,7 @@ int main( int argc, char** argv ){
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
 	  printf("dev 3dpattern (3dpat, pattern, pat) <id de la fuente> <numero de puntos> <distancia entre los puntos (mm)>\n");
-	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
+	  printf("addtracker (addt) <nombre> [numero de sensores] [id del dispositivo]-> añade un tracker (si no se especifica id, al ultimo dispositivo creado).\n");
 	  printf("list (l)-> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
 	  printf("commands (c) -> lista todos los comandos relevantes realizados hasta el momento.\n");
