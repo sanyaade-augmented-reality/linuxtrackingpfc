@@ -52,8 +52,6 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
       
       bool foundpattern=false; // flag que dice si el report tiene datos validos
       if (n>=dots || all==false){// si requerimos todos los puntos y no hay suficientes, no entramos
-	// creamos matriz n*n
-	bool distances[n][n];
 	// y un contador de pares de puntos que estan a la distancia correcta
 	int distok=0;
 	// vamos punto por punto comprobando si entran dentro de la distancia y la tolerancia
@@ -71,20 +69,15 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    dotdis=dotdist(dot1,dot2);
 	    // si esa distancia esta dentro del limite de tolerancia, marcamos la casilla a cierto
 	    if (dotdis>tol1 && dotdis<tol2){
-	      distances[d1][d2]=true;
-	      distances[d2][d1]=true;
 	      // lo marcamos en la lista de incluidos
 	      included[d1]=true;
 	      included[d2]=true;
 	      distok++; // incrementamos el contador
-	    }else{// las marcamos a falso
-	      distances[d1][d2]=false;
-	      distances[d2][d1]=false;
 	    }
 	  }
 	}
-	// si dots=2 deberia haber 2(distok=1) ciertos en la matriz
-	// si dots=3 deberia haber 6 (distok=3) ciertos en la matriz
+	// si dots=2 deberia haber (distok=1)
+	// si dots=3 deberia haber (distok=3)
 	// si el numero es el esperado, hemos encontrado el patron
 	if ( (dots==2 && distok==1) || (dots==3 && distok==3) ){
 	  double* newdot = new double[7];
