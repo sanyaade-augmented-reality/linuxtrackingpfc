@@ -5,6 +5,8 @@
 
 
 class TPFC_device_3dpattern : public TPFC_device{
+  public:
+    enum keepothersoptions {NEVER, WITHPATTERN, ALWAYS};
   private:
     // Puntero a los 2 device fuente
     TPFC_device* source;
@@ -13,15 +15,16 @@ class TPFC_device_3dpattern : public TPFC_device{
     float dist; // distancia entre puntos
     int tag; // tag a usar
     bool all; // se requieren todos los puntos para dar el report?
-    bool keepothers; // incluir los puntos que no pertenecen al patron
+    keepothersoptions keepothers; // incluir los puntos que no pertenecen al patron
     float tolerance; // % de error aceptado
+    double* lastpattern; // numero de dato que contiene el ultimo pattern registrado
 
     // funcion auxiliar que calcula la distancia entre 2 puntos
     double dotdist(const double*,const double*);
 
   public:
     // consctructora y creadora
-    TPFC_device_3dpattern(int ident, TPFC_device* s, int dot, float dis, bool al = false, int t = 1, bool others = true);
+    TPFC_device_3dpattern(int ident, TPFC_device* s, int dot, float dis, bool al = false, int t = 1,keepothersoptions others = WITHPATTERN);
     ~TPFC_device_3dpattern();
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
