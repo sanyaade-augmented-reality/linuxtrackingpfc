@@ -11,7 +11,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <typeinfo>
 
 using namespace std;
 
@@ -198,7 +197,6 @@ int main( int argc, char** argv ){
 		  printf("%s",sourceok.c_str());
 		}else{// si lo es, creamos el dispositivo
 		  dev.push_back( new TPFC_device_3dfrom2d(dev.size(),dev[source]) );
-		  //((TPFC_device_3dfrom2d*)dev[1])->setdeep(TPFC_device_3dfrom2d::FIJA, 0.5);
 		  printf("Añadido dispositivo %i: 3dfrom2d con fuente %i\n",dev.size()-1, source);
 		  devadded=true;
 		}
@@ -256,6 +254,37 @@ int main( int argc, char** argv ){
 	}else
 	
 
+	// Opciones de profundidad
+	if ( input[0].compare("setdeep")==0 || input[0].compare("deep")==0){
+	  // comprobamos que el ultimo dispositivo sea valido
+	  if (dev.size()==0){
+	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
+	  }else
+	  // comprobamos el numero de parametros
+	  if (input.size()!=3){
+	    printf("El comando setdeep requiere como parametros el tipo (fija, rotacion, size) y el valor de la distancia (o el parametro de size).\n");
+	  }else{
+	    string aux = dev[dev.size()-1]->info();
+	    if ( (aux.substr(0,8)).compare("3dfrom2d")!=0){
+	      printf("No se puede aplicar setdeep al ultimo dispositivo, no es del tipo 3dfrom2d\n");
+	    }else {
+	      // llamamos con la opcion adecuada:
+	      if (input[1].compare("fija")==0){
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::FIJA, (float)str2int(input[2])/100 );
+		commands.push_back(s);
+	      }else if (input[1].compare("rotacion")==0){
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::ROTACION, (float)str2int(input[2])/100 );
+		commands.push_back(s);
+	      }else if (input[1].compare("size")==0){
+		((TPFC_device_3dfrom2d*)dev[dev.size()-1])->setdeep(TPFC_device_3dfrom2d::APROXSIZE, (float)str2int(input[2])/100 );
+		commands.push_back(s);
+	      }else{
+		printf("La opcion '%s' no es valida para set deep, opciones posibles: fija, rotacion, size\n",input[1].c_str());
+	      }
+	    }
+	  }
+	}else
+
 	// añadir tracker
 	if ( input[0].compare("addtracker")==0 || input[0].compare("addt")==0){
 	  // comprobamos primero que haya un device al que añadir el tracker
@@ -264,7 +293,7 @@ int main( int argc, char** argv ){
 	  }else{
 	    // comprobamos que el numero sea el esperado
 	    if (input.size()==1 || input.size()>3){
-	      printf("addtracker necesita uno o 2 parametros adicionales: el nombre del tracker y el numero de sensores.\n");
+	      printf("addtracker necesita 1 o 2 parametros adicionales: el nombre del tracker y el numero de sensores.\n");
 	    }else{
 	      // si solo tenemos 2 parametros llamamos a la funcion default
 	      if (input.size()==2)
@@ -283,7 +312,7 @@ int main( int argc, char** argv ){
 	  if (commands.size()==0)
 	    printf("No se han introducido comandos relevantes validos por el momento.\n");
 	  else
-	    printf("%i comandosintroducidos:\n", commands.size());
+	    printf("%i comandos introducidos:\n", commands.size());
 	  for (int i =0 ; i<commands.size();i++){
 	    printf("%s\n",commands[i].c_str() );
 	  }
@@ -363,6 +392,22 @@ int main( int argc, char** argv ){
 	  }
 	} else
 
+	// Pause
+	if (s.compare("pause")==0 || s.compare("p")==0){
+	  // pausamos los device
+	  for (int i =0; i<dev.size();i++){
+	    dev[i]->pause();
+	  }
+	}else
+
+	// UnPause
+	if (s.compare("unpause")==0 || s.compare("u")==0 || s.compare("run")==0 || s.compare("r")==0){
+	  // pausamos los device
+	  for (int i =0; i<dev.size();i++){
+	    dev[i]->unpause();
+	  }
+	}else
+
 	// Fin de programa
 	if (s.compare("exit")==0 || s.compare("quit")==0 || s.compare("q")==0){
 	  // paramos los devices
@@ -388,11 +433,14 @@ int main( int argc, char** argv ){
 	  printf("     opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("     wiimote (wii)\n");
 	  printf("     3dfrom2d (3f2) <id del dispositivo fuente>\n");
+	  printf("         setdeep (deep) <fija, rotacion, size> <distancia> -> cambia la forma de calcular la profundidad\n");
 	  printf("     3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list -> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
 	  printf("commands -> lista todos los comandos relevantes realizados hasta el momento.\n");
+	  printf("pause (p) -> Pone en pausa los dispositivos creados hasta el momento.\n");
+	  printf("unpause (u, run, r) -> quita la pausa (pone en funcionamiento) todos los devices creados hasta el momento\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
 	  printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
 	  printf("Leyenda: (alias de los comandos), <parametros obligatorios>, [<parametros opcionales>].\n");
