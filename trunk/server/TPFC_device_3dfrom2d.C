@@ -77,8 +77,8 @@ void TPFC_device_3dfrom2d::setdata(double x, double y, bool newrep){
 
   // Tipo de calculo de profundidad
   if (deep==FIJA){
-    aux[0]=tan(x);
-    aux[1]=tan(y);
+    aux[0]=tan(x)*dist;
+    aux[1]=tan(y)*dist;
     aux[2]=dist;
   } else if (deep==ROTACION){
     aux[0]=dist*sin(x);
