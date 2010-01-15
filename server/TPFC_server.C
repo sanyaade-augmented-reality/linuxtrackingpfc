@@ -497,6 +497,7 @@ int main( int argc, char** argv ){
 	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm> -> cambia la forma de calcular la profundidad\n");
 	  printf("     setmerge (merge) <on, off> -> Activa o desactiva la opcion de juntar los puntos\n");
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
+	  printf("dev 3dmod (mod) <id de la fuente>.\n");
 	  printf("addtracker (addt) <nombre> [numero de sensores] -> añade un tracker al ultimo dispositivo creado.\n");
 	  printf("list (l)-> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
