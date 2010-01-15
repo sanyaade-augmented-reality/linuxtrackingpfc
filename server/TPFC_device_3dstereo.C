@@ -18,8 +18,9 @@ TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_devi
   lastdata[0]=NULL;
   lastdata[1]=NULL;
 
-  // marcamos el sensor izquierdo con un valor invalido
+  // marcamos el sensor izquierdo con un valor invalido, y el contador de fallos a 0
   left=-1;
+  fails=0;
 
   // inicializamos camdist con la distancia standad entre 2 wiimotes
   camdist=0.036;
@@ -139,20 +140,31 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
 	  sideok=false;
 	}
       }
+      // Avisamos al usuario si ha fallado la deteccion de colocacion
+      if (!sideok)
+	printf("3dstereo: no ha sido posible determinar la colocacion de los sensores en este report\n");
       // si el report es congruente y left esta sin inicializar, lo inicializamos
       if ( sideok && left==-1)
 	left=izq;
       // comprobamos que coincida el valor almacenado de left con el obtenido
-      if (izq!=left){
-	sideok=false; // si no lo es, marcamos la congruencia como erronea
+      if (sideok && izq!=left){
+	fails++; // incrementamos el contador de fallos
+	if (fails >20){ // si llevamos 20 fallos consecutivos, entendemos que la deteccion anterior era erronea
+	  fails=0; // resteamos los contadores
+	  left=izq; // cambiamos la izquierda
+	  printf("3dstereo: Detectados 20 errores de deteccion consecutivos, reseteando...\n");
+	}else{
+	  sideok=false; // si no lo es, marcamos la congruencia como erronea
+	  printf("3dstereo: la colocacion detectada no coincide con la de los anteriores reports (%i).\n", fails);
+	}
       }
       // llegados a este punto, si la detección de posicion del sensor
-      // ha fallado, avisamos al usuario, y marcamos needreport a false,
-      // ya que no habra datos que reportar
+      // ha fallado, no habra datos que reportar
       if (!sideok){
-	printf("3dstereo: no ha sido posible determinar la colocacion de los sensores en este report\n");
 	needreport=false;
       }else{// el report es valido, seguimos con el proceso
+	// reseteamos el contador de fallos
+	fails=0; // resteamos los contadores
 	// realizamos calculos
 	// variables para las posiciones de los puntos
 	double x,y,z;
