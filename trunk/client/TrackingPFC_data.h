@@ -80,17 +80,17 @@ class TrackingPFC_data{
     double* getlastposd();
     // añade una nueva posición (copiando la orientación de la anterior posicion, si la hay)
     // funciona tb para datos 2d, simplemente ignora el 3r parametro
-    void setnewpos(double, double, double f = 0.0);
+    int setnewpos(double, double, double f = 0.0);
     // añade un nuevo report con los datos de d, d debe tener tamaño dsize
-    void setnewdata(const float* d, bool real = true);
-    void setnewdata(const double* d, bool real = true);
+    int setnewdata(const float* d, bool real = true);
+    int setnewdata(const double* d, bool real = true);
 
     // Escritoras avanzadas
     // añadir información de otro punto adicional al ultimo report
     void setmoredata(const float* d, bool real = true);
     void setmoredata(const double* d, bool real = true);
     // añadir un nuevo report vacio y con el flag de datos no validos
-    void setnodata(bool real = true);
+    int setnodata(bool real = true);
     // añadir tag a algun datachunk del ultimo report
     void settag(int tag, int n=0);
 
