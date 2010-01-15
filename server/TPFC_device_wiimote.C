@@ -94,8 +94,9 @@ TPFC_device_wiimote::TPFC_device_wiimote(int ident, string bta):TPFC_device(iden
 
   // Conectar los wiimotes
   printf("Pon el wiimote en modo discoverable (pulsa 1+2)...\n");
+  wiimote=NULL;
   while (!wiimote){
-    if ( !(wiimote = cwiid_open(&bdaddr, 0)) && !(wiimote = cwiid_open(&bdaddr, 0)) ){
+    if ( !(wiimote = cwiid_open(&bdaddr, 0)) ){
 	    printf("Esperando al wiimote (pulsa 1+2)...\n");
     }
   }
