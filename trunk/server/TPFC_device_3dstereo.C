@@ -168,15 +168,12 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
 	  z= camdist / ( ( tan(ang0)+tan(ang1) ) / ( tan(ang0)*tan(ang1) ) );
 
 	  // calculo de la posición horizontal
-	  x = z/ tan(angleconversion(dots[ (left+1)%1 ][dn][0], (left+1)%1 ));
-	  //printf("Punto %i a %f / %f (%f)\n",dn, z/tan(ang0),z/tan(ang1),z/tan(ang0)+z/tan(ang1));
-	
+	  // damos la distancia desde el sensor derecho, y restamos la mitad
+	  // de la distancia entre sensores para dar la posicion desde el centro
+	  x = ( z/ tan(angleconversion(dots[ (left+1)%1 ][dn][0], (left+1)%1 )) )- camdist/2.0;
+	  
 	  // calculo de la posicion vertical
-	  //printf("Vertical: %f %f\n", dots[0][dn][1], dots[1][dn][1]);
-	  y=tan( ( dots[0][dn][1] + dots[1][dn][1] )/2.0 );
-
-
-	  //printf("Punto %i a <%f, %f, %f>\n", dn, x, y, z);
+	  y=z*tan( ( dots[0][dn][1] + dots[1][dn][1] )/2.0 );
 
 	  // guardamos en data
 	  double* aux = new double[3];
