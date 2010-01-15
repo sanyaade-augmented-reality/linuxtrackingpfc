@@ -80,6 +80,10 @@ void TPFC_device_3dfrom2d::setdata(double x, double y, bool newrep){
     aux[0]=tan(x);
     aux[1]=tan(y);
     aux[2]=dist;
+  } else if (deep==ROTACION){
+    aux[0]=dist*sin(x);
+    aux[1]=dist*sin(y);
+    aux[2]=sqrt(dist*dist-aux[0]*aux[0]-aux[1]*aux[1]);
   }
   // comprobamos si hay que empezar report nuevo o añadir al ya existente
   if (newrep)
