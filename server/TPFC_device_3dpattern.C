@@ -18,6 +18,7 @@ TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot,
   // posiciones del ultimo patron encontrado
   // { 0{xyz} 1{xyz} [2{xyz}] }
   lastpattern= new double[3*dots];
+  anypattern=false; // aun no hemos encontrado patrones
   
   // guardamos un puntero a la fuente
   source=s;
@@ -91,6 +92,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	  newdot[1]=0;
 	  newdot[2]=0;
 	  // para hacerlo, recorremos el vector de incluidos
+	  int pdn=0; // variable auxiliar para saber en que punto del pattern nos encontramos
 	  for (int dn =0; dn<n; dn++){
 	    // buscamos los que estan a cierto
 	    if (included[dn]){
@@ -98,6 +100,11 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	      newdot[0]+=aux[0];
 	      newdot[1]+=aux[1];
 	      newdot[2]+=aux[2];
+	      // actualizamos lastpattern
+	      lastpattern[pdn*3]=aux[0];
+	      lastpattern[pdn*3+1]=aux[1];
+	      lastpattern[pdn*3+2]=aux[2];
+	      pdn++;
 	    }
 	  }
 	  // y obtenemos la media, ese es el nuevo punto
@@ -122,8 +129,13 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	// buscamos coincidencias parciales
 	// solo entramos aqui si el problema no es que hemos encontrado puntos DE MAS
 	// no entramos si aun no hemos encontrado un pattern en ningun report anterior
-	if ( !foundpattern && !all &&  ( (dots==2 && distok==0) || (dots==3 && distok<3) )){
-	  //TrackingPFC_data::datachunk* aux = (s->getdata())->getdatabycount(lastpattern);
+	if ( !foundpattern && !all &&  ( (dots==2 && distok==0) || (dots==3 && distok<3) && anypattern)){
+	  // recorremos los puntos actuales buscando cuales estan mas cerca de los del ultimo pattern
+	  // si tenemos un par nos quedamos con ellos como referencia, 
+	  // si no, nos quedamos al/los que tenga menos distancia (hay que definir un umbral)
+	  // calculamos el vectores desde lastpattern
+	  // aplicamos esos vectores al punto actual
+	  // ya tenemos el punto
 	}
       } //if (n>=dots || all=false
       // si hay que incluir los puntos que no pertenezcan al patron, los guardamos en data
@@ -143,7 +155,10 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	  }
 	}
       }//if (keepothers){
-
+      
+      // actualizamos el flag de patrones encontrados
+      anypattern = foundpattern || anypattern;
+    
       // por ultimo, reportamos
       if (foundpattern ||  keepothers==ALWAYS){
 	report();
