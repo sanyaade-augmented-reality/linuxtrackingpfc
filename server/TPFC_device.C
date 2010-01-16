@@ -54,7 +54,7 @@ void TPFC_device::report(){
 	quaternion[0]=0.0;
 	quaternion[1]=0.0;
 	quaternion[2]=0.0;
-	quaternion[3]=0.0;
+	quaternion[3]=1.0;
       }
       server->report_pose(i,current_time, position, quaternion);
     }

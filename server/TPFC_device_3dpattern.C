@@ -108,7 +108,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	  newdot[3]=0;
 	  newdot[4]=0;
 	  newdot[5]=0;
-	  newdot[6]=0;
+	  newdot[6]=1;
 	  // guardamos la informacion en lastpattern
 	  for (int i =0; i<7;i++)
 	    lastpattern[i]=newdot[i];
