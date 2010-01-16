@@ -181,35 +181,29 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    // en last tenemos el indice del punto relacionado de lastpattern
 	    // calculamos el vector desde ese punto al centro de su patron
 	    double* newdot= new double[7];
-	    /*newdot[0]=lastpattern[0]-lastpattern[7+last*3];
-	    newdot[1]=lastpattern[1]-lastpattern[8+last*3];
-	    newdot[2]=lastpattern[2]-lastpattern[9+last*3];
-	    // sumamos el punto actual a ese vector
-	    const double* aux = sourcedata->getdata(nearest[last]);
-	    newdot[0]+=aux[0];
-	    newdot[1]+=aux[1];
-	    newdot[2]+=aux[2];*/
 	    const double* aux = sourcedata->getdata(nearest[last]);
 	    newdot[0]=aux[0]-lastpattern[7+last*3];
 	    newdot[1]=aux[1]-lastpattern[8+last*3];
 	    newdot[2]=aux[2]-lastpattern[9+last*3];
+	    // actualizamos la informacion de los puntos de lastdot, que ya no se usaran mas
+	    for (int li=0;li<dots;li++){
+	      lastpattern[7+li*3]+=newdot[0];
+	      lastpattern[8+li*3]+=newdot[1];
+	      lastpattern[9+li*3]+=newdot[2];
+	    }
 	    // sumamos el vector actual al centro del ultimo pattern
+	    // ahora en newpos[0..2] tenemos ya la informacion del nuevo centro del pattern
 	    newdot[0]+=lastpattern[0];
 	    newdot[1]+=lastpattern[1];
 	    newdot[2]+=lastpattern[2];
+	    for (int i =0; i<3;i++) // la orientacion no hace falta copiarla, ya que es la misma
+	      lastpattern[i]=newdot[i];
 	    // copiamos la orientacion del vector pasado
 	    newdot[3]=lastpattern[3];
 	    newdot[4]=lastpattern[4];
 	    newdot[5]=lastpattern[5];
 	    newdot[6]=lastpattern[6];
-
-	    /*// actualizamos lastpattern
-	    for (int i =0; i<7;i++)
-	      lastpattern[i]=newdot[i];
-	    for (int li=0;li<dots;li++){
-	      
-	    }*/
-
+	    
 	    // guardamos el punto, pero lo marcamos como artificial
 	    data->setnewdata(newdot, false);
 	    // y lo marcamos
