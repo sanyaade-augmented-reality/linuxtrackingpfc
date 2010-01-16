@@ -165,6 +165,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    q_from_euler (qua, zrot,yrot, xrot);
 
 	  }
+	  // en qua tenemos la rotacion respecto al a la normal del plano del sensor
 	  // guardamos el quat en newdot
 	  newdot[3]=qua[Q_X];
 	  newdot[4]=qua[Q_Y];
