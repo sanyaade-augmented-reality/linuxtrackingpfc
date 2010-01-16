@@ -117,7 +117,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	  // y lo marcamos
 	  data->settag(tag);
 	  //liberamos el vector auxiliar
-	  //free (newdot);
+	  free (newdot);
 	  // marcamos el flag a cierto ya que hemos incluido datos
 	  foundpattern = true;
 	  //printf("x");fflush(stdout);
@@ -211,7 +211,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    // y lo marcamos
 	    data->settag(tag);
 	    //liberamos el vector auxiliar
-	    //free (newdot);
+	    free (newdot);
 	    // marcamos el flag a cierto ya que hemos incluido datos
 	    foundpattern = true;
 	    
