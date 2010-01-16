@@ -97,13 +97,13 @@ int TrackingPFC_client::getDisplayHeight(){
 // segun la informacion del servidor de las X
 float TrackingPFC_client::getDisplayWidthMM(){
     Display * disp = XOpenDisplay(NULL);
-    float res = (float)DisplayWidthMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;
+    float res = (float)DisplayWidthMM(disp,XDefaultScreen(disp))/1000.0;
     XCloseDisplay(disp);
     return res;
 }
 float TrackingPFC_client::getDisplayHeightMM(){
     Display * disp = XOpenDisplay(NULL);
-    float res = (float)DisplayHeightMM(XOpenDisplay(NULL),XDefaultScreen(XOpenDisplay(NULL)))/1000.0;
+    float res = (float)DisplayHeightMM(disp,XDefaultScreen(disp))/1000.0;
     XCloseDisplay(disp);
     return res;
 }
