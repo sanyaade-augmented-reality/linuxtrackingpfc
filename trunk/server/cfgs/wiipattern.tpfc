@@ -1,0 +1,12 @@
+# Tracking PFC Server Sample Configuration file
+# 3d Tracking using 2 wiimotes with stereo capture,
+# looking for a 2 dots pattern with 170mm distance
+
+device wiimote
+device wiimote
+
+device 3dstereo 0 1
+device 3dpattern 2 2 170
+addtracker Tracker0 4
+
+daemon
