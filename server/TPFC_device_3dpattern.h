@@ -2,6 +2,7 @@
 #define TPFC_DEVICE_3DPATTERN_
 
 #include "TPFC_device.h"
+#include "quat.h"
 
 
 class TPFC_device_3dpattern : public TPFC_device{

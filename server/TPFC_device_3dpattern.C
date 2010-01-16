@@ -105,10 +105,71 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	  newdot[1]=newdot[1]/dots;
 	  newdot[2]=newdot[2]/dots;
 	  // calculamos la orientacion
-	  newdot[3]=0;
-	  newdot[4]=0;
-	  newdot[5]=0;
-	  newdot[6]=1;
+	  // en este punto los 2-3 puntos en lastpattern corresponden a los del patron actual
+	  q_type qua;
+	  if (dots==2){
+	    // Con patrones de 2 puntos, solo podemos calcular 2 rotaciones, 
+	    // asumiendo que los 2 puntos forman una linea horizontal, normalmente
+	    // paralela al plano del sensor, solo podremos deducir 2 de los 3 angulos
+	    // (la rotacion en el eje que forman los 2 puntos no podemos calcularla)
+	    // por lo tanto debemos calcular solo la rotacion sobre los ejes y,z
+	    // incluso asi, al no poder distinguir las marcas unas de otras, solo tenemos
+	    // 180º de giro (llegados a los extremos la percepcion sobre qué marcador es
+	    // cada uno se invertira
+	    double xdist = lastpattern[7]-lastpattern[10];
+	    double ydist = lastpattern[8]-lastpattern[11];
+	    double zdist = lastpattern[9]-lastpattern[12];
+	    double zrot, yrot;
+	    if (xdist<0){ // el segundo punto esta mas a la derecha
+	      zrot=atan(ydist/xdist); 
+	      yrot=-atan(zdist/xdist); 
+	    }else{
+	      zrot=-atan(ydist/xdist); 
+	      yrot=atan(zdist/xdist); 
+	    }
+	    //printf("z: %f, y:%f\n",zrot*360/6.2832,yrot*360/6.2832);
+	    // roll is rotation about X, pitch is rotation about Y, yaw is about Z.
+	    //void q_from_euler (q_type destQuat, double yaw, double pitch, double roll);
+	    q_from_euler (qua, zrot,yrot, 0);
+	    
+	  }else{
+	    q_vec_type v1,v2, vn; // vectores
+	    // calculamos 2 vectores dentro del plano que forman los tres puntos
+	    double xdist = lastpattern[7]-lastpattern[10];
+	    double ydist = lastpattern[8]-lastpattern[11];
+	    double zdist = lastpattern[9]-lastpattern[12];
+	    q_vec_set(v1, xdist, ydist, zdist);
+	    xdist = lastpattern[7]-lastpattern[13];
+	    ydist = lastpattern[8]-lastpattern[14];
+	    zdist = lastpattern[9]-lastpattern[15];
+	    q_vec_set(v2, xdist, ydist, zdist);
+	    // realizamos el producto vectorial
+	    q_vec_cross_product(vn,v1,v2);
+	    // la normal debe apunta hacia el sensor (q_z negativa)
+	    if (vn[Q_Z]<0){
+	      xdist=vn[Q_X];
+	      ydist=vn[Q_Y];
+	      zdist=vn[Q_Z];
+	    }else{
+	      xdist=-vn[Q_X];
+	      ydist=-vn[Q_Y];
+	      zdist=-vn[Q_Z];
+	    }
+	    // en _dist tenemos el vector normal, apuntando hacia el sensor
+	    double xrot = atan(ydist/-zdist);
+	    double yrot = atan(-xdist/-zdist);
+	    double zrot = atan(-xdist/ydist);
+	    // guardamos las rotaciones en el quat
+	    // roll is rotation about X, pitch is rotation about Y, yaw is about Z.
+	    //void q_from_euler (q_type destQuat, double yaw, double pitch, double roll);
+	    q_from_euler (qua, zrot,yrot, xrot);
+
+	  }
+	  // guardamos el quat en newdot
+	  newdot[3]=qua[Q_X];
+	  newdot[4]=qua[Q_Y];
+	  newdot[5]=qua[Q_Z];
+	  newdot[6]=qua[Q_W];
 	  // guardamos la informacion en lastpattern
 	  for (int i =0; i<7;i++)
 	    lastpattern[i]=newdot[i];
