@@ -150,32 +150,29 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    }
 	  }
 
+	  int last =0; //indice en lastpattern donde está el punto relacionado
+
+	  // primero comprobamos si habia algun par usable
+	  if (p1!=-1){ // p1 y p2 son pares usables, comprobamos si tienen correspondencia con el ultimo pattern
+	    if ( !(p1==nearest[0] || p1==nearest[1] || p1==nearest[2]) ) p1=-1;
+	    if ( !(p2==nearest[0] || p2==nearest[1] || p2==nearest[2]) ) p2=-1;
+	    // si p2 es valido y p1 no, guardamos p2
+	    if (p1==-1 && p2!=-1) p1=p2;
+	    // actualizamos en last cual es el punto relacionado
+	    // si tanto p1 como p2 son -1, no entrara en ninguno de los ifs
+	    if (p1==nearest[1]) last=1;
+	    else if (p1==nearest[2]) last=2;
+	  }else
 	  // si no habia ningun par usable, nos quedamos el que tenga menos distancia,
 	  // siempre que esté dentro del umbral
-	  int last =0; //indice en lastpattern donde está el punto relacionado
 	  if (p1==-1){
 	    // encontramos que distancia es la menor
-	    if (distances[1]<distances[last])
-	      last=1;
-	    if (dots==3 && distances[2]<distances[last])
-	      last=2;
+	    if (distances[1]<distances[last]) last=1;
+	    if (dots==3 && distances[2]<distances[last]) last=2;
 	    // distances[last] es la menor de las 3
 	    // como umbral definimos el tamaño del pattern
-	    if (distances[last]<dist)
-	      p1=nearest[last]; // guardamos el numero del punto mas cercano al anterior
-	  }else{ // p1 y p2 son pares usables, comprobamos si tienen correspondencia con el ultimo pattern
-	    if ( !(p1==nearest[0] || p1==nearest[1] || p1==nearest[2]) )
-	      p1=-1;
-	    if ( !(p2==nearest[0] || p2==nearest[1] || p2==nearest[2]) )
-	      p2=-1;
-	    // si p2 es valido y p1 no, guardamos p2
-	    if (p1==-1 && p2!=-1)
-	      p1=p2;
-	    // actualizamos en last cual es el punto relacionado
-	    if (p1==nearest[1])
-	      last=1;
-	    else if (p1==nearest[2])
-	      last=2;
+	    // si esta dentro del umbral guardamos el numero del punto mas cercano a los de lastpattern
+	    if (distances[last]<dist) p1=nearest[last]; 
 	  }
 
 	  // llegados aqui, si p1=-1 es que no habia puntos utiles
