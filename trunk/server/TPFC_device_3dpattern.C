@@ -279,6 +279,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
       } //if (n>=dots || all=false
       // si hay que incluir los puntos que no pertenezcan al patron, los guardamos en data
       if ( (foundpattern && keepothers==WITHPATTERN) ||  keepothers==ALWAYS){
+	int sourcedsize = source->getdata()->datasize();
 	const double* dotdata;
 	// recorremos el vector de incluidos
 	for (int dn =0; dn<n; dn++){
@@ -287,10 +288,27 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    dotdata = sourcedata->getdata(dn);
 	    // si estamos en el primer punto y no habia un patron, hay que crear un nuevo report
 	    // si no, simplemente añadir
-	    if (dn==0 && !foundpattern)
-	      data->setnewdata(dotdata);
-	    else
-	      data->setmoredata(dotdata);
+	    if (sourcedsize<7){
+	      // si la source no tenia orientacion, dotdata no es del tamaño adecuado
+	      double* aux = new double(7);
+	      aux[0]=dotdata[0];
+	      aux[1]=dotdata[1];
+	      aux[2]=dotdata[2];
+	      aux[3]=0;
+	      aux[4]=0;
+	      aux[5]=0;
+	      aux[6]=1;
+	      if (dn==0 && !foundpattern)
+		data->setnewdata(aux);
+	      else
+		data->setmoredata(aux);
+	      free(aux);
+	    }else{
+	      if (dn==0 && !foundpattern)
+		data->setnewdata(dotdata);
+	      else
+		data->setmoredata(dotdata);
+	    }
 	  }
 	}
       }//if (keepothers){
