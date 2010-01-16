@@ -49,6 +49,10 @@ class TrackingPFC_client{
     // funcion auxiliar para getDisplaySizex() y getDisplaySizey()
     static float getDisplaySize(int);
 
+    // variables donde guardar el tamaño de la pantalla, para no estar leyendo continuamente del disco
+    static float screensizex;
+    static float screensizey;
+
   public:
     // placeholder para el callback personalizado (si es necesario)
     void (*callback_func)(TrackingPFC_client*);
