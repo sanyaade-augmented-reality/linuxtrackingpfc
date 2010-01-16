@@ -70,14 +70,29 @@ float* TrackingPFC_client::getlastpos(){
   return data->getlastpos();
 }
 
+// variables estaticas para el tamaño de la pantalla:
+// (se updatearan con la primera llamada a getDisplaySize
+float TrackingPFC_client::screensizex=0;
+float TrackingPFC_client::screensizey=0;
+
 // Devuelven el tamaño guardado en el archivo de configuracion
 float TrackingPFC_client::getDisplaySizex(){
-  // llamamos a la funcion auxiliar
-  return getDisplaySize(0);
+  // Comprobamos si tenemos el valor guardado
+  if (screensizex==0){
+    // si no lo tenemos (es la primera vez que se llama a la funcion) lo guardamos
+    screensizex=getDisplaySize(0); // lo obtenemos con la funcion auxiliar
+  }
+  // y lo devolvemos
+  return screensizex;
 }
 float TrackingPFC_client::getDisplaySizey(){
-  // llamamos a la funcion auxiliar
-  return getDisplaySize(1);
+  // Comprobamos si tenemos el valor guardado
+  if (screensizey==0){
+    // si no lo tenemos (es la primera vez que se llama a la funcion) lo guardamos
+    screensizey=getDisplaySize(1); // lo obtenemos con la funcion auxiliar
+  }
+  // y lo devolvemos
+  return screensizey;
 }
 // Devuelven la altura y el alto de la resolucion de la pantalla por defecto del display por defecto
 // segun la informacion del servidor de las X
