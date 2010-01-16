@@ -16,6 +16,7 @@ void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_
   aux[5]=t.quat[2];
   aux[6]=t.quat[3];
   trk->setdata(aux, t.sensor);
+  free(aux);
 
   if (trk->callback_func!=NULL)
     trk->callback_func(trk);
