@@ -14,7 +14,7 @@ TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot,
   tag=t;
   keepothers=others;
 
-  tolerance=0.2;// 20%
+  tolerance=0.25;// 20%
   // posiciones del ultimo patron encontrado
   // { pos{xyz} ori{xyzw} dot0{xyz} dot1{xyz} [dot2{xyz}]}
   lastpattern= new double[7+3*dots];
@@ -120,12 +120,14 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	  //free (newdot);
 	  // marcamos el flag a cierto ya que hemos incluido datos
 	  foundpattern = true;
+	  //printf("x");fflush(stdout);
 	} // hay suficientes numeros para el patron
 	// si no hemos encontrado el patron completo, pero tenemos la opcion all=false
 	// buscamos coincidencias parciales
 	// solo entramos aqui si el problema no es que hemos encontrado puntos DE MAS
 	// no entramos si aun no hemos encontrado un pattern en ningun report anterior
 	if ( !foundpattern && !all && anypattern && ( (dots==2 && distok==0) || (dots==3 && distok<3))){
+	  //printf(".");fflush(stdout);
 	  // recorremos los puntos actuales buscando cuales estan mas cerca de los del ultimo pattern
 	  double distances[dots];
 	  int nearest[dots];
