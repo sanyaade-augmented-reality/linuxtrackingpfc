@@ -327,6 +327,8 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	nullreport();
       }
     }// validos
+    // eliminamos sourcedata
+    delete (sourcedata);
   }//working
 }
 
