@@ -2,6 +2,7 @@
 #define TPFC_DEVICE_3DMOD_
 
 #include "TPFC_device.h"
+#include <cv.h>
 
 
 class TPFC_device_3dmod : public TPFC_device{
@@ -12,10 +13,16 @@ class TPFC_device_3dmod : public TPFC_device{
     // Puntero a los 2 device fuente
     TPFC_device* source;
 
+    // Filtro Kalman
+    CvKalman* kalman;
+
   public:
     // consctructora y creadora
     TPFC_device_3dmod(int ident, TPFC_device*);
     ~TPFC_device_3dmod();
+
+    // activa el filtrado de kalman
+    void activatekalman();
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
     void report_from(TPFC_device*);
