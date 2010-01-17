@@ -5,6 +5,9 @@
 
 
 class TPFC_device_3dmod : public TPFC_device{
+  public:
+    enum reorientopt {NONE, ONLYUNTAGGED, ALL};
+    enum reorientdir {CENTER, FORWARD};
   private:
     // Puntero a los 2 device fuente
     TPFC_device* source;
