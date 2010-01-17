@@ -292,14 +292,15 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    // si no, simplemente añadir
 	    if (sourcedsize<7){
 	      // si la source no tenia orientacion, dotdata no es del tamaño adecuado
+	      // rellenamos con un quaternon nulo
 	      double* aux = new double[7];
 	      aux[0]=dotdata[0];
 	      aux[1]=dotdata[1];
 	      aux[2]=dotdata[2];
 	      aux[3]=0;
-	      aux[4]=0;
+	      aux[4]=1;
 	      aux[5]=0;
-	      aux[6]=1;
+	      aux[6]=0;
 	      if (dn==0 && !foundpattern)
 		data->setnewdata(aux);
 	      else
