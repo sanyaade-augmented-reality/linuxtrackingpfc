@@ -239,6 +239,8 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 
 	  // llegados aqui, si p1=-1 es que no habia puntos utiles
 	  if (p1!=-1){
+	    // si entramos, el punto p1 esta en el patron, lo incluimos en la lista included
+	    included[p1]=true;
 	    // en last tenemos el indice del punto relacionado de lastpattern
 	    // calculamos el vector desde ese punto al centro de su patron
 	    double* newdot= new double[7];
