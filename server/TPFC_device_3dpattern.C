@@ -290,7 +290,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    // si no, simplemente añadir
 	    if (sourcedsize<7){
 	      // si la source no tenia orientacion, dotdata no es del tamaño adecuado
-	      double* aux = new double(7);
+	      double* aux = new double[7];
 	      aux[0]=dotdata[0];
 	      aux[1]=dotdata[1];
 	      aux[2]=dotdata[2];
