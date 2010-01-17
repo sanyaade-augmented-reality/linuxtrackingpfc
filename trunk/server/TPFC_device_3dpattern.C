@@ -5,7 +5,7 @@ TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot,
 					     bool al, int t, keepothersoptions others)
 					     :TPFC_device(ident){
   // creamos los datos
-  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,100);
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI);
 
   // guardamos los parametros
   dots=dot;
