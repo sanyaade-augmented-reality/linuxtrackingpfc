@@ -407,7 +407,7 @@ int main( int argc, char** argv ){
 	      int auxid = (input.size()==4)?str2int(input[3]):dev.size()-1;
 	      // si solo tenemos 2 parametros llamamos a la funcion default
 	      if (input.size()==2)
-		settracker(dev[auxid], input[1].c_str() );
+		settracker(dev[auxid], input[1].c_str() , 4);
 	      else{ // si tenemos 3 o 4, incluimos el parametro
 		settracker(dev[auxid], input[1].c_str() , str2int(input[2]) );
 	      }
@@ -419,7 +419,7 @@ int main( int argc, char** argv ){
 	}else
 	
 	// Listar comandos
-	if ( input[0].compare("history")==0){
+	if ( input[0].compare("history")==0 || input[0].compare("hist")==0 ){
 	  if (commands.size()==0)
 	    printf("No se han introducido comandos relevantes validos por el momento.\n");
 	  else
@@ -552,7 +552,7 @@ int main( int argc, char** argv ){
 	  printf("addtracker (addt) <nombre> [numero de sensores] [id del dispositivo]-> añade un tracker (si no se especifica id, al ultimo dispositivo creado).\n");
 	  printf("list (l)-> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
-	  printf("history -> lista todos los comandos relevantes realizados hasta el momento.\n");
+	  printf("history (hist) -> lista todos los comandos relevantes realizados hasta el momento.\n");
 	  printf("pause (p) -> Pone en pausa los dispositivos creados hasta el momento.\n");
 	  printf("unpause (u, run, r) -> quita la pausa (pone en funcionamiento) todos los devices creados hasta el momento\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
