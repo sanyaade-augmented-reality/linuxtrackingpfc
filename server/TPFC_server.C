@@ -419,7 +419,7 @@ int main( int argc, char** argv ){
 	}else
 	
 	// Listar comandos
-	if ( input[0].compare("commands")==0 || input[0].compare("c")==0){
+	if ( input[0].compare("history")==0){
 	  if (commands.size()==0)
 	    printf("No se han introducido comandos relevantes validos por el momento.\n");
 	  else
@@ -552,7 +552,7 @@ int main( int argc, char** argv ){
 	  printf("addtracker (addt) <nombre> [numero de sensores] [id del dispositivo]-> añade un tracker (si no se especifica id, al ultimo dispositivo creado).\n");
 	  printf("list (l)-> lista los dispositivos configurados en el servidor.\n");
 	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
-	  printf("commands (c) -> lista todos los comandos relevantes realizados hasta el momento.\n");
+	  printf("history -> lista todos los comandos relevantes realizados hasta el momento.\n");
 	  printf("pause (p) -> Pone en pausa los dispositivos creados hasta el momento.\n");
 	  printf("unpause (u, run, r) -> quita la pausa (pone en funcionamiento) todos los devices creados hasta el momento\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
