@@ -6,7 +6,9 @@ TPFC_device_3dmod::TPFC_device_3dmod(int ident, TPFC_device* s):TPFC_device(iden
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,1);
 
   // kalman
-  kalman = NULL;
+  kalmanx = NULL;
+  kalmany = NULL;
+  kalmanz = NULL;
   activatekalman();
 
   // guardamos un puntero a la fuente
@@ -33,20 +35,25 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
       nullreport();
     }else{// si son validos...
       // predict point position
-      const CvMat* y_k = cvKalmanPredict( kalman, 0 );
+      const CvMat* y_k = cvKalmanPredict( kalmanx, 0 );
       double x =CV_MAT_ELEM(*y_k,float,0,0);
-      double y =CV_MAT_ELEM(*y_k,float,1,0);
-      double z =CV_MAT_ELEM(*y_k,float,2,0);
+      y_k = cvKalmanPredict( kalmany, 0 );
+      double y =CV_MAT_ELEM(*y_k,float,0,0);
+      y_k = cvKalmanPredict( kalmanz, 0 );
+      double z =CV_MAT_ELEM(*y_k,float,0,0);
+
       data->setnewpos(x,y,z);
 
       const double* dotdata = sourcedata->getdata();
-      CvMat* z_k = cvCreateMat( 3, 1, CV_32FC1 );
+      CvMat* z_k = cvCreateMat( 1, 1, CV_32FC1 );
       cvZero( z_k );
       *( (float*)CV_MAT_ELEM_PTR(*z_k,0,0 ) ) = dotdata[0];
-      *( (float*)CV_MAT_ELEM_PTR(*z_k,1,0 ) ) = dotdata[1];
-      *( (float*)CV_MAT_ELEM_PTR(*z_k,2,0 ) ) = dotdata[2];
-      cvKalmanCorrect( kalman, z_k );
-      
+      cvKalmanCorrect( kalmanx, z_k );
+      *( (float*)CV_MAT_ELEM_PTR(*z_k,0,0 ) ) = dotdata[1];
+      cvKalmanCorrect( kalmany, z_k );
+      *( (float*)CV_MAT_ELEM_PTR(*z_k,0,0 ) ) = dotdata[2];
+      cvKalmanCorrect( kalmanz, z_k );
+
       report();
 
     } // validos
@@ -60,16 +67,35 @@ void TPFC_device_3dmod::activatekalman(){
     CvRandState rng;
     cvRandInit( &rng, 0, 1, -1, CV_RAND_UNI );
 
-    kalman = cvCreateKalman( 3, 3, 0 );
+    kalmanx = cvCreateKalman( 2, 1, 0 );
+    kalmany = cvCreateKalman( 2, 1, 0 );
+    kalmanz = cvCreateKalman( 2, 1, 0 );
 
 
-    cvSetIdentity( kalman->measurement_matrix,    cvRealScalar(1) );
-    cvSetIdentity( kalman->process_noise_cov,     cvRealScalar(1e-5) );
-    cvSetIdentity( kalman->measurement_noise_cov, cvRealScalar(1e-1) );
-    cvSetIdentity( kalman->error_cov_post,        cvRealScalar(1));
+    cvSetIdentity( kalmanx->measurement_matrix,    cvRealScalar(1) );
+    cvSetIdentity( kalmanx->process_noise_cov,     cvRealScalar(1e-5) );
+    cvSetIdentity( kalmanx->measurement_noise_cov, cvRealScalar(1e-1) );
+    cvSetIdentity( kalmanx->error_cov_post,        cvRealScalar(1));
+
+    cvSetIdentity( kalmany->measurement_matrix,    cvRealScalar(1) );
+    cvSetIdentity( kalmany->process_noise_cov,     cvRealScalar(1e-5) );
+    cvSetIdentity( kalmany->measurement_noise_cov, cvRealScalar(1e-1) );
+    cvSetIdentity( kalmany->error_cov_post,        cvRealScalar(1));
+
+    cvSetIdentity( kalmanz->measurement_matrix,    cvRealScalar(1) );
+    cvSetIdentity( kalmanz->process_noise_cov,     cvRealScalar(1e-5) );
+    cvSetIdentity( kalmanz->measurement_noise_cov, cvRealScalar(1e-1) );
+    cvSetIdentity( kalmanz->error_cov_post,        cvRealScalar(1));
+
+    const float F[] = { 1, 1, 0, 1 };
+    memcpy( kalmanx->transition_matrix->data.fl, F, sizeof(F));
+    memcpy( kalmany->transition_matrix->data.fl, F, sizeof(F));
+    memcpy( kalmanz->transition_matrix->data.fl, F, sizeof(F));
 
 
-    cvRand( &rng, kalman->state_post );
+    cvRand( &rng, kalmanx->state_post );
+    cvRand( &rng, kalmany->state_post );
+    cvRand( &rng, kalmanz->state_post );
 }
 
 // Informacion sobre el dispositivo
