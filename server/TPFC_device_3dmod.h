@@ -4,6 +4,12 @@
 #include "TPFC_device.h"
 #include <cv.h>
 
+/* TO DO:
+Reajuste de posicion (con calibracion
+kalman
+reajuste de orientaciones
+escala
+*/
 
 class TPFC_device_3dmod : public TPFC_device{
   public:
@@ -14,7 +20,9 @@ class TPFC_device_3dmod : public TPFC_device{
     TPFC_device* source;
 
     // Filtro Kalman
-    CvKalman* kalman;
+    CvKalman* kalmanx;
+    CvKalman* kalmany;
+    CvKalman* kalmanz;
 
   public:
     // consctructora y creadora
