@@ -6,14 +6,19 @@ TPFC_device_3dmod::TPFC_device_3dmod(int ident, TPFC_device* s):TPFC_device(iden
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,1);
 
   // escala
-  scale = 1; //100%, no se modifica
+  scale = 1.00; //100%, no se modifica
 
   // reorientacion
   orientopt=NONE; // no se aplican cambios de orientacion
   orientdir=FORWARD;
 
+  // localizacion
+  location = NULL;
+  calibrando = false;
+
   // guardamos un puntero a la fuente
   source=s;
+
   // registramos este dispositivo en la lista de listeners del que vamos a usar como input
   s-> report_to(this);
   
@@ -37,6 +42,66 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
     }else{// si son validos...
       // obtenemos el numero de puntos del report
       int n = sourcedata->size();
+
+      // Obtencion de datos para calibrado
+      if (calibrando && n==dots){
+	bool needdata=false; // flag para saber si debemos guardar los datos
+	pthread_mutex_lock( caliblock ); // obtenemos acceso exclusivo
+	if (processedsamples<TPFC_CALIBSAMPLES){ // si aun no tenemos suficientes
+	  processedsamples++;
+	  needdata=true;
+	}
+	pthread_mutex_unlock( caliblock ); // liberamos acceso exclusivo
+
+	if (needdata){
+	  // primero ordenamos los puntos
+	  int order[dots]; // orden
+	  if (dots==1){
+	    order[0]=0;
+	  }else{ // 2 o 3 dots
+	    double xs[dots];// bufer donde guardaremos la posicion x de los puntos para ordenarlos
+	      for (int dn=0; dn<n;dn++){
+		const double* dotdata = sourcedata->getdata(dn);
+		xs[dn]=dotdata[0];
+	      }
+	    // obtenemos el orden a partir de los datos de xs
+	    if (dots==2){
+	      if (xs[0]>xs[1]){
+		order[0]=0;order[1]=1;
+	      }else{
+		order[0]=1;order[1]=0;
+	      }
+	    }else{ // dots = 3
+	      order[0]=0;order[1]=1;order[2]=2;
+	      if (xs[order[1]]>xs[order[0]]){
+		int aux = order[0];
+		order[0]=order[1];
+		order[1]=aux;
+	      }
+	      if (xs[order[2]]>xs[order[0]]){
+		int aux = order[0];
+		order[0]=order[2];
+		order[2]=aux;
+	      }
+	      if (xs[order[2]]>xs[order[1]]){
+		int aux = order[1];
+		order[1]=order[2];
+		order[2]=aux;
+	      }
+	    }// 3 dots
+	  } // 2 o 3 dots
+
+	  // los guardamos por ese orden
+	  for (int dn=0; dn<n;dn++){
+	    const double* dotdata = sourcedata->getdata(order[dn]);
+	    if (dn==0)
+	      calibdata->setnewdata(dotdata);
+	    else
+	      calibdata->setmoredata(dotdata);
+	  }
+	}
+	
+      }
   
       for (int dn=0; dn<n;dn++){
 	// obtenemos los datos reales
@@ -45,7 +110,6 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 	double* newdot = new double[7];
 
 	if (kalman.size()!=0){ // hay filtros de kalman
-	  // FALTA comprobar que no estemos en un punto sin filtro
 	  // si no tenemos suficientes filtros, creamos uno nuevo
 	  if (kalman.size()<(dn+1))
 	    addkalman();
@@ -69,6 +133,8 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 	  newdot[2]=dotdata[2];
 	}//kalman
 	
+	// Aplicamos el cambio de ubicacion
+
 	// Aplicamos la escala
 	newdot[0]=newdot[0]*scale;
 	newdot[1]=newdot[1]*scale;
@@ -114,7 +180,7 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
   }//working
 }
 
-// activa el filtro de kalman
+// añade un filtro de kalman
 void TPFC_device_3dmod::addkalman(){
     CvRandState rng;
     cvRandInit( &rng, 0, 1, -1, CV_RAND_UNI );
@@ -144,6 +210,68 @@ void TPFC_device_3dmod::setscale(double s){
 void TPFC_device_3dmod::setorientation(reorientopt o, reorientdir d){
   orientopt=o;
   orientdir=d;
+}
+
+// Calibrado
+double* TPFC_device_3dmod::calibrate(int d, double* c){
+  if (c==NULL){
+    // Tenemos que obtener los datos
+
+    // guardamos la cantidad de puntos usados
+    // esta es la cantidad de puntos que se esperan en cada toma
+    // en total siempre se necesitan 3 puntos
+    dots = d;
+
+
+    // inicializaciones
+    calibdata = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D,TPFC_CALIBSAMPLES);
+    caliblock = new pthread_mutex_t(); // inicializamos el semaforo
+    int processeddots=0;
+    int warn;
+    
+    // EXPLICACION AL USUARIO SEGUN DOTS
+    while(processeddots<3){
+    
+      warn= TPFC_CALIBINC;
+      processedsamples =0;
+      
+
+      // Mensajes de aviso con cuenta atrás para el usuario
+      printf("Preparando para obtener datos en...\n");
+      for (int i =5; i>0;i--){
+	printf("%i ",i);
+	fflush(stdout);
+	vrpn_SleepMsecs(1000);
+      }
+      printf("Adquiriendo datos\n");
+
+      // activamos el flag de calibrando
+      calibrando = true;
+
+      // esperamos a que el handler de reports llene el buffer
+      while (processedsamples<TPFC_CALIBSAMPLES){
+	vrpn_SleepMsecs(10); // sleep para no consumir cpu
+	if (processedsamples>=warn){ // barra de progreso
+	  printf(".");
+	  fflush(stdout);
+	  warn+=TPFC_CALIBINC;
+	}
+      }
+
+      // desactivamos el flag de calibrando, para dejar de capturar datos
+      calibrando = false;
+
+      // procesamos los datos
+      printf("\nDatos adquiridos, procesando...\n");
+    
+      // incrementamos el contador de datos procesados
+      processeddots+=dots;
+
+    }//while(processeddots<3){
+
+    // CALCULAMOS LO NECESARIO
+  } //if c==NULL
+
 }
 
 // Informacion sobre el dispositivo

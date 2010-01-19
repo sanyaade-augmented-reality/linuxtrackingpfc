@@ -4,6 +4,9 @@
 #include "TPFC_device.h"
 #include <cv.h>
 
+#define TPFC_CALIBSAMPLES 200
+#define TPFC_CALIBINC TPFC_CALIBSAMPLES/50
+
 class TPFC_device_3dmod : public TPFC_device{
   public:
     enum reorientopt {NONE, UNTAGGED, ALL};
@@ -23,6 +26,16 @@ class TPFC_device_3dmod : public TPFC_device{
     reorientopt orientopt;
     reorientdir orientdir;
 
+    // reubicacion
+    double* location;
+
+    // variables auxiliares para el calibrado
+    bool calibrando;
+    int dots;
+    int processedsamples;
+    pthread_mutex_t* caliblock;
+    TrackingPFC_data* calibdata;
+
   public:
     // consctructora y creadora
     TPFC_device_3dmod(int ident, TPFC_device*);
@@ -36,6 +49,9 @@ class TPFC_device_3dmod : public TPFC_device{
 
     // cambiar la rotacion
     void setorientation(reorientopt o, reorientdir d=FORWARD);
+
+    // calibrado
+    double* calibrate(int d, double* c = NULL);
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
     void report_from(TPFC_device*);

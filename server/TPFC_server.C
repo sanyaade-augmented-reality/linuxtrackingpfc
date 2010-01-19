@@ -111,6 +111,7 @@ bool FileExists(string strFilename) {
 
 
 int main( int argc, char** argv ){
+    //printf("%f\n",strtod("0.1",NULL));
 
     // incializaciones
     connection=NULL;
@@ -315,6 +316,32 @@ int main( int argc, char** argv ){
 	  
 	}else
 	
+
+	// Calibrado (3dmod)
+	if ( input[0].compare("calibrate")==0 || input[0].compare("cal")==0){
+	  // comprobamos que el ultimo dispositivo sea valido
+	  if (dev.size()==0){
+	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
+	  }else
+	  // comprobamos el numero de parametros
+	  if (input.size()>3 || input.size()<2 ){
+	    printf("El comando calibrate requiere el numero de puntos del patron a usar (1, 2 o 3)\n");
+	  }else{
+	    // Seleccionamos la id del device
+	    int auxid = (input.size()==3)?str2int(input[2]):dev.size()-1;
+	    // y comprobamos que sea del tipo adecuado como fuente
+	    string aux = dev[auxid]->info();
+	    if ( (aux.substr(0,5)).compare("3dmod")!=0){
+	      printf("No se puede aplicar calibrate al dispositivo %i, no es del tipo 3dmod\n", auxid);
+	    }else {
+	      // Cambiamos la opcion
+	      ((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]) );
+	      commands.push_back(s);
+	      printf("Calibrado completado\n");
+
+	    }
+	  }
+	}else
 
 	// Opciones de escala (3dmod)
 	if ( input[0].compare("setscale")==0 || input[0].compare("scale")==0){
