@@ -77,6 +77,28 @@ TrackingPFC_data::datachunk* TrackingPFC_data::getlastdata(){
   return res;
 }
 
+// consultora avanzada que devuelve una copia del datachunk con count = c
+TrackingPFC_data::datachunk* TrackingPFC_data::getdata(int c){
+  if (c>count)
+    return NULL;
+  if (c<=count-size)
+    return NULL;
+  datachunk* res=NULL;
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  // calculamos el indice donde estaria ese count sabiendo el actual
+  int diff = count-c;
+  // copiamos los datos
+  res = new datachunk(data[(ind-diff+size)%size], dsize);
+  pthread_mutex_unlock( lock ); // liberamos el acceso
+  // comprobamos que el numero coincida
+  if (res->getcount()!=c){
+    printf("error al recuperar los datos %i, se han obtenido %i.\n",c,res->getcount());
+    res=NULL;
+  }
+  //y los devolvemos
+  return res;
+}
+
 // copia la orientacion de los ultimos datos (si la hay), modificando la posición.
 // aunque está pensado para funcionar con datos de tamaño 3 o mas, funcionara con los de 2
 // ignorando el 3r argumento
@@ -199,6 +221,10 @@ TrackingPFC_data::TPFCdatatype TrackingPFC_data::datatype(){
 // devuelve el tamaño de los datos segun el tipo
 int TrackingPFC_data::datasize(){
   return dsize;
+}
+// devuelve el count actual
+int TrackingPFC_data::getcount(){
+  return count;
 }
 
 
