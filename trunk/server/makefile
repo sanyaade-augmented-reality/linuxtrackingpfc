@@ -2,7 +2,7 @@ INCLUDE = -I/usr/local/include/opencv
 LIBDIR  = 
 
 #COMPILERFLAGS = -Wall -O2
-COMPILERFLAGS = -O2
+COMPILERFLAGS = -O2 -g
 CC = g++
 CFLAGS = $(COMPILERFLAGS) $(INCLUDE)
 LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread  -lquat -ltpfcc -lcwiid -lcv -lhighgui
