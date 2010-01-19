@@ -9,16 +9,16 @@ device wii
 device wii
 
 device 3dstereo 0 1
-addt Tracker0 4
+addserver Tracker0
 
 device 3dfrom2d 0
-addt Tracker1 4
+addserver Tracker1
 setdeep onlysize 170
 
 device 3dpattern 2 2 170 off
-addt Tracker2 4
+addserver Tracker2
 
 device 3dpattern 2 2 170 on
-addt Tracker3 4
+addserver Tracker3
 
 daemon

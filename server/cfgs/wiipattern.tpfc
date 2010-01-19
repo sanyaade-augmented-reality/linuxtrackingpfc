@@ -6,7 +6,8 @@ device wiimote
 device wiimote
 
 device 3dstereo 0 1
+
 device 3dpattern 2 2 170
-addtracker Tracker0 4
+addserver Tracker0
 
 daemon

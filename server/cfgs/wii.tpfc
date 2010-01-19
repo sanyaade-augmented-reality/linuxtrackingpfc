@@ -3,6 +3,8 @@
 # pero sin preocuparse por los problemas cuando pierda de vista un punto)
 
 device wiimote
+
 device 3dfrom2d 0
-addtracker Tracker0 4
+addserver Tracker0
+
 daemon
