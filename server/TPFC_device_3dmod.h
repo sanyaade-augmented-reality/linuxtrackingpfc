@@ -20,9 +20,7 @@ class TPFC_device_3dmod : public TPFC_device{
     TPFC_device* source;
 
     // Filtro Kalman
-    CvKalman* kalmanx;
-    CvKalman* kalmany;
-    CvKalman* kalmanz;
+    CvKalman* kalman;
 
   public:
     // consctructora y creadora
