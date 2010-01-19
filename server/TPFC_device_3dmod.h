@@ -4,23 +4,24 @@
 #include "TPFC_device.h"
 #include <cv.h>
 
-/* TO DO:
-Reajuste de posicion (con calibracion
-kalman
-reajuste de orientaciones
-escala
-*/
-
 class TPFC_device_3dmod : public TPFC_device{
   public:
-    enum reorientopt {NONE, ONLYUNTAGGED, ALL};
+    enum reorientopt {NONE, UNTAGGED, ALL};
     enum reorientdir {CENTER, FORWARD};
+
   private:
     // Puntero a los 2 device fuente
     TPFC_device* source;
 
     // Filtro Kalman
-    CvKalman* kalman;
+    vector<CvKalman*> kalman;
+
+    // escala
+    double scale;
+
+    // reorientacion
+    reorientopt orientopt;
+    reorientdir orientdir;
 
   public:
     // consctructora y creadora
@@ -28,7 +29,13 @@ class TPFC_device_3dmod : public TPFC_device{
     ~TPFC_device_3dmod();
 
     // activa el filtrado de kalman
-    void activatekalman();
+    void addkalman();
+
+    // cambiar la escala
+    void setscale(double);
+
+    // cambiar la rotacion
+    void setrotation(reorientopt o, reorientdir d=FORWARD);
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
     void report_from(TPFC_device*);

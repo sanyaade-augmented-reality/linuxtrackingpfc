@@ -5,9 +5,12 @@ TPFC_device_3dmod::TPFC_device_3dmod(int ident, TPFC_device* s):TPFC_device(iden
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,1);
 
-  // kalman
-  kalman = NULL;
-  activatekalman();
+  // escala
+  scale = 1; //100%, no se modifica
+
+  // reorientacion
+  orientopt=NONE; // no se aplican cambios de orientacion
+  orientdir=FORWARD;
 
   // guardamos un puntero a la fuente
   source=s;
@@ -32,41 +35,94 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
       data->setnodata();
       nullreport();
     }else{// si son validos...
+      // obtenemos el numero de puntos del report
+      int n = sourcedata->size();
+  
+      for (int dn=0; dn<n;dn++){
+	// obtenemos los datos reales
+	const double* dotdata = sourcedata->getdata(dn);
 
-      
-      const CvMat* y_k = cvKalmanPredict( kalman, 0 );
-      double x =CV_MAT_ELEM(*y_k,float,0,0);
-      double y =CV_MAT_ELEM(*y_k,float,1,0);
-      double z =CV_MAT_ELEM(*y_k,float,2,0);
-      data->setnewpos(x,y,z);
+	double* newdot = new double[7];
 
-      const double* dotdata = sourcedata->getdata();
-      CvMat* z_k = cvCreateMat( 3, 1, CV_32FC1 );
-      cvZero( z_k );
-      *( (float*)CV_MAT_ELEM_PTR(*z_k,0,0 ) ) = dotdata[0];
-      *( (float*)CV_MAT_ELEM_PTR(*z_k,1,0 ) ) = dotdata[1];
-      *( (float*)CV_MAT_ELEM_PTR(*z_k,2,0 ) ) = dotdata[2];
-      cvKalmanCorrect( kalman, z_k );
+	if (kalman.size()!=0){ // hay filtros de kalman
+	  // FALTA comprobar que no estemos en un punto sin filtro
+	  // si no tenemos suficientes filtros, creamos uno nuevo
+	  if (kalman.size()<(dn+1))
+	    addkalman();
+	  // obtenemos la predicción del filtro de kalman
+	  const CvMat* y_k = cvKalmanPredict( kalman[dn], 0 );
+	  newdot[0] =CV_MAT_ELEM(*y_k,float,0,0);
+	  newdot[1]=CV_MAT_ELEM(*y_k,float,1,0);
+	  newdot[2] =CV_MAT_ELEM(*y_k,float,2,0);
+
+	  // preparamos el vector opencv
+	  CvMat* z_k = cvCreateMat( 3, 1, CV_32FC1 );
+	  cvZero( z_k );
+	  *( (float*)CV_MAT_ELEM_PTR(*z_k,0,0 ) ) = dotdata[0];
+	  *( (float*)CV_MAT_ELEM_PTR(*z_k,1,0 ) ) = dotdata[1];
+	  *( (float*)CV_MAT_ELEM_PTR(*z_k,2,0 ) ) = dotdata[2];
+	  // introducimos las lecturas en el filtro
+	  cvKalmanCorrect( kalman[dn], z_k );
+	}else{// no hay filtro de kalman
+	  newdot[0]=dotdata[0];
+	  newdot[1]=dotdata[1];
+	  newdot[2]=dotdata[2];
+	}//kalman
+	
+	// Aplicamos la escala
+	newdot[0]=newdot[0]*scale;
+	newdot[1]=newdot[1]*scale;
+
+	// Reajuste de orientacion
+	if ( orientopt==ALL || // si hay que reorientar todos
+	     (orientopt==UNTAGGED && sourcedata->gettag(dn)!=0) ){ // o solo los que estan sin marcar
+	  if (orientdir==FORWARD){
+	    // la orientacion debe ser el quaternion nulo (perpendicular al plano normal del sensor)
+	    newdot[3]=0;
+	    newdot[4]=1;
+	    newdot[5]=0;
+	    newdot[6]=0;
+	  }else{ //CENTER
+	    q_vec_type cent, norm;
+	    q_type rot;
+	    q_vec_set(norm,0,0,-1);
+	    q_vec_set(cent,-newdot[0],-newdot[1],-newdot[2]);
+	    q_from_two_vecs(rot,norm,cent);
+	    newdot[3]=rot[Q_X];
+	    newdot[4]=rot[Q_Y];
+	    newdot[5]=rot[Q_Z];
+	    newdot[6]=rot[Q_W];
+	  }
+	}//reorientacion
+
+
+	//guardamos los datos
+	if (dn==0)
+	  data->setnewdata(newdot);
+	else
+	  data->setmoredata(newdot);
+
+	// liberamos el vector
+	free(newdot);
+	  
+      }// recorrido por los puntos 
+
 
       report();
 
     } // validos
   }//working
-
-
 }
 
 // activa el filtro de kalman
-void TPFC_device_3dmod::activatekalman(){
+void TPFC_device_3dmod::addkalman(){
     CvRandState rng;
     cvRandInit( &rng, 0, 1, -1, CV_RAND_UNI );
-
-    kalman = cvCreateKalman( 6, 3, 0 );
-
-    cvSetIdentity( kalman->measurement_matrix,    cvRealScalar(1) );
-    cvSetIdentity( kalman->process_noise_cov,     cvRealScalar(1e-5) );
-    cvSetIdentity( kalman->measurement_noise_cov, cvRealScalar(1e-1) );
-    cvSetIdentity( kalman->error_cov_post,        cvRealScalar(1));
+    CvKalman* newkalman = cvCreateKalman( 6, 3, 0 );
+    cvSetIdentity( newkalman->measurement_matrix,    cvRealScalar(1) );
+    cvSetIdentity( newkalman->process_noise_cov,     cvRealScalar(1e-5) );
+    cvSetIdentity( newkalman->measurement_noise_cov, cvRealScalar(1e-1) );
+    cvSetIdentity( newkalman->error_cov_post,        cvRealScalar(1));
     const float F[] = { 1,0,0,1,0,0,
 			0,1,0,0,1,0,
 			0,0,1,0,0,1,
@@ -74,10 +130,20 @@ void TPFC_device_3dmod::activatekalman(){
 			0,0,0,0,1,0,
 			0,0,0,0,0,1,
 			};
-    memcpy( kalman->transition_matrix->data.fl, F, sizeof(F));
+    memcpy( newkalman->transition_matrix->data.fl, F, sizeof(F));
+    cvRand( &rng, newkalman->state_post );
 
+    // lo añadimos al vector
+    kalman.push_back(newkalman);
+}
 
-    cvRand( &rng, kalman->state_post );
+void TPFC_device_3dmod::setscale(double s){
+  scale= s;
+}
+
+void TPFC_device_3dmod::setrotation(reorientopt o, reorientdir d){
+  orientopt=o;
+  orientdir=d;
 }
 
 // Informacion sobre el dispositivo
