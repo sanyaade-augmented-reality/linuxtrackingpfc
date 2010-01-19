@@ -3,8 +3,10 @@
 
 device wiimote
 device wiimote
+
 device 3dfrom2d 0
-addtracker Tracker0 4
+addserver Tracker0
+
 device 3dfrom2d 1
-addtracker Tracker1 4
+addserver Tracker1
 daemon
