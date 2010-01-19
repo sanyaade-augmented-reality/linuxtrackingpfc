@@ -162,8 +162,10 @@ int main( int argc, char** argv ){
       }else{
 	// Hay instrucciones
 	// separamos la entrada en tokens sueltos
+	printf("ajkdfhakhjfd -> %s\n",s.c_str());
 	input.clear();
 	StringExplode(s, " ", &input);
+	printf("size=%i\n",input.size());
 
 	// Nuevos devices
 	if ( input[0].compare("device")==0 || input[0].compare("dev")==0|| input[0].compare("d")==0){
@@ -326,7 +328,7 @@ int main( int argc, char** argv ){
 	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
 	  }else
 	  // comprobamos el numero de parametros
-	  if (input.size()>4){
+	  if (input.size()>4 || input.size()<3){
 	    printf("El comando setdeep requiere como parametros el tipo (fija, rotacion, size, onlysize) y el valor de la distancia (o el parametro de size).\n");
 	  }else{
 	    // Seleccionamos la id del device
@@ -334,7 +336,7 @@ int main( int argc, char** argv ){
 	    // y comprobamos que sea del tipo adecuado como fuente
 	    string aux = dev[auxid]->info();
 	    if ( (aux.substr(0,8)).compare("3dfrom2d")!=0){
-	      printf("No se puede aplicar setdeep al ultimo dispositivo, no es del tipo 3dfrom2d\n");
+	      printf("No se puede aplicar setdeep al dispositivo %i, no es del tipo 3dfrom2d\n", auxid);
 	    }else {
 	      // llamamos con la opcion adecuada:
 	      if (input[1].compare("fija")==0){
@@ -367,7 +369,7 @@ int main( int argc, char** argv ){
 	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
 	  }else
 	  // comprobamos el numero de parametros
-	  if (input.size()>3){
+	  if (input.size()>4 || input.size()<3){
 	    printf("El comando setmerge requiere un parametro (on, off), o dos (si se quiere aplicar a otro dispositivo)\n");
 	  }else{
 	    // Seleccionamos la id del device
@@ -375,7 +377,7 @@ int main( int argc, char** argv ){
 	    // y comprobamos que sea del tipo correcto
 	    string aux = dev[auxid]->info();
 	    if ( (aux.substr(0,8)).compare("3dfrom2d")!=0){
-	      printf("No se puede aplicar setmerge al ultimo dispositivo, no es del tipo 3dfrom2d\n");
+	      printf("No se puede aplicar setmerge al dispositivo %i, no es del tipo 3dfrom2d\n",auxid);
 	    }else {
 	      // llamamos con la opcion adecuada:
 	      if (input[1].compare("on")==0){
