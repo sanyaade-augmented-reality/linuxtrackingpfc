@@ -110,9 +110,6 @@ bool FileExists(string strFilename) {
 
 
 
-
-
-
 int main( int argc, char** argv ){
 
     // incializaciones
@@ -162,11 +159,9 @@ int main( int argc, char** argv ){
       }else{
 	// Hay instrucciones
 	// separamos la entrada en tokens sueltos
-	printf("ajkdfhakhjfd -> %s\n",s.c_str());
 	input.clear();
 	StringExplode(s, " ", &input);
-	printf("size=%i\n",input.size());
-
+	
 	// Nuevos devices
 	if ( input[0].compare("device")==0 || input[0].compare("dev")==0|| input[0].compare("d")==0){
 	  bool devadded=false; //flag de dispositivo añadido
@@ -321,7 +316,107 @@ int main( int argc, char** argv ){
 	}else
 	
 
-	// Opciones de profundidad
+	// Opciones de escala (3dmod)
+	if ( input[0].compare("setscale")==0 || input[0].compare("scale")==0){
+	  // comprobamos que el ultimo dispositivo sea valido
+	  if (dev.size()==0){
+	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
+	  }else
+	  // comprobamos el numero de parametros
+	  if (input.size()>3 || input.size()<2){
+	    printf("El comando setscale requiere como parametro el % a escalar\n");
+	  }else{
+	    // Seleccionamos la id del device
+	    int auxid = (input.size()==3)?str2int(input[2]):dev.size()-1;
+	    // y comprobamos que sea del tipo adecuado como fuente
+	    string aux = dev[auxid]->info();
+	    if ( (aux.substr(0,5)).compare("3dmod")!=0){
+	      printf("No se puede aplicar setscale al dispositivo %i, no es del tipo 3dmod\n", auxid);
+	    }else {
+	      // Cambiamos la opcion
+	      ((TPFC_device_3dmod*)dev[auxid])->setscale((float)str2int(input[1])/100 );
+	      commands.push_back(s);
+	      printf("Opcion cambiada correctamente\n");
+
+	    }
+	  }
+	}else
+
+	// Opciones de filtrado (3dmod)
+	if ( input[0].compare("setfilter")==0 || input[0].compare("filter")==0|| input[0].compare("kalman")==0){
+	  // comprobamos que el ultimo dispositivo sea valido
+	  if (dev.size()==0){
+	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
+	  }else
+	  // comprobamos el numero de parametros
+	  if (input.size()>2 || input.size()<1){
+	    printf("El comando setfilter no requiere parametros\n");
+	  }else{
+	    // Seleccionamos la id del device
+	    int auxid = (input.size()==2)?str2int(input[1]):dev.size()-1;
+	    // y comprobamos que sea del tipo adecuado como fuente
+	    string aux = dev[auxid]->info();
+	    if ( (aux.substr(0,5)).compare("3dmod")!=0){
+	      printf("No se puede aplicar setscale al dispositivo %i, no es del tipo 3dmod\n", auxid);
+	    }else {
+	      // Cambiamos la opcion
+	      ((TPFC_device_3dmod*)dev[auxid])->addkalman();
+	      commands.push_back(s);
+	      printf("Filtro añadido correctamente\n");
+
+	    }
+	  }
+	}else
+
+	// Opciones de reorientacion (3dmod)
+	if ( input[0].compare("setorientation")==0 || input[0].compare("setorient")==0 || input[0].compare("orient")==0){
+	  // comprobamos que el ultimo dispositivo sea valido
+	  if (dev.size()==0){
+	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
+	  }else
+	  // comprobamos el numero de parametros
+	  if (input.size()>4 || input.size()<3){
+	    printf("El comando setorientation requiere como parametros el tipo (none, all, untagged) y la direccion (forward, center).\n");
+	  }else{
+	    // Seleccionamos la id del device
+	    int auxid = (input.size()==4)?str2int(input[3]):dev.size()-1;
+	    // si la primera opcion es "none", no se requiere 2a opcion, el 3r parametro puede ser un id
+	    if (input[1].compare("none")==0 && input.size()==3)
+	      auxid= str2int(input[2]);
+	    // y comprobamos que sea del tipo adecuado como fuente
+	    string aux = dev[auxid]->info();
+	    if ( (aux.substr(0,5)).compare("3dmod")!=0){
+	      printf("No se puede aplicar setorientation al dispositivo %i, no es del tipo 3dmod\n", auxid);
+	    }else {
+	      // llamamos con la opcion adecuada:
+	      if (input[1].compare("none")==0){
+		((TPFC_device_3dmod*)dev[auxid])->setorientation(TPFC_device_3dmod::NONE);
+		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
+	      }else if (input[1].compare("all")==0 && input[2].compare("center")==0){
+		((TPFC_device_3dmod*)dev[auxid])->setorientation(TPFC_device_3dmod::ALL, TPFC_device_3dmod::CENTER );
+		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
+	      }else if (input[1].compare("all")==0 && input[2].compare("forward")==0){
+		((TPFC_device_3dmod*)dev[auxid])->setorientation(TPFC_device_3dmod::ALL, TPFC_device_3dmod::FORWARD );
+		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
+	      }else if (input[1].compare("untagged")==0 && input[2].compare("center")==0){
+		((TPFC_device_3dmod*)dev[auxid])->setorientation(TPFC_device_3dmod::UNTAGGED, TPFC_device_3dmod::CENTER );
+		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
+	      }else if (input[1].compare("untagged")==0 && input[2].compare("forward")==0){
+		((TPFC_device_3dmod*)dev[auxid])->setorientation(TPFC_device_3dmod::UNTAGGED, TPFC_device_3dmod::FORWARD );
+		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
+	      }else{
+		printf("Las opciones '%s %s' no son validas para setorientation, opciones posibles: <none, all, untagged> <forward, center>\n",input[1].c_str(),input[2].c_str());
+	      }
+	    }
+	  }
+	}else
+
+	// Opciones de profundidad (3dfrom2d)
 	if ( input[0].compare("setdeep")==0 || input[0].compare("deep")==0){
 	  // comprobamos que el ultimo dispositivo sea valido
 	  if (dev.size()==0){
@@ -362,7 +457,7 @@ int main( int argc, char** argv ){
 	  }
 	}else
 
-	// Opciones de merge
+	// Opciones de merge (3dfrom2d)
 	if ( input[0].compare("setmerge")==0 || input[0].compare("merge")==0){
 	  // comprobamos que el ultimo dispositivo sea valido
 	  if (dev.size()==0){
@@ -396,14 +491,14 @@ int main( int argc, char** argv ){
 	}else
 
 	// añadir tracker
-	if ( input[0].compare("addtracker")==0 || input[0].compare("addt")==0){
+	if ( input[0].compare("addserver")==0 || input[0].compare("server")==0 || input[0].compare("addtracker")==0 || input[0].compare("tracker")==0){
 	  // comprobamos primero que haya un device al que añadir el tracker
 	  if (dev.size()==0){
-	    printf("Para usar addtracker, primero se debe haber añadido un dispositivo.\n");
+	    printf("Para usar addserver, primero se debe haber añadido un dispositivo.\n");
 	  }else{
 	    // comprobamos que el numero sea el esperado
 	    if (input.size()<2 || input.size()>4){
-	      printf("addtracker necesita de 1 a 3 parametros adicionales: el nombre del tracker, el numero maximo de sensores y el dispositivo en el que se instala.\n");
+	      printf("addserver necesita de 1 a 3 parametros adicionales: el nombre del tracker, el numero maximo de sensores y el dispositivo en el que se instala.\n");
 	    }else{
 	      // calculamos la id del dispositivo segun el numero de parametros
 	      int auxid = (input.size()==4)?str2int(input[3]):dev.size()-1;
@@ -413,7 +508,7 @@ int main( int argc, char** argv ){
 	      else{ // si tenemos 3 o 4, incluimos el parametro
 		settracker(dev[auxid], input[1].c_str() , str2int(input[2]) );
 	      }
-	      printf("Añadido tracker, con nombre '%s al dispositivo %i'\n", input[1].c_str() , auxid);
+	      printf("Añadido servidor, con nombre '%s al dispositivo %i'\n", input[1].c_str() , auxid);
 	      // añadimos el comando a commands
 	      commands.push_back(s);
 	    }
@@ -539,27 +634,43 @@ int main( int argc, char** argv ){
 	if (s.compare("help")==0 || s.compare("?")==0 || s.compare("h")==0){
 	  // si es una peticion de ayuda, imprimimos la lista de comandos
 	  printf("Ayuda de TPFCServer, lista de comandos:\n");
+	  printf("\n");
 	  printf("help (?, h) -> muestra la lista de comandos disponibles.\n");
-	  printf("load <nombre> -> carga el script ~./trackingpfc/nombre.tpfc");
-	  printf("save <nombre> -> guarda el script ~./trackingpfc/nombre.tpfc");
-	  printf("device (dev, d) <tipo> -> crea un nuevo dispositivo. los posibles tipos son:\n");
+	  printf("load <nombre> -> carga el script ~./trackingpfc/nombre.tpfc\n");
+	  printf("save <nombre> -> guarda el script ~./trackingpfc/nombre.tpfc\n");
+	  printf("\n");
+	  printf("device (dev, d) <tipo> -> crea un nuevo dispositivo:\n");
 	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
 	  printf("dev wiimote (wii)\n");
 	  printf("dev 3dfrom2d (3f2) <id del dispositivo fuente>\n");
-	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm> [id del dispositivo, el ultimo por defecto]-> cambia la forma de calcular la profundidad\n");
-	  printf("     setmerge (merge) <on, off> [id del dispositivo, el ultimo por defecto] -> Activa o desactiva la opcion de juntar los puntos\n");
+	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm>\n");
+	  printf("                    [id del dispositivo, el ultimo por defecto]-> \n");
+	  printf("                    cambia la forma de calcular la profundidad\n");
+	  printf("     setmerge (merge) <on, off> [id del dispositivo, el ultimo por defecto]\n");
+	  printf(" 		      Activa o desactiva la opcion de juntar los puntos\n");
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
-	  printf("dev 3dpattern (3dpat, pattern, pat) <id de la fuente> <numero de puntos> <distancia entre los puntos (mm)> [autocompletar: on,off]\n");
-	  printf("addtracker (addt) <nombre> [numero de sensores] [id del dispositivo]-> añade un tracker (si no se especifica id, al ultimo dispositivo creado).\n");
+	  printf("     setscale (scale) <% de escala> [id del device]\n");
+	  printf("     setorientation (setorient, orient) <none, all, untagged> [center, forward]\n");
+	  printf("                    [id del device]\n");
+	  printf("     setfilter (filter, setkalman, kalman) [id del device]\n");
+	  printf("dev 3dpattern (3dpat, pattern, pat) <id de la fuente> <numero de puntos>\n");
+	  printf("		 <distancia entre los puntos (mm)> [autocompletar: on,off]\n");
+	  printf("\n");
+	  printf("addserver (server, addtracker, tracker) <nombre> [numero de sensores]\n");
+	  printf("		 [id del dispositivo]-> añade un Servidor.\n");
+	  printf("\n");
 	  printf("list (l)-> lista los dispositivos configurados en el servidor.\n");
-	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
-	  printf("history (hist) -> lista todos los comandos relevantes realizados hasta el momento.\n");
+	  printf("history (hist) -> lista todos los comandos relevantes introducidos.\n");
+	  printf("\n");
 	  printf("pause (p) -> Pone en pausa los dispositivos creados hasta el momento.\n");
-	  printf("unpause (u, run, r) -> quita la pausa (pone en funcionamiento) todos los devices creados hasta el momento\n");
+	  printf("unpause (u, run, r) -> quita la pausa.\n");
 	  printf("Exit (quit, q) -> finalizar el servidor.\n");
+	  printf("daemon -> Pone el servidor en modo daemon (dejará de aceptar comandos).\n");
+	  printf("\n");
 	  printf("Si la linea empieza con '#' será considerada un comentario y por lo tanto, ignorada.\n");
 	  printf("Leyenda: (alias de los comandos), <parametros obligatorios>, [parametros opcionales].\n");
+	  printf("Todos los comandos que tienen como parametro opcional una id de dispositivo, se aplicaran por defecto al ultimo dispositivo creado.\n");
 	  printf("Se pueden encontrar ejemplos de uso en las configuraciones de ejemplo en la carpeta cfg.\n");
 	  printf("\n");
 	}else{ // si hemos llegado aqui sin reconocer la orden avisamos de que es incorrecta
@@ -595,5 +706,4 @@ TO DO LIST:
 - Quitar la chapuza del if (d->camera()==0) cvWaitKey( 10 ); en el opencv
 - Ver por que mostrar 2 ventanas del facedetect acaba provocando un segfault
 - eliminar el mensaje de error de vrpn tracker cuando no se envian reports en >10 secs
-- añadir comandos load y save al servidor
 */

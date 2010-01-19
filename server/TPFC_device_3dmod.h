@@ -35,7 +35,7 @@ class TPFC_device_3dmod : public TPFC_device{
     void setscale(double);
 
     // cambiar la rotacion
-    void setrotation(reorientopt o, reorientdir d=FORWARD);
+    void setorientation(reorientopt o, reorientdir d=FORWARD);
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
     void report_from(TPFC_device*);

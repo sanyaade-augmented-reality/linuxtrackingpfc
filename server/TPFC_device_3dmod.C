@@ -141,7 +141,7 @@ void TPFC_device_3dmod::setscale(double s){
   scale= s;
 }
 
-void TPFC_device_3dmod::setrotation(reorientopt o, reorientdir d){
+void TPFC_device_3dmod::setorientation(reorientopt o, reorientdir d){
   orientopt=o;
   orientdir=d;
 }
