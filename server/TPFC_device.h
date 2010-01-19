@@ -11,6 +11,7 @@
 #include <vector>
 using namespace std;
 
+#include <quat.h>
 
 class TPFC_device{
   private:
