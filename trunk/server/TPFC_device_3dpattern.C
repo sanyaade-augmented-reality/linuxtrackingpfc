@@ -15,6 +15,7 @@ TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot,
   keepothers=others;
 
   tolerance=0.25;// 25%
+  tolerancereconstruct=0.40; //40%
   // posiciones del ultimo patron encontrado
   // { pos{xyz} ori{xyzw} dot0{xyz} dot1{xyz} [dot2{xyz}]}
   lastpattern= new double[7+3*dots];
@@ -234,7 +235,7 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    // distances[last] es la menor de las 3
 	    // como umbral definimos el tamaño del pattern
 	    // si esta dentro del umbral guardamos el numero del punto mas cercano a los de lastpattern
-	    if (distances[last]<dist) p1=nearest[last]; 
+	    if (distances[last]<dist*tolerancereconstruct) p1=nearest[last]; 
 	  }
 
 	  // llegados aqui, si p1=-1 es que no habia puntos utiles
