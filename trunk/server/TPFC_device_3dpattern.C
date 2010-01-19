@@ -14,7 +14,7 @@ TPFC_device_3dpattern::TPFC_device_3dpattern(int ident, TPFC_device* s, int dot,
   tag=t;
   keepothers=others;
 
-  tolerance=0.25;// 20%
+  tolerance=0.25;// 25%
   // posiciones del ultimo patron encontrado
   // { pos{xyz} ori{xyzw} dot0{xyz} dot1{xyz} [dot2{xyz}]}
   lastpattern= new double[7+3*dots];
