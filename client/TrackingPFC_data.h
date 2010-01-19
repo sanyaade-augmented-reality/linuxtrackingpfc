@@ -94,8 +94,13 @@ class TrackingPFC_data{
     // añadir tag a algun datachunk del ultimo report
     void settag(int tag, int n=0);
 
+    // obtiene el count actual
+    int getcount();
+
     // Consultoras avanzadas
     // devuelve una copia del ultimo datachunk 
     datachunk* getlastdata();
+    // devuelve una copia del datachunk con count =c (o null si no lo tenemos)
+    datachunk* getdata(int c);
 };
 #endif /*TRACKINGPFC_DATA_*/
