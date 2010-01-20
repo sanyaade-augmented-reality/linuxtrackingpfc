@@ -704,6 +704,8 @@ int main( int argc, char** argv ){
 	  printf("     setorientation (setorient, orient) <none, all, untagged> [center, forward]\n");
 	  printf("                    [id del device]\n");
 	  printf("     setfilter (filter, setkalman, kalman) [id del device]\n");
+	  printf("     calibrate (cal) <numero de puntos> [id del device]\n");
+	  printf("     calibrate (cal) <7 floats con la informacion del calibrado> [id del device]\n");
 	  printf("dev 3dpattern (3dpat, pattern, pat) <id de la fuente> <numero de puntos>\n");
 	  printf("		 <distancia entre los puntos (mm)> [autocompletar: on,off]\n");
 	  printf("\n");
