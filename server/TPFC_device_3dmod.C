@@ -111,30 +111,11 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 
 	double* newdot = new double[7];
 
-	if (kalman.size()!=0){ // hay filtros de kalman
-	  // si no tenemos suficientes filtros, creamos uno nuevo
-	  if (kalman.size()<(dn+1))
-	    addkalman();
-	  // obtenemos la predicción del filtro de kalman
-	  const CvMat* y_k = cvKalmanPredict( kalman[dn], 0 );
-	  newdot[0] =CV_MAT_ELEM(*y_k,float,0,0);
-	  newdot[1]=CV_MAT_ELEM(*y_k,float,1,0);
-	  newdot[2] =CV_MAT_ELEM(*y_k,float,2,0);
+	// copiamos los datos
+	newdot[0]=dotdata[0];
+	newdot[1]=dotdata[1];
+	newdot[2]=dotdata[2];
 
-	  // preparamos el vector opencv
-	  CvMat* z_k = cvCreateMat( 3, 1, CV_32FC1 );
-	  cvZero( z_k );
-	  *( (float*)CV_MAT_ELEM_PTR(*z_k,0,0 ) ) = dotdata[0];
-	  *( (float*)CV_MAT_ELEM_PTR(*z_k,1,0 ) ) = dotdata[1];
-	  *( (float*)CV_MAT_ELEM_PTR(*z_k,2,0 ) ) = dotdata[2];
-	  // introducimos las lecturas en el filtro
-	  cvKalmanCorrect( kalman[dn], z_k );
-	}else{// no hay filtro de kalman
-	  newdot[0]=dotdata[0];
-	  newdot[1]=dotdata[1];
-	  newdot[2]=dotdata[2];
-	}//kalman
-	
 	// Aplicamos el cambio de ubicacion
 	if (location!=NULL){
 	  //printf("olddot: %f %f %f\n", newdot[0], newdot[1], newdot[2]);
@@ -154,6 +135,30 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 	  //printf("newdot: %f %f %f\n", newdot[0], newdot[1], newdot[2]);
 	}
 
+
+	if (kalman.size()!=0){ // hay filtros de kalman
+	  // si no tenemos suficientes filtros, creamos uno nuevo
+	  if (kalman.size()<(dn+1))
+	    addkalman();
+
+	  // Guardamos los datos para corregir el filtro en un vector opencv
+	  CvMat* z_k = cvCreateMat( 3, 1, CV_32FC1 );
+	  cvZero( z_k );
+	  *( (float*)CV_MAT_ELEM_PTR(*z_k,0,0 ) ) = newdot[0];
+	  *( (float*)CV_MAT_ELEM_PTR(*z_k,1,0 ) ) = newdot[1];
+	  *( (float*)CV_MAT_ELEM_PTR(*z_k,2,0 ) ) = newdot[2];
+
+	  // obtenemos la predicción del filtro de kalman
+	  double* aux = new double[3];
+	  const CvMat* y_k = cvKalmanPredict( kalman[dn], 0 );
+	  newdot[0] =CV_MAT_ELEM(*y_k,float,0,0);
+	  newdot[1]=CV_MAT_ELEM(*y_k,float,1,0);
+	  newdot[2] =CV_MAT_ELEM(*y_k,float,2,0);
+
+	  // aplicamos la correccion al filtro
+	  cvKalmanCorrect( kalman[dn], z_k );
+	}
+	
 	// Aplicamos la escala
 	newdot[0]=newdot[0]*scale;
 	newdot[1]=newdot[1]*scale;
