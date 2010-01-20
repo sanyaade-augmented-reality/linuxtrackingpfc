@@ -96,6 +96,8 @@ class TrackingPFC_data{
 
     // obtiene el count actual
     int getcount();
+    // obtiene el count actual
+    bool isreal();
 
     // Consultoras avanzadas
     // devuelve una copia del ultimo datachunk 
