@@ -4,7 +4,7 @@
 #include "TPFC_device.h"
 #include <cv.h>
 
-#define TPFC_CALIBSAMPLES 200
+#define TPFC_CALIBSAMPLES 50
 #define TPFC_CALIBINC TPFC_CALIBSAMPLES/50
 
 class TPFC_device_3dmod : public TPFC_device{
