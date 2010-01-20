@@ -227,6 +227,11 @@ int TrackingPFC_data::getcount(){
   return count;
 }
 
+// devuelve un booleano segun si los datos son reales o artificiales
+bool TrackingPFC_data::isreal(){
+  return data[ind]->getreal();
+}
+
 
 
 // STRUCT DATACHUNK
