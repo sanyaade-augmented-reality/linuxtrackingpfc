@@ -42,9 +42,11 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
     }else{// si son validos...
       // obtenemos el numero de puntos del report
       int n = sourcedata->size();
-
+      sourcedata->getreal();
       // Obtencion de datos para calibrado
-      if (calibrando && n==dots){
+      // solo si estamos calibrando, el report tiene exactamente los puntos requeridos
+      // y el report no es artificial
+      if (calibrando && n==dots && sourcedata->getreal()){
 	bool needdata=false; // flag para saber si debemos guardar los datos
 	pthread_mutex_lock( caliblock ); // obtenemos acceso exclusivo
 	if (processedsamples<TPFC_CALIBSAMPLES){ // si aun no tenemos suficientes
@@ -231,7 +233,7 @@ void TPFC_device_3dmod::setorientation(reorientopt o, reorientdir d){
 }
 
 // Calibrado
-double* TPFC_device_3dmod::calibrate(int d, double* c){
+double* TPFC_device_3dmod::calibrate(int d, double dis, double* c){
   double* loc = new double[3];
   if (c==NULL){
     // Tenemos que obtener los datos
@@ -251,7 +253,26 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
       for (int j =0; j<3;j++)
 	dotdata[i][j]=0.0;
 
-    // EXPLICACION AL USUARIO SEGUN DOTS
+    // Explicacion al usuario
+    if (dots==1){
+      printf("Calibración usando 1 solo marcador:\n");
+      printf("Se realizaran tres tomas de datos.");
+      printf("Para todas las tomas, el marcador debe estar a una distancia de %f metros.",dis);
+      printf("del plano del display.");
+      printf("Las 3 posiciones para las tomas deben formar un triangulo bien diferenciado,");
+      printf("cuyo centro esté alineado con el centro del display.");
+    }else if (dots==2){
+      printf("Calibración usando 2 marcadores simultaneos:\n");
+      printf("Se realizaran dos tomas de datos, manten el marcador en posicion horizontal, ");
+      printf("paralelo al display a una distancia de %f metros.",dis);
+      printf("La posicion en ambas tomas debe estar centrada respecto al eje horizontal del display");
+      printf("para las 2 tomas, varia la posicion vertical unos centimetros, primero hacia arriba,");
+      printf("despues hacia abajo, procurando que el centro del display quede entre ambas posiciones.");
+    }else{
+      printf("Calibracion usando 3 marcadores simultaneos:");
+      printf("Se realizará una sola toma de datos, manten el marcador frente al centro del display");
+      printf("a una distancia de %f metros.",dis);
+    }
     while(processeddots<3){
     
       warn= TPFC_CALIBINC;
@@ -328,9 +349,10 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
       q_vec_invert(vn,vn);
 
     // sumamos este vector a la posicion media de los puntos, con eso obtenemos la posicion del display
-    loc[0]+=vn[Q_X];
-    loc[1]+=vn[Q_Y];
-    loc[2]+=vn[Q_Z];
+    // multiplicamos por dis ya que vn es normalizado, por lo que la distancia seria 1
+    loc[0]+=vn[Q_X]*dis;
+    loc[1]+=vn[Q_Y]*dis;
+    loc[2]+=vn[Q_Z]*dis;
 
     // obtenemos el quaternion que rota de la normal al plano del sensor a la normal al plano del display
     q_type rot;
