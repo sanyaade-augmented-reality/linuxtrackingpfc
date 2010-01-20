@@ -134,6 +134,23 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 	}//kalman
 	
 	// Aplicamos el cambio de ubicacion
+	if (location!=NULL){
+	  //printf("olddot: %f %f %f\n", newdot[0], newdot[1], newdot[2]);
+	  // primero aplicamos la translacion
+	  newdot[0]-=location[0];
+	  newdot[1]-=location[1];
+	  newdot[2]-=location[2];
+	  
+	  double aux[3];
+	  aux[0]=newdot[0]*rotation[0][0]+newdot[1]*rotation[0][1]+newdot[2]*rotation[0][2];
+	  aux[1]=newdot[0]*rotation[1][0]+newdot[1]*rotation[1][1]+newdot[2]*rotation[1][2];
+	  aux[2]=newdot[0]*rotation[2][0]+newdot[1]*rotation[2][1]+newdot[2]*rotation[2][2];
+
+	  newdot[0]=aux[0];
+	  newdot[1]=aux[1];
+	  newdot[2]=aux[2];
+	  //printf("newdot: %f %f %f\n", newdot[0], newdot[1], newdot[2]);
+	}
 
 	// Aplicamos la escala
 	newdot[0]=newdot[0]*scale;
@@ -215,6 +232,7 @@ void TPFC_device_3dmod::setorientation(reorientopt o, reorientdir d){
 
 // Calibrado
 double* TPFC_device_3dmod::calibrate(int d, double* c){
+  double* loc = new double[3];
   if (c==NULL){
     // Tenemos que obtener los datos
 
@@ -223,30 +241,22 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
     // en total siempre se necesitan 3 puntos
     dots = d;
 
-
     // inicializaciones
     calibdata = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D,TPFC_CALIBSAMPLES);
     caliblock = new pthread_mutex_t(); // inicializamos el semaforo
     int processeddots=0;
     int warn;
-    double dotdata[3][3];
+    double dotdata[4][3];
     for (int i =0; i<3;i++)
       for (int j =0; j<3;j++)
 	dotdata[i][j]=0.0;
 
-    int dotsinsample=1;
-    
     // EXPLICACION AL USUARIO SEGUN DOTS
     while(processeddots<3){
-      if (dots==2 && processeddots==0)
-	dotsinsample=2;
-      if (dots==3)
-	dotsinsample=3;
     
       warn= TPFC_CALIBINC;
       processedsamples =0;
       
-
       // Mensajes de aviso con cuenta atrás para el usuario
       printf("Preparando para obtener datos en...\n");
       for (int i =5; i>0;i--){
@@ -277,7 +287,7 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
       int c= calibdata->getcount();
       for (int i=0; i<TPFC_CALIBSAMPLES; i++){
 	TrackingPFC_data::datachunk* sampledata=calibdata->getdata(c-i);
-	for (int dn=0; dn<dotsinsample;dn++){
+	for (int dn=0; dn<dots;dn++){
 	  const double* aux= sampledata->getdata(dn);
 	  dotdata[dn+processeddots][0]+=aux[0];
 	  dotdata[dn+processeddots][1]+=aux[1];
@@ -293,13 +303,13 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
 
     // CALCULAMOS LO NECESARIO
     // hacemos las medias
-    for (int i =0; i<3;i++)
+    int totaldots = (dots==2)?4:3;
+    for (int i =0; i<totaldots;i++)
       for (int j =0; j<3;j++){
 	dotdata[i][j]=dotdata[i][j]/(double)TPFC_CALIBSAMPLES;
       }
     
-    // calculamos en loc[0.2] el punto medio de los 3 puntos
-    double* loc = new double[7];
+    // calculamos en loc el punto medio de los 3 puntos
     loc[0]=(dotdata[0][0]+dotdata[1][0]+dotdata[2][0])/3.0;
     loc[1]=(dotdata[0][1]+dotdata[1][1]+dotdata[2][1])/3.0;
     loc[2]=(dotdata[0][2]+dotdata[1][2]+dotdata[2][2])/3.0;
@@ -329,12 +339,13 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
 
     printf("LOC: %f %f %f\n", loc[0],loc[1], loc[2]);
     printf("ROT: %f %f %f %f\n", rot[Q_X], rot[Q_Y], rot[Q_Z], rot[Q_W]);
-
-    
+    q_to_row_matrix(rotation, rot);
+    location=loc;
     
     // eliminamos el buffer
     delete(calibdata);
-  } //if c==NULL
+  }else{ //if c==NULL
+  }
 
 }
 
