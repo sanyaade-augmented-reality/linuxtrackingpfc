@@ -366,7 +366,30 @@ double* TPFC_device_3dmod::calibrate(int d, double dis, double* c){
     
     // eliminamos el buffer
     delete(calibdata);
+    // creamos el vector resultado
+    double* res = new double[7];
+    res[0]=location[0];
+    res[1]=location[1];
+    res[2]=location[2];
+    res[3]=rot[Q_X];
+    res[4]=rot[Q_Y];
+    res[5]=rot[Q_Z];
+    res[6]=rot[Q_W];
+    return res;
   }else{ //if c==NULL
+    // simplemente cargamos los datos de c
+    double* aux = new double[3];
+    aux[0]=c[0];
+    aux[1]=c[1];
+    aux[2]=c[2];
+    q_type rot;
+    rot[Q_X]=c[3];
+    rot[Q_Y]=c[4];
+    rot[Q_Z]=c[5];
+    rot[Q_W]=c[6];
+    q_to_row_matrix(rotation, rot);
+    location=aux;
+    return NULL;
   }
 
 }

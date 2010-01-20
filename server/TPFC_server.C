@@ -62,7 +62,13 @@ int str2int (const string &str) {
   ss >> n;
   return n;
 }
-
+// version alternativa para doubles
+double str2double (const string &str) {
+  stringstream ss(str);
+  double n;
+  ss >> n;
+  return n;
+}
 // funcion auxiliar para parsear la entrada
 // (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
 void StringExplode(string str, string separator, vector<string>* results){
@@ -107,54 +113,9 @@ bool FileExists(string strFilename) {
   
   return(blnReturn);
 }
-/*
 
-double mat[3][3];
-    mat[0][0]=0;  mat[0][1]=0;  mat[0][2]=1;
-    mat[1][0]=0;  mat[1][1]=1;  mat[1][2]=0;
-    mat[2][0]=-1; mat[2][1]=0;  mat[2][2]=0;
-    // la diferencia de posicion es 2,0,0
-    double pos[3];
-    double res[3];
-    pos[0]=-1, pos[1]=2, pos[2]=-1;
-    printf("%f %f %f\n",pos[0],pos[1],pos[2]);
-
-    //q_to_row_matrix(mat, rot);
-    res[0]=pos[0]*mat[0][0]+pos[1]*mat[0][1]+pos[2]*mat[0][2];
-    res[1]=pos[0]*mat[1][0]+pos[1]*mat[1][1]+pos[2]*mat[1][2];
-    res[2]=pos[0]*mat[2][0]+pos[1]*mat[2][1]+pos[2]*mat[2][2];
-    printf("%f %f %f\n",res[0],res[1],res[2]);
-
-    //q_to_col_matrix(mat, rot);
-    res[0]=pos[0]*mat[0][0]+pos[1]*mat[1][0]+pos[2]*mat[2][0];
-    res[1]=pos[0]*mat[0][1]+pos[1]*mat[1][1]+pos[2]*mat[2][1];
-    res[2]=pos[0]*mat[0][2]+pos[1]*mat[1][2]+pos[2]*mat[2][2];
-    printf("%f %f %f\n",res[0],res[1],res[2]);
-
-
-*/
 
 int main( int argc, char** argv ){
-    //printf("%f\n",strtod("0.1",NULL));
-    /*q_vec_type vn, vns;
-    q_type rot;
-    q_vec_set(vns, 0,0,-1);
-    q_vec_set(vn, -1,0,0);
-    q_from_two_vecs(rot, vns, vn);
-
-    // la diferencia de posicion es 2,0,0
-    double pos[3];
-    double res[3];
-    pos[0]=-1, pos[1]=2, pos[2]=-1;
-    printf("%f %f %f\n",pos[0],pos[1],pos[2]);
-    // ahora a rotar
-    q_matrix_type mat;
-    q_to_row_matrix(mat, rot);
-    res[0]=pos[0]*mat[0][0]+pos[1]*mat[0][1]+pos[2]*mat[0][2];
-    res[1]=pos[0]*mat[1][0]+pos[1]*mat[1][1]+pos[2]*mat[1][2];
-    res[2]=pos[0]*mat[2][0]+pos[1]*mat[2][1]+pos[2]*mat[2][2];
-    printf("%f %f %f\n",res[0],res[1],res[2]);
-    */
 
     // incializaciones
     connection=NULL;
@@ -367,18 +328,28 @@ int main( int argc, char** argv ){
 	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
 	  }else
 	  // comprobamos el numero de parametros
-	  if (input.size()>3 || input.size()<2 ){
+	  if (input.size()!=2 && input.size()!=3 && input.size()!=8 && input.size()!=9 ){
 	    printf("El comando calibrate requiere el numero de puntos del patron a usar (1, 2 o 3)\n");
 	  }else{
 	    // Seleccionamos la id del device
 	    int auxid = (input.size()==3)?str2int(input[2]):dev.size()-1;
+	    auxid = (input.size()==9)?str2int(input[8]):auxid
+;
 	    // y comprobamos que sea del tipo adecuado como fuente
 	    string aux = dev[auxid]->info();
 	    if ( (aux.substr(0,5)).compare("3dmod")!=0){
 	      printf("No se puede aplicar calibrate al dispositivo %i, no es del tipo 3dmod\n", auxid);
 	    }else {
 	      // Cambiamos la opcion
-	      ((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]), 0.5 );
+	      if (input.size()<=3){ // llamada de calibrado normal
+		double* aux=((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]), 0.5 );
+		commands.push_back("# Version alternativa para usar los datos de este calibrado: ");
+		char aux2[200];
+		sprintf(aux2, "# calibrate %f %f %f %f %f %f %f\n", aux[0], aux[1], aux[2], aux[3], aux[4], aux[5], aux[6]);
+		commands.push_back(aux2);
+	      }else{
+		
+	      }
 	      commands.push_back(s);
 	      printf("Calibrado completado\n");
 
