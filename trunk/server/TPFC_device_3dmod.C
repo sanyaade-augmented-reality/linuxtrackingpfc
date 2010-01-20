@@ -359,8 +359,6 @@ double* TPFC_device_3dmod::calibrate(int d, double dis, double* c){
     q_vec_set(vns, 0,0,-1);
     q_from_two_vecs(rot, vns, vn);
 
-    printf("LOC: %f %f %f\n", loc[0],loc[1], loc[2]);
-    printf("ROT: %f %f %f %f\n", rot[Q_X], rot[Q_Y], rot[Q_Z], rot[Q_W]);
     q_to_row_matrix(rotation, rot);
     location=loc;
     

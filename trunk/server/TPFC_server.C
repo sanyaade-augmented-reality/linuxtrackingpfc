@@ -52,23 +52,6 @@ void settracker(TPFC_device* dev, const char* name, int nsensors = 1){
   dev->settracker(connection, name, nsensors);
 }
 
-
-
-// funcion auxiliar para pasar de str a int
-// (por Martin Gieseking, encontrada en http://bytes.com/topic/c/answers/132109-string-integer)
-int str2int (const string &str) {
-  stringstream ss(str);
-  int n;
-  ss >> n;
-  return n;
-}
-// version alternativa para doubles
-double str2double (const string &str) {
-  stringstream ss(str);
-  double n;
-  ss >> n;
-  return n;
-}
 // funcion auxiliar para parsear la entrada
 // (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
 void StringExplode(string str, string separator, vector<string>* results){
@@ -84,6 +67,18 @@ void StringExplode(string str, string separator, vector<string>* results){
     if(str.length() > 0){
         results->push_back(str);
     }
+}
+
+// funcion auxiliar para pasar de str a int
+inline int str2int (const string str) {
+  return atoi(str.c_str());
+}
+// version alternativa para doubles (cuando estan expresados con comas y no con puntos)
+inline double str2double (const string str) {
+  vector<string> aux;
+  StringExplode(str, ",", &aux);
+  string aux2 = aux[0]+"."+aux[1];
+  return atof(aux2.c_str());
 }
 
 // funcion auxiliar para comprobar si un archivo existe
@@ -345,10 +340,24 @@ int main( int argc, char** argv ){
 		double* aux=((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]), 0.5 );
 		commands.push_back("# Version alternativa para usar los datos de este calibrado: ");
 		char aux2[200];
-		sprintf(aux2, "# calibrate %f %f %f %f %f %f %f\n", aux[0], aux[1], aux[2], aux[3], aux[4], aux[5], aux[6]);
+		sprintf(aux2, "# calibrate %f %f %f %f %f %f %f", aux[0], aux[1], aux[2], aux[3], aux[4], aux[5], aux[6]);
 		commands.push_back(aux2);
+		free (aux);
 	      }else{
+		double* aux = new double[7];
 		
+		aux[0]=str2double(input[1]);
+		aux[1]=str2double(input[2]);
+		aux[2]=str2double(input[3]);
+		aux[3]=str2double(input[4]);
+		aux[4]=str2double(input[5]);
+		aux[5]=str2double(input[6]);
+		aux[6]=str2double(input[7]);
+		printf("enviando %s %s %s\n", input[1].c_str(), input[2].c_str(), input[3].c_str());
+		printf("enviando %f %f %f\n", aux[0], aux[1], aux[2]);
+		// el numero de puntos es irrelevante cuando se llama con los datos
+		((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]), 0,  aux );
+		free (aux);
 	      }
 	      commands.push_back(s);
 	      printf("Calibrado completado\n");
