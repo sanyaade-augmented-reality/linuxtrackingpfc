@@ -7,7 +7,7 @@ CC = g++
 CFLAGS = $(COMPILERFLAGS) $(INCLUDE)
 LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread  -lquat -ltpfcc -lcwiid -lcv -lhighgui
 
-all: tpfcserver
+all: tpfcserver calibrate
 
 tpfcdev.o : TPFC_device.C TPFC_device.h
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
@@ -30,6 +30,9 @@ tpfcdevopencvface.o : TPFC_device_opencv_face.C TPFC_device_opencv_face.h tpfcde
 tpfcdevwii.o : TPFC_device_wiimote.C TPFC_device_wiimote.h tpfcdev.o
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
+calibrate: calibrate.C
+	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
+
 tpfcserver : TPFC_server.C tpfcdev.o tpfcdev3df2d.o tpfcdev3dmod.o tpfcdev3dpattern.o tpfcdev3dstereo.o tpfcdevopencvface.o tpfcdevwii.o
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $^ $(LIBRARIES)
 	mkdir -p ~/.trackingpfc
@@ -40,5 +43,5 @@ tpfcserver : TPFC_server.C tpfcdev.o tpfcdev3df2d.o tpfcdev3dmod.o tpfcdev3dpatt
 
 # to clean up:
 clean:
-	rm *~ *.o *.so* tpfcserver cfgs/*~
+	rm *~ *.o *.so* tpfcserver calibrate cfgs/*~
 
