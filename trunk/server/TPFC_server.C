@@ -107,11 +107,54 @@ bool FileExists(string strFilename) {
   
   return(blnReturn);
 }
+/*
+
+double mat[3][3];
+    mat[0][0]=0;  mat[0][1]=0;  mat[0][2]=1;
+    mat[1][0]=0;  mat[1][1]=1;  mat[1][2]=0;
+    mat[2][0]=-1; mat[2][1]=0;  mat[2][2]=0;
+    // la diferencia de posicion es 2,0,0
+    double pos[3];
+    double res[3];
+    pos[0]=-1, pos[1]=2, pos[2]=-1;
+    printf("%f %f %f\n",pos[0],pos[1],pos[2]);
+
+    //q_to_row_matrix(mat, rot);
+    res[0]=pos[0]*mat[0][0]+pos[1]*mat[0][1]+pos[2]*mat[0][2];
+    res[1]=pos[0]*mat[1][0]+pos[1]*mat[1][1]+pos[2]*mat[1][2];
+    res[2]=pos[0]*mat[2][0]+pos[1]*mat[2][1]+pos[2]*mat[2][2];
+    printf("%f %f %f\n",res[0],res[1],res[2]);
+
+    //q_to_col_matrix(mat, rot);
+    res[0]=pos[0]*mat[0][0]+pos[1]*mat[1][0]+pos[2]*mat[2][0];
+    res[1]=pos[0]*mat[0][1]+pos[1]*mat[1][1]+pos[2]*mat[2][1];
+    res[2]=pos[0]*mat[0][2]+pos[1]*mat[1][2]+pos[2]*mat[2][2];
+    printf("%f %f %f\n",res[0],res[1],res[2]);
 
 
+*/
 
 int main( int argc, char** argv ){
     //printf("%f\n",strtod("0.1",NULL));
+    /*q_vec_type vn, vns;
+    q_type rot;
+    q_vec_set(vns, 0,0,-1);
+    q_vec_set(vn, -1,0,0);
+    q_from_two_vecs(rot, vns, vn);
+
+    // la diferencia de posicion es 2,0,0
+    double pos[3];
+    double res[3];
+    pos[0]=-1, pos[1]=2, pos[2]=-1;
+    printf("%f %f %f\n",pos[0],pos[1],pos[2]);
+    // ahora a rotar
+    q_matrix_type mat;
+    q_to_row_matrix(mat, rot);
+    res[0]=pos[0]*mat[0][0]+pos[1]*mat[0][1]+pos[2]*mat[0][2];
+    res[1]=pos[0]*mat[1][0]+pos[1]*mat[1][1]+pos[2]*mat[1][2];
+    res[2]=pos[0]*mat[2][0]+pos[1]*mat[2][1]+pos[2]*mat[2][2];
+    printf("%f %f %f\n",res[0],res[1],res[2]);
+    */
 
     // incializaciones
     connection=NULL;
@@ -335,7 +378,7 @@ int main( int argc, char** argv ){
 	      printf("No se puede aplicar calibrate al dispositivo %i, no es del tipo 3dmod\n", auxid);
 	    }else {
 	      // Cambiamos la opcion
-	      ((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]) );
+	      ((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]), 0.5 );
 	      commands.push_back(s);
 	      printf("Calibrado completado\n");
 
