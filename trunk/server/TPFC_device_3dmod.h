@@ -28,6 +28,7 @@ class TPFC_device_3dmod : public TPFC_device{
 
     // reubicacion
     double* location;
+    q_matrix_type rotation;
 
     // variables auxiliares para el calibrado
     bool calibrando;
