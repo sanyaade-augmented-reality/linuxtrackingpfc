@@ -177,6 +177,7 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
       report();
 
     } // validos
+    delete(sourcedata);
   }//working
 }
 
@@ -228,9 +229,19 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
     caliblock = new pthread_mutex_t(); // inicializamos el semaforo
     int processeddots=0;
     int warn;
+    double dotdata[3][3];
+    for (int i =0; i<3;i++)
+      for (int j =0; j<3;j++)
+	dotdata[i][j]=0.0;
+
+    int dotsinsample=1;
     
     // EXPLICACION AL USUARIO SEGUN DOTS
     while(processeddots<3){
+      if (dots==2 && processeddots==0)
+	dotsinsample=2;
+      if (dots==3)
+	dotsinsample=3;
     
       warn= TPFC_CALIBINC;
       processedsamples =0;
@@ -263,13 +274,66 @@ double* TPFC_device_3dmod::calibrate(int d, double* c){
 
       // procesamos los datos
       printf("\nDatos adquiridos, procesando...\n");
-    
+      int c= calibdata->getcount();
+      for (int i=0; i<TPFC_CALIBSAMPLES; i++){
+	TrackingPFC_data::datachunk* sampledata=calibdata->getdata(c-i);
+	for (int dn=0; dn<dotsinsample;dn++){
+	  const double* aux= sampledata->getdata(dn);
+	  dotdata[dn+processeddots][0]+=aux[0];
+	  dotdata[dn+processeddots][1]+=aux[1];
+	  dotdata[dn+processeddots][2]+=aux[2];
+	}
+	delete(sampledata);
+      }
+      
       // incrementamos el contador de datos procesados
       processeddots+=dots;
 
     }//while(processeddots<3){
 
     // CALCULAMOS LO NECESARIO
+    // hacemos las medias
+    for (int i =0; i<3;i++)
+      for (int j =0; j<3;j++){
+	dotdata[i][j]=dotdata[i][j]/(double)TPFC_CALIBSAMPLES;
+      }
+    
+    // calculamos en loc[0.2] el punto medio de los 3 puntos
+    double* loc = new double[7];
+    loc[0]=(dotdata[0][0]+dotdata[1][0]+dotdata[2][0])/3.0;
+    loc[1]=(dotdata[0][1]+dotdata[1][1]+dotdata[2][1])/3.0;
+    loc[2]=(dotdata[0][2]+dotdata[1][2]+dotdata[2][2])/3.0;
+
+    // calculamos 2 vectores con los 3 puntos de los samples
+    q_vec_type v1, v2,vn, vns;
+    q_vec_set(v1, dotdata[0][0]-dotdata[1][0], dotdata[0][1]-dotdata[1][1], dotdata[0][2]-dotdata[1][2]);
+    q_vec_set(v2, dotdata[0][0]-dotdata[2][0], dotdata[0][1]-dotdata[2][1], dotdata[0][2]-dotdata[2][2]);
+    //calculamos la normal al plano que forman los vectores
+    // realizamos el producto vectorial
+    q_vec_cross_product(vn,v1,v2);
+    // y normalizamos
+    q_vec_normalize(vn,vn);
+    // si el vector se aleja del sensor, lo invertimos
+    if (vn[Q_Z]>0)
+      q_vec_invert(vn,vn);
+
+    // sumamos este vector a la posicion media de los puntos, con eso obtenemos la posicion del display
+    loc[0]+=vn[Q_X];
+    loc[1]+=vn[Q_Y];
+    loc[2]+=vn[Q_Z];
+
+    // obtenemos el quaternion que rota de la normal al plano del sensor a la normal al plano del display
+    q_type rot;
+    q_vec_set(vns, 0,0,-1);
+    q_from_two_vecs(rot, vns, vn);
+
+    printf("LOC: %f %f %f\n", loc[0],loc[1], loc[2]);
+    printf("ROT: %f %f %f %f\n", rot[Q_X], rot[Q_Y], rot[Q_Z], rot[Q_W]);
+
+    
+    
+    // eliminamos el buffer
+    delete(calibdata);
   } //if c==NULL
 
 }
