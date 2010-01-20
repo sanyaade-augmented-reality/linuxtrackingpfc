@@ -42,7 +42,7 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
     }else{// si son validos...
       // obtenemos el numero de puntos del report
       int n = sourcedata->size();
-      sourcedata->getreal();
+
       // Obtencion de datos para calibrado
       // solo si estamos calibrando, el report tiene exactamente los puntos requeridos
       // y el report no es artificial
@@ -192,8 +192,8 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 	  
       }// recorrido por los puntos 
 
-
-      report();
+      // reportamos
+	report();
 
     } // validos
     delete(sourcedata);
