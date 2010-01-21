@@ -37,7 +37,7 @@ class TPFC_device_opencv_face : public TPFC_device{
     // Facedetect
     pthread_t facedetect_thread;
     static void* facedetect(void * t);
-    static int detect_and_draw( IplImage* , double ,  CvMemStorage* , CvHaarClassifierCascade* ,
+    static void detect_and_draw( IplImage* , double ,  CvMemStorage* , CvHaarClassifierCascade* ,
 			 const char* , TPFC_device_opencv_face*);
 
     // funcion auxiliar para comprobar si existen los archivos
