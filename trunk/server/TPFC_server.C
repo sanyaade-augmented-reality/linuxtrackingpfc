@@ -760,10 +760,3 @@ int main( int argc, char** argv ){
     // finalizamos
     return 0;
 }
-
-/*
-TO DO LIST:
-- Quitar la chapuza del if (d->camera()==0) cvWaitKey( 10 ); en el opencv
-- Ver por que mostrar 2 ventanas del facedetect acaba provocando un segfault
-- eliminar el mensaje de error de vrpn tracker cuando no se envian reports en >10 secs
-*/
