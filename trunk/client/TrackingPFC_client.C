@@ -127,7 +127,7 @@ float TrackingPFC_client::getDisplayHeightMM(){
 
 // funcion auxiliar para parsear la entrada
 // (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
-void StringExplode(string str, string separator, vector<string>* results){
+void TrackingPFC_client::StringExplode(string str, string separator, vector<string>* results){
     int found;
     found = str.find_first_of(separator);
     while(found != string::npos){
