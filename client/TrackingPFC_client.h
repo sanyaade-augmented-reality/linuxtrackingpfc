@@ -53,6 +53,9 @@ class TrackingPFC_client{
     static float screensizex;
     static float screensizey;
 
+    // funcion auxiliar para partir strings
+    static void StringExplode(string str, string separator, vector<string>* results);
+
   public:
     // placeholder para el callback personalizado (si es necesario)
     void (*callback_func)(TrackingPFC_client*);
