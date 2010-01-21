@@ -35,11 +35,11 @@ calibrate: calibrate.C
 
 tpfcserver : TPFC_server.C tpfcdev.o tpfcdev3df2d.o tpfcdev3dmod.o tpfcdev3dpattern.o tpfcdev3dstereo.o tpfcdevopencvface.o tpfcdevwii.o
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $^ $(LIBRARIES)
-
-install : tpfcserver calibrate
 	mkdir -p ~/.trackingpfc
 	cp cfgs/*.tpfc ~/.trackingpfc
-	cp cfgs/*.cfg ~/.trackingpfc
+	cp cfgs/*.cfg ~/.trackingpfc	
+
+install : tpfcserver calibrate
 	cp tpfcserver /usr/bin/tpfcserver
 	
 
