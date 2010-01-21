@@ -89,11 +89,11 @@ void* TPFC_device_opencv_face::facedetect(void * t){
       d->stop();
   }
   storage = cvCreateMemStorage(0);
-  //capture = cvCaptureFromCAM( !input_name ? 0 : input_name[0] - '0' );
+
   capture = cvCaptureFromCAM(d->camera());
   char* winname = new char[48];
   sprintf(winname, "%s%i", "Face Detect on cam: ", d->idnum());
-  cvNamedWindow( winname, 1 );
+  cvNamedWindow( winname );
   if( !capture ){
     d->stop();
     printf("Fallo al iniciar la captura en la webcam, abortando thread");
@@ -117,7 +117,7 @@ void* TPFC_device_opencv_face::facedetect(void * t){
 
       if (detect_and_draw( frame_copy , scale, storage, cascade, winname, d)==1)
 	d->report();
-      if (d->camera()==0) cvWaitKey( 10 ); // si quito esto la ventana no aparece :\
+      if (d->idnum()==firstinstance) cvWaitKey( 10 ); // si quito esto la ventana no aparece :\
       // fin del bucle central de facedetect
 
       vrpn_SleepMsecs(1); // liberamos la cpu
@@ -141,7 +141,11 @@ void* TPFC_device_opencv_face::facedetect(void * t){
 
 }
 
+int TPFC_device_opencv_face::firstinstance=-1;
+
 TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c):TPFC_device(ident){
+  if (firstinstance==-1)
+    firstinstance=ident;
   cam = c;
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
   // lanzamos el thread
