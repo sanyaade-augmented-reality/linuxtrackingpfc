@@ -4,7 +4,7 @@
 int TPFC_device_opencv_face::firstinstance=-1;
 
 // Constructora
-TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single):TPFC_device(ident){
+TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single, float fl):TPFC_device(ident){
   // si somos el primer device de este tipo, marcamos firstinstance
   if (firstinstance==-1)
     firstinstance=ident;
@@ -14,6 +14,10 @@ TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single):
   cam = c;
   // Creamos el buffer de datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
+  
+  // focal length
+  focal_length[0]=fl;
+  focal_length[1]=fl;
 
   // inicializamos el contador de frames incorrectos a uno (como si en el frame anterior
   // no hubiesemos detectado caras, ya que no tenemos datos)
@@ -83,6 +87,11 @@ void* TPFC_device_opencv_face::facedetect(void * t){
     // Cargamos los datos desde el disco
     CvMat *intrinsic = (CvMat*)cvLoad(filename2);
     CvMat *distortion = (CvMat*)cvLoad(filename1);
+    
+    // obtenemos los Focal Lengths, y los guardamos
+    d->focal_length[0] =CV_MAT_ELEM(*intrinsic,float,0,0);
+    d->focal_length[1] =CV_MAT_ELEM(*intrinsic,float,0,0);
+    
 
     // obtenemos un frame desde la camara para poder saber el tamaño
     frame = cvQueryFrame( capture );
@@ -277,8 +286,8 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 
 	  // guardamos los datos
 	  float* aux= new float[3];
-	  aux[0]=atan(-(center.x-320)/640.0);
-	  aux[1]=atan(-(center.y-240)/480.0);
+	  aux[0]=atan(-(center.x-img->width/2.0)/d->focal_length[0]);
+	  aux[1]=atan(-(center.y-img->height/2.0)/d->focal_length[1]);
 	  aux[2]=radius;
 	  if (i==0) // primera del report
 	    (d->getdata())->setnewdata(aux);

@@ -30,6 +30,8 @@ class TPFC_device_opencv_face : public TPFC_device{
     int wrongframes; // numero de frames incorrectos
     CvPoint2D32f lastframepos; // centro de la cara del ultimo frame
     int lastradius;
+
+    float focal_length[2];
     
     // variable auxiliar para la gestion de la ventana
     // (para detectar cual es el primer device, que es el unico que debe hacerlo)
@@ -46,7 +48,7 @@ class TPFC_device_opencv_face : public TPFC_device{
 
   public:
     // consctructora y creadora
-    TPFC_device_opencv_face(int ident, int cam, bool single = true);
+    TPFC_device_opencv_face(int ident, int cam, bool single = true, float fl=560.0);
     ~TPFC_device_opencv_face();
  
     // sobrecarga de stop (para parar el thread)
