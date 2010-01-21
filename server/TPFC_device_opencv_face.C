@@ -14,6 +14,10 @@ TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single):
   cam = c;
   // Creamos el buffer de datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
+
+  // marcamos el flag de lastframeok a falso
+  lastframeok=false;
+
   // lanzamos el thread
   pthread_create( &facedetect_thread, NULL, facedetect,this);
   
@@ -119,8 +123,9 @@ void* TPFC_device_opencv_face::facedetect(void * t){
       }
 
       // llamamos a detect&draw
-      if (detect_and_draw( frame_copy , scale, storage, cascade, winname, d)==1)
-	d->report();
+      detect_and_draw( frame_copy , scale, storage, cascade, winname, d);
+	
+
       // si somos la primera instancia, ejecutamos el bucle de la ventana
       if (d->idnum()==firstinstance) cvWaitKey( 10 ); // si quito esto la ventana no aparece :\
 
@@ -131,8 +136,6 @@ void* TPFC_device_opencv_face::facedetect(void * t){
       vrpn_SleepMsecs(100); // el sleep es mas largo para consumir menos cpu
     }
   }
-
-  
 
   // limpieza para finalizar el thread
   cvReleaseImage( &frame_copy );
@@ -145,89 +148,101 @@ void* TPFC_device_opencv_face::facedetect(void * t){
   }
 }
 
-int TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaarClassifierCascade* cascade, const char* winname, TPFC_device_opencv_face* d){
-    static CvScalar colors[] =
-    {
-        {{0,0,255}},
-        {{0,128,255}},
-        {{0,255,255}},
-        {{0,255,0}},
-        {{255,128,0}},
-        {{255,255,0}},
-        {{255,0,0}},
-        {{255,0,255}}
-    };
+void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaarClassifierCascade* cascade, const char* winname, TPFC_device_opencv_face* d){
+  static CvScalar colors[] =
+  {
+      {{0,0,255}},
+      {{0,128,255}},
+      {{0,255,255}},
+      {{0,255,0}},
+      {{255,128,0}},
+      {{255,255,0}},
+      {{255,0,0}},
+      {{255,0,255}}
+  };
 
-    IplImage *gray, *small_img;
-    int i;
-    int res;
+  IplImage *gray, *small_img;
+  int i;
+  int res;
 
-    gray = cvCreateImage( cvSize(img->width,img->height), 8, 1 );
-    small_img = cvCreateImage( cvSize( cvRound (img->width/scale),
-                         cvRound (img->height/scale)), 8, 1 );
+  gray = cvCreateImage( cvSize(img->width,img->height), 8, 1 );
+  small_img = cvCreateImage( cvSize( cvRound (img->width/scale),
+			cvRound (img->height/scale)), 8, 1 );
 
-    cvCvtColor( img, gray, CV_BGR2GRAY );
-    cvResize( gray, small_img, CV_INTER_LINEAR );
-    cvEqualizeHist( small_img, small_img );
-    cvClearMemStorage( storage );
+  cvCvtColor( img, gray, CV_BGR2GRAY );
+  cvResize( gray, small_img, CV_INTER_LINEAR );
+  cvEqualizeHist( small_img, small_img );
+  cvClearMemStorage( storage );
 
-    /*CvPoint2D32f cent;
-    cent.x = cvRound(img->width*0.5);
-    cent.y = cvRound(img->height*0.5);
-    cvGetRectSubPix(gray, small_img,cent);*/
+  /*CvPoint2D32f cent;
+  cent.x = cvRound(img->width*0.5);
+  cent.y = cvRound(img->height*0.5);
+  cvGetRectSubPix(gray, small_img,cent);*/
 
-    if( cascade ){
-        double t = (double)cvGetTickCount();
-	CvSeq* faces;
-	if (!d->singleuser){
-	  // Buscando a mas de un usuario
-	  faces = cvHaarDetectObjects( small_img, cascade, storage,
-                                            1.1, 2, 0
-                                            //|CV_HAAR_FIND_BIGGEST_OBJECT
-                                            |CV_HAAR_DO_ROUGH_SEARCH
-                                            //|CV_HAAR_DO_CANNY_PRUNING
-                                            //|CV_HAAR_SCALE_IMAGE
-                                            ,cvSize(30, 30) );
-	}else{
-	  // buscando solo un usuario
-	  faces = cvHaarDetectObjects( small_img, cascade, storage,
-                                            1.1, 2, 0
-                                            |CV_HAAR_FIND_BIGGEST_OBJECT
-                                            |CV_HAAR_DO_ROUGH_SEARCH
-                                            //|CV_HAAR_DO_CANNY_PRUNING
-                                            //|CV_HAAR_SCALE_IMAGE
-                                            ,cvSize(30, 30) );
-	}
-        t = (double)cvGetTickCount() - t;
-        printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
-	CvPoint center;
-	int radius;
-        for( i = 0; i < (faces ? faces->total : 0); i++ ){
-            CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
-            CvMat small_img_roi;
-            CvScalar color = colors[i%8];
-            center.x = cvRound((r->x + r->width*0.5)*scale);
-            center.y = cvRound((r->y + r->height*0.5)*scale);
-            radius = cvRound((r->width + r->height)*0.25*scale);
-            cvCircle( img, center, radius, color, 3, 8, 0 );
-            cvGetSubRect( small_img, &small_img_roi, *r );
-        }
-	if (i>0){
+  if( cascade ){
+      double t = (double)cvGetTickCount();
+      CvSeq* faces;
+      if (!d->singleuser){
+	// Buscando a mas de un usuario
+	faces = cvHaarDetectObjects( small_img, cascade, storage,
+					  1.1, 2, 0
+					  //|CV_HAAR_FIND_BIGGEST_OBJECT
+					  |CV_HAAR_DO_ROUGH_SEARCH
+					  //|CV_HAAR_DO_CANNY_PRUNING
+					  //|CV_HAAR_SCALE_IMAGE
+					  ,cvSize(30, 30) );
+      }else{
+	// buscando solo un usuario
+	faces = cvHaarDetectObjects( small_img, cascade, storage,
+					  1.1, 2, 0
+					  |CV_HAAR_FIND_BIGGEST_OBJECT
+					  |CV_HAAR_DO_ROUGH_SEARCH
+					  //|CV_HAAR_DO_CANNY_PRUNING
+					  //|CV_HAAR_SCALE_IMAGE
+					  ,cvSize(30, 30) );
+      }
+      t = (double)cvGetTickCount() - t;
+      printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
+      CvPoint center;
+      int radius;
+      // bucle de procesado de caras
+      for( i = 0; i < (faces ? faces->total : 0); i++ ){
+	  CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
+	  CvScalar color = colors[i%8];
+	  center.x = cvRound((r->x + r->width*0.5)*scale);
+	  center.y = cvRound((r->y + r->height*0.5)*scale);
+	  radius = cvRound((r->width + r->height)*0.25*scale);
+	  cvCircle( img, center, radius, color, 3, 8, 0 );
+
 	  float* aux= new float[3];
 	  aux[0]=atan(-(center.x-320)/640.0);
 	  aux[1]=atan(-(center.y-240)/480.0);
 	  aux[2]=radius;
-	  (d->getdata())->setnewdata(aux);
-	}else{
-	   (d->getdata())->setnodata();
-	}
-    }
-    
+	  if (i==0) // primera del report
+	    (d->getdata())->setnewdata(aux);
+	  else // siguientes
+	    (d->getdata())->setmoredata(aux);
+	  // liberamos la memoria del vector
+	  free(aux);
+      }
+      // si no habia caras, no guardamos datos
+      if (i==0){
+	  (d->getdata())->setnodata();
+      }
+  }
+  
 
-    if (d->idnum()==firstinstance) cvShowImage( winname, img );
-    cvReleaseImage( &gray );
-    cvReleaseImage( &small_img );
-    return i;
+  if (d->idnum()==firstinstance) cvShowImage( winname, img );
+  cvReleaseImage( &gray );
+  cvReleaseImage( &small_img );
+  // si hemos detectado caras, reportamos y marcamos el flag d->lastframeok
+  if (i>0){
+    d->report();
+    d->lastframeok=true;
+  }else{
+    d->nullreport();
+    d->lastframeok=false;
+  }
 }
 
 // Sobrecarga de stop, para esperar al thread
