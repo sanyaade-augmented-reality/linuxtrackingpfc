@@ -21,6 +21,8 @@ class TPFC_device_opencv_face : public TPFC_device{
   private:
     pthread_t facedetect_thread; // thread que se encarga del facedetect
     int cam;
+    bool singleuser;
+    
 
     static int firstinstance;
 
@@ -33,7 +35,7 @@ class TPFC_device_opencv_face : public TPFC_device{
 
   public:
     // consctructora y creadora
-    TPFC_device_opencv_face(int ident, int cam);
+    TPFC_device_opencv_face(int ident, int cam, bool single = true);
     ~TPFC_device_opencv_face(); 
     void stop();
     int camera();
