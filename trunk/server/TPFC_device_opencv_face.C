@@ -243,6 +243,19 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       }
       t = (double)cvGetTickCount() - t;
       //printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
+
+      // incluimos mensaje de tiempo de deteccion
+      char text[64];
+      sprintf( text, "Detection time = %gms", t/((double)cvGetTickFrequency()*1000.) );
+      CvFont font = cvFont( 1, 1 );
+      CvPoint text_origin;
+      int base_line;
+      CvSize text_size = {0,0};
+      cvGetTextSize( text, &font, &text_size, &base_line );
+      text_origin.x = 10; //img->width - text_size.width - 10;
+      text_origin.y = img->height - base_line - 10;
+      cvPutText( img, text, text_origin, &font, CV_RGB(255,255,255));
+
       CvPoint center;
       int radius;
       // bucle de procesado de caras
@@ -298,7 +311,6 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       }
       // si no habia caras, no guardamos datos
       if (i==0){
-	  printf("no habia caras\n");
 	  (d->getdata())->setnodata();
       }
   }
