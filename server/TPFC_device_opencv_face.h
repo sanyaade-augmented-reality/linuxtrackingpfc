@@ -14,19 +14,29 @@
 #include <time.h>
 #include <ctype.h>
 
-
 #include "TPFC_device.h"
+
+// para file exist
+#include <sys/stat.h>
 
 class TPFC_device_opencv_face : public TPFC_device{
   private:
-    pthread_t facedetect_thread; // thread que se encarga del facedetect
+    // numero de camara a usar
     int cam;
+    // flag de singleuser/multiuser
     bool singleuser;
-    
 
+    // Variables auxiliares para el recorte de frame
+    bool lastframeok; // flag de si en el ultimo frame se habia detectado una cara
+    CvPoint2D32f lastframepos; // centro de la cara del ultimo frame
+    
+    // variable auxiliar para la gestion de la ventana
+    // (para detectar cual es el primer device, que es el unico que debe hacerlo)
     static int firstinstance;
 
-    // funcion auxiliar
+    // Facedetect
+    pthread_t facedetect_thread;
+    static void* facedetect(void * t);
     static int detect_and_draw( IplImage* , double ,  CvMemStorage* , CvHaarClassifierCascade* ,
 			 const char* , TPFC_device_opencv_face*);
 
@@ -36,10 +46,12 @@ class TPFC_device_opencv_face : public TPFC_device{
   public:
     // consctructora y creadora
     TPFC_device_opencv_face(int ident, int cam, bool single = true);
-    ~TPFC_device_opencv_face(); 
+    ~TPFC_device_opencv_face();
+ 
+    // sobrecarga de stop (para parar el thread)
     void stop();
+    // consultora de la id de la camara
     int camera();
-    static void* facedetect(void * t);
 
     // funcion que devuelve en un string la información relativa al dispositivo
     string info();

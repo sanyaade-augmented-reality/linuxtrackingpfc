@@ -1,34 +1,149 @@
 #include "TPFC_device_opencv_face.h" 
 
+// incializacion de la variable estatica
+int TPFC_device_opencv_face::firstinstance=-1;
 
-// funcion auxiliar para comprobar si un archivo existe
-// (encontrada en http://www.techbytes.ca/techbyte103.html)
-#include <sys/stat.h>
-
-bool TPFC_device_opencv_face::FileExists(string strFilename) {
-  struct stat stFileInfo;
-  bool blnReturn;
-  int intStat;
-
-  // Attempt to get the file attributes
-  intStat = stat(strFilename.c_str(),&stFileInfo);
-  if(intStat == 0) {
-    // We were able to get the file attributes
-    // so the file obviously exists.
-    blnReturn = true;
-  } else {
-    // We were not able to get the file attributes.
-    // This may mean that we don't have permission to
-    // access the folder which contains this file. If you
-    // need to do that level of checking, lookup the
-    // return values of stat which will give you
-    // more details on why stat failed.
-    blnReturn = false;
-  }
+// Constructora
+TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single):TPFC_device(ident){
+  // si somos el primer device de este tipo, marcamos firstinstance
+  if (firstinstance==-1)
+    firstinstance=ident;
+  // copiamos opcion de singleusar
+  singleuser=single;
+  // guardamos la camara
+  cam = c;
+  // Creamos el buffer de datos
+  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
+  // lanzamos el thread
+  pthread_create( &facedetect_thread, NULL, facedetect,this);
   
-  return(blnReturn);
 }
 
+// Destructora
+TPFC_device_opencv_face::~TPFC_device_opencv_face(){
+  free(data);
+}
+
+
+// Thread de facedetect
+void* TPFC_device_opencv_face::facedetect(void * t){
+  // para no tener que estar haciendo casts, creamos un apuntador al device
+  TPFC_device_opencv_face* d = (TPFC_device_opencv_face*)t;
+
+  // escala a usara
+    double scale = 2.0;
+
+  // inicialización de lo necesario para el facedetect
+  CvMemStorage* storage = 0;
+  CvHaarClassifierCascade* cascade = 0;
+  const char* cascade_name =
+    "haarcascades/haarcascade_frontalface_alt.xml";
+  CvCapture* capture = 0;
+  IplImage *frame, *frame_copy = 0;
+  const char* input_name = 0;
+  cascade = (CvHaarClassifierCascade*)cvLoad( cascade_name, 0, 0, 0 );
+  if( !cascade ){
+      fprintf( stderr, "ERROR: Could not load classifier cascade\n" );
+      d->stop();
+  }
+  storage = cvCreateMemStorage(0);
+
+  // Captura de video desde la camara
+  capture = cvCaptureFromCAM(d->camera());
+  
+  // Gestion de la ventana
+  char* winname = new char[48];
+  sprintf(winname, "FaceDetect (cam: %i)", d->idnum());
+  // solo se crea si somos la primera instance
+  if (d->idnum()==firstinstance) cvNamedWindow( winname );
+  // si no es posible, avisamos al usuario y paramos el device
+  if( !capture ){
+    d->stop();
+    printf("Fallo al iniciar la captura en la webcam, abortando thread");
+  }
+
+  // Carga de los parametros de la camara
+  char filename1[200];
+  char filename2[200];
+  // formateamos el nombre del archivo
+  sprintf(filename1, "%s/.trackingpfc/Distortion.xml",getenv ("HOME"));
+  sprintf(filename2, "%s/.trackingpfc/Intrinsics.xml",getenv ("HOME"));
+  // flag de uso de undistort
+  bool undistort=false;
+
+  IplImage* mapx;
+  IplImage* mapy;
+  if (FileExists(filename1) && FileExists(filename2)){
+
+    // Cargamos los datos desde el disco
+    CvMat *intrinsic = (CvMat*)cvLoad(filename2);
+    CvMat *distortion = (CvMat*)cvLoad(filename1);
+
+    // obtenemos un frame desde la camara para poder saber el tamaño
+    frame = cvQueryFrame( capture );
+    while (!frame){
+      frame = cvQueryFrame( capture );
+    }
+    // creamos los mapas
+    mapx = cvCreateImage( cvSize(frame->width,frame->height), IPL_DEPTH_32F, 1 );
+    mapy = cvCreateImage( cvSize(frame->width,frame->height), IPL_DEPTH_32F, 1 );
+    cvInitUndistortMap(intrinsic, distortion, mapx, mapy );
+
+    // marcamos el flag de undistort a cierto
+    undistort=true;
+
+    printf("%s y Intrinsics.xml existen, datos cargados.\n", filename1);
+  }
+  // fin de las inicializaciones
+    
+  while (d->alive()==1){ // mientras no recibamos la señal de parar
+    if (d->working()){ // si no estamos en pausa
+
+      // bucle central del facedetect
+      frame = cvQueryFrame( capture );
+      if( !frame )
+	  break;
+      if( !frame_copy )
+	  frame_copy = cvCreateImage( cvSize(frame->width,frame->height),
+				      IPL_DEPTH_8U, frame->nChannels );
+      if( frame->origin == IPL_ORIGIN_TL )
+	  cvCopy( frame, frame_copy, 0 );
+      else
+	  cvFlip( frame, frame_copy, 0 );
+
+      // si tenemos los datos, aplicamos undistort
+      if (undistort){
+	IplImage *t = cvCloneImage(frame_copy);
+	cvRemap( t, frame_copy, mapx, mapy );     // Undistort image
+	cvReleaseImage(&t);
+      }
+
+      // llamamos a detect&draw
+      if (detect_and_draw( frame_copy , scale, storage, cascade, winname, d)==1)
+	d->report();
+      // si somos la primera instancia, ejecutamos el bucle de la ventana
+      if (d->idnum()==firstinstance) cvWaitKey( 10 ); // si quito esto la ventana no aparece :\
+
+      // fin del bucle central de facedetect
+
+      vrpn_SleepMsecs(1); // liberamos la cpu
+    }else{// estamos en pausa
+      vrpn_SleepMsecs(100); // el sleep es mas largo para consumir menos cpu
+    }
+  }
+
+  
+
+  // limpieza para finalizar el thread
+  cvReleaseImage( &frame_copy );
+  cvReleaseCapture( &capture );
+  if (d->idnum()==firstinstance) cvDestroyWindow(winname);
+  if (storage){
+      cvReleaseMemStorage(&storage);
+  }if (cascade){
+      cvReleaseHaarClassifierCascade(&cascade);
+  }
+}
 
 int TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaarClassifierCascade* cascade, const char* winname, TPFC_device_opencv_face* d){
     static CvScalar colors[] =
@@ -115,139 +230,14 @@ int TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMe
     return i;
 }
 
-void* TPFC_device_opencv_face::facedetect(void * t){
-  // para no tener que estar haciendo casts, creamos un apuntador al device
-  TPFC_device_opencv_face* d = (TPFC_device_opencv_face*)t;
-
-  // inicialización de lo necesario para el facedetect
-  CvMemStorage* storage = 0;
-  CvHaarClassifierCascade* cascade = 0;
-  const char* cascade_name =
-    "haarcascades/haarcascade_frontalface_alt.xml";
-  double scale = 2.0;
-  CvCapture* capture = 0;
-  IplImage *frame, *frame_copy = 0;
-  const char* input_name = 0;
-  cascade = (CvHaarClassifierCascade*)cvLoad( cascade_name, 0, 0, 0 );
-  if( !cascade ){
-      fprintf( stderr, "ERROR: Could not load classifier cascade\n" );
-      d->stop();
-  }
-  storage = cvCreateMemStorage(0);
-
-  capture = cvCaptureFromCAM(d->camera());
-  char* winname = new char[48];
-  sprintf(winname, "FaceDetect (cam: %i)", d->idnum());
-  if (d->idnum()==firstinstance) cvNamedWindow( winname );
-  if( !capture ){
-    d->stop();
-    printf("Fallo al iniciar la captura en la webcam, abortando thread");
-  }
-
-  // Carga de los parametros de la camara
-  char filename1[200];
-  char filename2[200];
-  // formateamos el nombre del archivo
-  sprintf(filename1, "%s/.trackingpfc/Distortion.xml",getenv ("HOME"));
-  sprintf(filename2, "%s/.trackingpfc/Intrinsics.xml",getenv ("HOME"));
-  bool undistort=false;
-  IplImage* mapx;
-  IplImage* mapy;
-  if (FileExists(filename1) && FileExists(filename2)){
-
-    // EXAMPLE OF LOADING THESE MATRICES BACK IN:
-    CvMat *intrinsic = (CvMat*)cvLoad(filename2);
-    CvMat *distortion = (CvMat*)cvLoad(filename1);
-
-    // Build the undistort map which we will use for all 
-    // subsequent frames.
-    //
-    frame = cvQueryFrame( capture );
-    while (!frame){
-      frame = cvQueryFrame( capture );
-    }
-    mapx = cvCreateImage( cvSize(frame->width,frame->height), IPL_DEPTH_32F, 1 );
-    mapy = cvCreateImage( cvSize(frame->width,frame->height), IPL_DEPTH_32F, 1 );
-    cvInitUndistortMap(
-      intrinsic,
-      distortion,
-      mapx,
-      mapy
-    );
-    printf("%s y Intrinsics.xml existen, datos cargados.\n", filename1);
-    undistort=true;
-  }
-  // fin de las inicializaciones
-    
-  while (d->alive()==1){ // mientras no recibamos la señal de parar
-    if (d->working()){ // si no estamos en pausa
-
-      // bucle central del facedetect
-      frame = cvQueryFrame( capture );
-      if( !frame )
-	  break;
-      if( !frame_copy )
-	  frame_copy = cvCreateImage( cvSize(frame->width,frame->height),
-				      IPL_DEPTH_8U, frame->nChannels );
-      if( frame->origin == IPL_ORIGIN_TL )
-	  cvCopy( frame, frame_copy, 0 );
-      else
-	  cvFlip( frame, frame_copy, 0 );
-
-      if (undistort){
-	IplImage *t = cvCloneImage(frame_copy);
-	cvRemap( t, frame_copy, mapx, mapy );     // Undistort image
-	cvReleaseImage(&t);
-      }
-
-      if (detect_and_draw( frame_copy , scale, storage, cascade, winname, d)==1)
-	d->report();
-      if (d->idnum()==firstinstance) cvWaitKey( 10 ); // si quito esto la ventana no aparece :\
-      // fin del bucle central de facedetect
-
-      vrpn_SleepMsecs(1); // liberamos la cpu
-    }else{// estamos en pausa
-      vrpn_SleepMsecs(100); // el sleep es mas largo para consumir menos cpu
-    }
-  }
-
-  
-
-  // limpieza para finalizar el thread
-  cvReleaseImage( &frame_copy );
-  cvReleaseCapture( &capture );
-  if (d->idnum()==firstinstance) cvDestroyWindow(winname);
-  if (storage){
-      cvReleaseMemStorage(&storage);
-  }if (cascade){
-      cvReleaseHaarClassifierCascade(&cascade);
-  }
-
-
-}
-
-int TPFC_device_opencv_face::firstinstance=-1;
-
-TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single):TPFC_device(ident){
-  if (firstinstance==-1)
-    firstinstance=ident;
-  singleuser=single;
-  cam = c;
-  data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
-  // lanzamos el thread
-  pthread_create( &facedetect_thread, NULL, facedetect,this);
-  
-}
-
-TPFC_device_opencv_face::~TPFC_device_opencv_face(){
-  pthread_join( facedetect_thread, NULL);
-  free(data);
-}
-
+// Sobrecarga de stop, para esperar al thread
 void TPFC_device_opencv_face::stop(){
    running= STOP;
    pthread_join( facedetect_thread, NULL);
 }
+
+
+// Consultora de numero de camara
 int TPFC_device_opencv_face::camera(){
    return cam;
 }
@@ -262,4 +252,32 @@ string TPFC_device_opencv_face::info(){
 string TPFC_device_opencv_face::checksource(TPFC_device*){
   string ret = "Este dispositivo no acepta fuentes.";
   return ret;
+}
+
+
+
+// funcion auxiliar para comprobar si un archivo existe
+// (encontrada en http://www.techbytes.ca/techbyte103.html)
+bool TPFC_device_opencv_face::FileExists(string strFilename) {
+  struct stat stFileInfo;
+  bool blnReturn;
+  int intStat;
+
+  // Attempt to get the file attributes
+  intStat = stat(strFilename.c_str(),&stFileInfo);
+  if(intStat == 0) {
+    // We were able to get the file attributes
+    // so the file obviously exists.
+    blnReturn = true;
+  } else {
+    // We were not able to get the file attributes.
+    // This may mean that we don't have permission to
+    // access the folder which contains this file. If you
+    // need to do that level of checking, lookup the
+    // return values of stat which will give you
+    // more details on why stat failed.
+    blnReturn = false;
+  }
+  
+  return(blnReturn);
 }
