@@ -24,6 +24,12 @@ class TPFC_device_opencv_face : public TPFC_device{
 
     static int firstinstance;
 
+    // funcion auxiliar
+    static int detect_and_draw( IplImage* , double ,  CvMemStorage* , CvHaarClassifierCascade* ,
+			 const char* , TPFC_device_opencv_face*);
+
+    // funcion auxiliar para comprobar si existen los archivos
+    static bool FileExists(string strFilename);
 
   public:
     // consctructora y creadora

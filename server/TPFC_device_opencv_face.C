@@ -1,8 +1,36 @@
 #include "TPFC_device_opencv_face.h" 
 
 
+// funcion auxiliar para comprobar si un archivo existe
+// (encontrada en http://www.techbytes.ca/techbyte103.html)
+#include <sys/stat.h>
 
-int detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaarClassifierCascade* cascade, const char* winname, TPFC_device_opencv_face* d){
+bool TPFC_device_opencv_face::FileExists(string strFilename) {
+  struct stat stFileInfo;
+  bool blnReturn;
+  int intStat;
+
+  // Attempt to get the file attributes
+  intStat = stat(strFilename.c_str(),&stFileInfo);
+  if(intStat == 0) {
+    // We were able to get the file attributes
+    // so the file obviously exists.
+    blnReturn = true;
+  } else {
+    // We were not able to get the file attributes.
+    // This may mean that we don't have permission to
+    // access the folder which contains this file. If you
+    // need to do that level of checking, lookup the
+    // return values of stat which will give you
+    // more details on why stat failed.
+    blnReturn = false;
+  }
+  
+  return(blnReturn);
+}
+
+
+int TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMemStorage* storage, CvHaarClassifierCascade* cascade, const char* winname, TPFC_device_opencv_face* d){
     static CvScalar colors[] =
     {
         {{0,0,255}},
@@ -98,6 +126,40 @@ void* TPFC_device_opencv_face::facedetect(void * t){
     d->stop();
     printf("Fallo al iniciar la captura en la webcam, abortando thread");
   }
+
+  // Carga de los parametros de la camara
+  char filename1[200];
+  char filename2[200];
+  // formateamos el nombre del archivo
+  sprintf(filename1, "%s/.trackingpfc/Distortion.xml",getenv ("HOME"));
+  sprintf(filename2, "%s/.trackingpfc/Intrinsics.xml",getenv ("HOME"));
+  bool undistort=false;
+  IplImage* mapx;
+  IplImage* mapy;
+  if (FileExists(filename1) && FileExists(filename2)){
+
+    // EXAMPLE OF LOADING THESE MATRICES BACK IN:
+    CvMat *intrinsic = (CvMat*)cvLoad(filename2);
+    CvMat *distortion = (CvMat*)cvLoad(filename1);
+
+    // Build the undistort map which we will use for all 
+    // subsequent frames.
+    //
+    frame = cvQueryFrame( capture );
+    while (!frame){
+      frame = cvQueryFrame( capture );
+    }
+    mapx = cvCreateImage( cvSize(frame->width,frame->height), IPL_DEPTH_32F, 1 );
+    mapy = cvCreateImage( cvSize(frame->width,frame->height), IPL_DEPTH_32F, 1 );
+    cvInitUndistortMap(
+      intrinsic,
+      distortion,
+      mapx,
+      mapy
+    );
+    printf("%s y Intrinsics.xml existen, datos cargados.\n", filename1);
+    undistort=true;
+  }
   // fin de las inicializaciones
     
   while (d->alive()==1){ // mientras no recibamos la señal de parar
@@ -114,6 +176,12 @@ void* TPFC_device_opencv_face::facedetect(void * t){
 	  cvCopy( frame, frame_copy, 0 );
       else
 	  cvFlip( frame, frame_copy, 0 );
+
+      if (undistort){
+	IplImage *t = cvCloneImage(frame_copy);
+	cvRemap( t, frame_copy, mapx, mapy );     // Undistort image
+	cvReleaseImage(&t);
+      }
 
       if (detect_and_draw( frame_copy , scale, storage, cascade, winname, d)==1)
 	d->report();
