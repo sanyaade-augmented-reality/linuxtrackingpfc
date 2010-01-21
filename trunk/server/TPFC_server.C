@@ -170,10 +170,14 @@ int main( int argc, char** argv ){
 	  }else
 
 	  if ( input[1].compare("opencvfacedetect")==0 || input[1].compare("face")==0 ){
-	    if (input.size()!=3){
+	    if (input.size()<3){
 	      printf("Device OpenCV Facedetect requiere el numero de camara.\n");
 	    }else{
-	      dev.push_back( new TPFC_device_opencv_face(dev.size(),str2int(input[2]) ) );
+
+	      if (input.size()==4 && input[3].compare("on")==0)
+		dev.push_back( new TPFC_device_opencv_face(dev.size(),str2int(input[2]), false ) );
+	      else
+		dev.push_back( new TPFC_device_opencv_face(dev.size(),str2int(input[2]) ) );
 	      printf("Añadido dispositivo %i: OpenCV Facedetect\n",dev.size()-1);
 	      devadded=true;
 	    }
@@ -690,7 +694,7 @@ int main( int argc, char** argv ){
 	  printf("save <nombre> -> guarda el script ~./trackingpfc/nombre.tpfc\n");
 	  printf("\n");
 	  printf("device (dev, d) <tipo> -> crea un nuevo dispositivo:\n");
-	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar>\n");
+	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar> [multiusuario: on, off]\n");
 	  printf("dev wiimote (wii)\n");
 	  printf("dev 3dfrom2d (3f2) <id del dispositivo fuente>\n");
 	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm>\n");
