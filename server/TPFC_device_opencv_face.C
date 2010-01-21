@@ -15,8 +15,9 @@ TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single):
   // Creamos el buffer de datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
 
-  // marcamos el flag de lastframeok a falso
-  lastframeok=false;
+  // inicializamos el contador de frames incorrectos a uno (como si en el frame anterior
+  // no hubiesemos detectado caras, ya que no tenemos datos)
+  wrongframes=1;
 
   // lanzamos el thread
   pthread_create( &facedetect_thread, NULL, facedetect,this);
@@ -167,7 +168,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 
   // si estamos buscando mas de un usuario, o no teniamos imagen en el frame anterior
   // usamos toda la imagen, escalada
-  if (!d->singleuser || !d->lastframeok){
+  if (!d->singleuser || d->wrongframes>0){
     gray = cvCreateImage( cvSize(img->width,img->height), 8, 1 );
     small_img = cvCreateImage( cvSize( cvRound (img->width/scale),
 			  cvRound (img->height/scale)), 8, 1 );
@@ -200,8 +201,10 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 					  //|CV_HAAR_DO_CANNY_PRUNING
 					  //|CV_HAAR_SCALE_IMAGE
 					  ,cvSize(30, 30) );
-      }else{
-	// buscando solo un usuario
+      }if (d->wrongframes==0){
+	// Buscando un solo usuario, frame anterior correcto
+	// aqui podemos poner minsize == 0, ya que la imagen es pequeña
+	// y el tiempo de busqueda (aunque no haya cara) es pequeño
 	faces = cvHaarDetectObjects( small_img, cascade, storage,
 					  1.1, 3, 0
 					  |CV_HAAR_FIND_BIGGEST_OBJECT
@@ -209,6 +212,25 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 					  //|CV_HAAR_DO_CANNY_PRUNING
 					  //|CV_HAAR_SCALE_IMAGE
 					  ,cvSize(0, 0) );
+      }else{
+	// buscando solo un usuario, frame anterior incorrecto
+	// calculamos el tamaño que debemos buscar
+	// cuanto mas pequeño es el numero, mas tardara la deteccion
+	// si no hay caras, pero podremos detectar objectos mas lejanos
+	// para evitar lag en caso de un frame borroso, empezamos con un valor
+	// alto (poco tiempo de calculo), y a partir de ahi buscaremos cada vez objetos
+	// mas pequeños (mas tiempo)
+	int minsize= 60 - d->wrongframes*5;
+	// nos aseguramos de que no es un numero negativo
+	if (minsize<0) minsize=0;
+
+	faces = cvHaarDetectObjects( small_img, cascade, storage,
+					  1.1, 3, 0
+					  |CV_HAAR_FIND_BIGGEST_OBJECT
+					  |CV_HAAR_DO_ROUGH_SEARCH
+					  //|CV_HAAR_DO_CANNY_PRUNING
+					  //|CV_HAAR_SCALE_IMAGE
+					  ,cvSize(minsize, minsize) );
       }
       t = (double)cvGetTickCount() - t;
       printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
@@ -220,7 +242,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 	  CvScalar color = colors[i%8];
 
 	  // calculo de la posicion en la imagen original
-	  if (d->singleuser && d->lastframeok){
+	  if (d->singleuser && d->wrongframes==0){
 	    color = colors[(i+1)%8];
 	    // se esta usando recorte
 	    // calculo de centro y radio
@@ -279,10 +301,10 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
   // si hemos detectado caras, reportamos y marcamos el flag d->lastframeok
   if (i>0){
     d->report();
-    d->lastframeok=true;
+    d->wrongframes=0;
   }else{
     d->nullreport();
-    d->lastframeok=false;
+    d->wrongframes++;
   }
 }
 

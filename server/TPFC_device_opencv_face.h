@@ -27,7 +27,7 @@ class TPFC_device_opencv_face : public TPFC_device{
     bool singleuser;
 
     // Variables auxiliares para el recorte de frame
-    bool lastframeok; // flag de si en el ultimo frame se habia detectado una cara
+    int wrongframes; // numero de frames incorrectos
     CvPoint2D32f lastframepos; // centro de la cara del ultimo frame
     int lastradius;
     
