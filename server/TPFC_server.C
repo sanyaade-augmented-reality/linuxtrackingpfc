@@ -514,7 +514,7 @@ int main( int argc, char** argv ){
 	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
 	  }else
 	  // comprobamos el numero de parametros
-	  if (input.size()>4 || input.size()<3){
+	  if (input.size()>3 || input.size()<2){
 	    printf("El comando setmerge requiere un parametro (on, off), o dos (si se quiere aplicar a otro dispositivo)\n");
 	  }else{
 	    // Seleccionamos la id del device
