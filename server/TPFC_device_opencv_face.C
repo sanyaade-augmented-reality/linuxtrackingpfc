@@ -209,7 +209,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 					  |CV_HAAR_DO_ROUGH_SEARCH
 					  //|CV_HAAR_DO_CANNY_PRUNING
 					  //|CV_HAAR_SCALE_IMAGE
-					  ,cvSize(30, 30) );
+					  ,cvSize(50, 50) );
       }if (d->wrongframes==0){
 	// Buscando un solo usuario, frame anterior correcto
 	// aqui podemos poner minsize == 0, ya que la imagen es pequeña
