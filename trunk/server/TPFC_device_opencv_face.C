@@ -301,7 +301,8 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 	  float* aux= new float[3];
 	  aux[0]=atan(-(center.x-img->width/2.0)/d->focal_length[0]);
 	  aux[1]=atan(-(center.y-img->height/2.0)/d->focal_length[1]);
-	  // como tamaño guardamos el angulo
+	  // como tamaño guardamos el angulo de abertura del radio (para ser compatibles
+	  // con 3dfrom2d
 	  aux[2]=atan(radius/d->focal_length[0]);
 	  if (i==0) // primera del report
 	    (d->getdata())->setnewdata(aux);
