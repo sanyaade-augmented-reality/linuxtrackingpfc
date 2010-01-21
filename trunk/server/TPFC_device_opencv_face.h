@@ -19,6 +19,11 @@
 // para file exist
 #include <sys/stat.h>
 
+// para poder leer del archivo de configuracion
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 class TPFC_device_opencv_face : public TPFC_device{
   private:
     // numero de camara a usar
@@ -45,6 +50,8 @@ class TPFC_device_opencv_face : public TPFC_device{
 
     // funcion auxiliar para comprobar si existen los archivos
     static bool FileExists(string strFilename);
+    // funcion auxiliar para partir strings
+    static void StringExplode(string str, string separator, vector<string>* results);
 
   public:
     // consctructora y creadora

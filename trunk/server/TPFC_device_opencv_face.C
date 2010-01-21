@@ -42,11 +42,43 @@ void* TPFC_device_opencv_face::facedetect(void * t){
   // escala a usara
     double scale = 2.0;
 
+  const char* cascade_name =
+    "haarcascades/haarcascade_frontalface_alt.xml";
+
+  // accedemos al archivo de configuracion
+  fstream indata;
+  char filename[200];
+  // formateamos el nombre del archivo
+  sprintf(filename, "%s/.trackingpfc/tpfc.cfg",getenv ("HOME"));
+  indata.open(filename); // abrimos
+  if(!indata) { // Si no se puede abrir avisamos
+      fprintf(stderr, "No se ha podido leer la configuracion en '%s' deteniendo dispositivo.\n", filename);
+      d->stop();
+  }else{ // si se puede...
+    string l; // string auxiliar
+    vector<string> t;
+    bool notfound = true;
+    while ( !indata.eof() && notfound ) { //sigue leyendo hasta el EOF
+      getline(indata,l); // obtenemos una linea
+      t.clear();
+      StringExplode(l, " ", &t);
+      if (t[0].compare("facedetectcascade")==0){ // hemos encontrado la opcion que buscabamos
+	cascade_name=t[1].c_str();
+	notfound=false;
+      }
+    }
+    indata.close();
+    if (notfound){
+      fprintf(stderr,"El archivo de configuracion %s no contiene datos sobre la localizacion del archivo de cascada.\n",filename);
+    }
+  }
+
+
+
+
   // inicialización de lo necesario para el facedetect
   CvMemStorage* storage = 0;
   CvHaarClassifierCascade* cascade = 0;
-  const char* cascade_name =
-    "haarcascades/haarcascade_frontalface_alt.xml";
   CvCapture* capture = 0;
   IplImage *frame, *frame_copy = 0;
   const char* input_name = 0;
@@ -381,4 +413,26 @@ bool TPFC_device_opencv_face::FileExists(string strFilename) {
   }
   
   return(blnReturn);
+}
+
+
+
+
+
+
+// funcion auxiliar para parsear la entrada
+// (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
+void TPFC_device_opencv_face::StringExplode(string str, string separator, vector<string>* results){
+    int found;
+    found = str.find_first_of(separator);
+    while(found != string::npos){
+        if(found > 0){
+            results->push_back(str.substr(0,found));
+        }
+        str = str.substr(found+1);
+        found = str.find_first_of(separator);
+    }
+    if(str.length() > 0){
+        results->push_back(str);
+    }
 }
