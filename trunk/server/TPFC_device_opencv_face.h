@@ -22,6 +22,8 @@ class TPFC_device_opencv_face : public TPFC_device{
     pthread_t facedetect_thread; // thread que se encarga del facedetect
     int cam;
 
+    static int firstinstance;
+
 
   public:
     // consctructora y creadora
