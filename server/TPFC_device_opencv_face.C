@@ -55,17 +55,36 @@ int TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMe
     cvResize( gray, small_img, CV_INTER_LINEAR );
     cvEqualizeHist( small_img, small_img );
     cvClearMemStorage( storage );
+
+    /*CvPoint2D32f cent;
+    cent.x = cvRound(img->width*0.5);
+    cent.y = cvRound(img->height*0.5);
+    cvGetRectSubPix(gray, small_img,cent);*/
+
     if( cascade ){
         double t = (double)cvGetTickCount();
-        CvSeq* faces = cvHaarDetectObjects( small_img, cascade, storage,
+	CvSeq* faces;
+	if (!d->singleuser){
+	  // Buscando a mas de un usuario
+	  faces = cvHaarDetectObjects( small_img, cascade, storage,
                                             1.1, 2, 0
-                                            |CV_HAAR_FIND_BIGGEST_OBJECT
-                                            //|CV_HAAR_DO_ROUGH_SEARCH
+                                            //|CV_HAAR_FIND_BIGGEST_OBJECT
+                                            |CV_HAAR_DO_ROUGH_SEARCH
                                             //|CV_HAAR_DO_CANNY_PRUNING
                                             //|CV_HAAR_SCALE_IMAGE
                                             ,cvSize(30, 30) );
+	}else{
+	  // buscando solo un usuario
+	  faces = cvHaarDetectObjects( small_img, cascade, storage,
+                                            1.1, 2, 0
+                                            |CV_HAAR_FIND_BIGGEST_OBJECT
+                                            |CV_HAAR_DO_ROUGH_SEARCH
+                                            //|CV_HAAR_DO_CANNY_PRUNING
+                                            //|CV_HAAR_SCALE_IMAGE
+                                            ,cvSize(30, 30) );
+	}
         t = (double)cvGetTickCount() - t;
-        //printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
+        printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
 	CvPoint center;
 	int radius;
         for( i = 0; i < (faces ? faces->total : 0); i++ ){
@@ -209,9 +228,10 @@ void* TPFC_device_opencv_face::facedetect(void * t){
 
 int TPFC_device_opencv_face::firstinstance=-1;
 
-TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c):TPFC_device(ident){
+TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c, bool single):TPFC_device(ident){
   if (firstinstance==-1)
     firstinstance=ident;
+  singleuser=single;
   cam = c;
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA2DSIZE);
   // lanzamos el thread
