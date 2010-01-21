@@ -1,0 +1,10 @@
+# Tracking PFC Server Sample Configuration file
+# Simple Wii Tracking (pensado para 1 marcador, con mas, hará merge,
+# pero sin preocuparse por los problemas cuando pierda de vista un punto)
+
+device wiimote
+
+device 3dfrom2d 0
+addserver Tracker0
+
+daemon

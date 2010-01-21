@@ -1,0 +1,24 @@
+# Tracking PFC Server Sample Configuration file
+# Esta configuracion prepara 2 wiimotes y despues crea 4 servidores:
+# Tracker0: Version 3dstereo
+# Tracker1: Version 3dfrom2d con estimacion de distancia basada en el tamaño observado
+# Tracker2: Version de 3dpattern (sobre el 3dstereo) que busca el patron de las gafas completo
+# Tracker3: Version de 3dpattern (sobre el 3dstereo) que busca el patron de las gafas aunque no este completo
+
+device wii
+device wii
+
+device 3dstereo 0 1
+addserver Tracker0
+
+device 3dfrom2d 0
+addserver Tracker1
+setdeep onlysize 170
+
+device 3dpattern 2 2 170 off
+addserver Tracker2
+
+device 3dpattern 2 2 170 on
+addserver Tracker3
+
+daemon

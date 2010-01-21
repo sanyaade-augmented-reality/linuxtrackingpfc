@@ -1,0 +1,13 @@
+# Tracking PFC Server Sample Configuration file
+# Opencv Facedetect Tracking con estimacion de distancia
+# por tamaño y filtro de kalman
+
+device face 0
+
+device 3dfrom2d 0
+setmerge off
+setdeep size 170
+
+device 3dmod 1
+kalman
+server Tracker0
