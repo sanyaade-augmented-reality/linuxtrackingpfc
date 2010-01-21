@@ -150,6 +150,7 @@ TPFC_device_opencv_face::TPFC_device_opencv_face(int ident, int c):TPFC_device(i
 }
 
 TPFC_device_opencv_face::~TPFC_device_opencv_face(){
+  pthread_join( facedetect_thread, NULL);
   free(data);
 }
 
