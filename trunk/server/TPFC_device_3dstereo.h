@@ -25,7 +25,7 @@ class TPFC_device_3dstereo : public TPFC_device{
     
     public:
     // consctructora y creadora
-    TPFC_device_3dstereo(int ident, TPFC_device*,TPFC_device*);
+    TPFC_device_3dstereo(int ident, TPFC_device*,TPFC_device*, double dist = 0.036);
     ~TPFC_device_3dstereo();
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
