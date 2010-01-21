@@ -1,7 +1,7 @@
 #include "TPFC_device_3dstereo.h" 
 
 
-TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_device* s2):TPFC_device(ident){
+TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_device* s2, double dist):TPFC_device(ident){
 
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D);
@@ -22,8 +22,8 @@ TPFC_device_3dstereo::TPFC_device_3dstereo(int ident, TPFC_device* s1, TPFC_devi
   left=-1;
   fails=0;
 
-  // inicializamos camdist con la distancia standad entre 2 wiimotes
-  camdist=0.036;
+  // inicializamos camdist con la distancia
+  camdist=dist;
 
   // registramos este dispositivo en la lista de listeners que vamos a usar como input
   s1-> report_to(this);
