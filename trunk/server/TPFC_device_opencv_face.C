@@ -242,7 +242,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
 					  ,cvSize(minsize, minsize) );
       }
       t = (double)cvGetTickCount() - t;
-      printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
+      //printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
       CvPoint center;
       int radius;
       // bucle de procesado de caras
