@@ -165,19 +165,28 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
   int i;
   int res;
 
-  gray = cvCreateImage( cvSize(img->width,img->height), 8, 1 );
-  small_img = cvCreateImage( cvSize( cvRound (img->width/scale),
-			cvRound (img->height/scale)), 8, 1 );
+  // si estamos buscando mas de un usuario, o no teniamos imagen en el frame anterior
+  // usamos toda la imagen, escalada
+  if (!d->singleuser || !d->lastframeok){
+    gray = cvCreateImage( cvSize(img->width,img->height), 8, 1 );
+    small_img = cvCreateImage( cvSize( cvRound (img->width/scale),
+			  cvRound (img->height/scale)), 8, 1 );
 
-  cvCvtColor( img, gray, CV_BGR2GRAY );
-  cvResize( gray, small_img, CV_INTER_LINEAR );
-  cvEqualizeHist( small_img, small_img );
+    cvCvtColor( img, gray, CV_BGR2GRAY );
+    cvResize( gray, small_img, CV_INTER_LINEAR );
+    cvEqualizeHist( small_img, small_img );
+  }else{
+    // si estamos buscando un solo usuario y teniamos su posicion en el frame anterior
+    // buscamos solo en un area mas pequeña de la imagen
+    gray = cvCreateImage( cvSize(img->width,img->height), 8, 1 );
+    small_img = cvCreateImage( cvSize( cvRound (d->lastradius*4),
+			  cvRound (d->lastradius*3)), 8, 1 );
+    cvCvtColor( img, gray, CV_BGR2GRAY );
+    cvGetRectSubPix(gray, small_img,d->lastframepos);
+    cvEqualizeHist( small_img, small_img );
+  }
   cvClearMemStorage( storage );
-
-  /*CvPoint2D32f cent;
-  cent.x = cvRound(img->width*0.5);
-  cent.y = cvRound(img->height*0.5);
-  cvGetRectSubPix(gray, small_img,cent);*/
+  
 
   if( cascade ){
       double t = (double)cvGetTickCount();
@@ -185,7 +194,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       if (!d->singleuser){
 	// Buscando a mas de un usuario
 	faces = cvHaarDetectObjects( small_img, cascade, storage,
-					  1.1, 2, 0
+					  1.1, 3, 0
 					  //|CV_HAAR_FIND_BIGGEST_OBJECT
 					  |CV_HAAR_DO_ROUGH_SEARCH
 					  //|CV_HAAR_DO_CANNY_PRUNING
@@ -194,12 +203,12 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       }else{
 	// buscando solo un usuario
 	faces = cvHaarDetectObjects( small_img, cascade, storage,
-					  1.1, 2, 0
+					  1.1, 3, 0
 					  |CV_HAAR_FIND_BIGGEST_OBJECT
 					  |CV_HAAR_DO_ROUGH_SEARCH
 					  //|CV_HAAR_DO_CANNY_PRUNING
 					  //|CV_HAAR_SCALE_IMAGE
-					  ,cvSize(30, 30) );
+					  ,cvSize(0, 0) );
       }
       t = (double)cvGetTickCount() - t;
       printf( "detection time = %gms\n", t/((double)cvGetTickFrequency()*1000.) );
@@ -209,11 +218,42 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       for( i = 0; i < (faces ? faces->total : 0); i++ ){
 	  CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
 	  CvScalar color = colors[i%8];
-	  center.x = cvRound((r->x + r->width*0.5)*scale);
-	  center.y = cvRound((r->y + r->height*0.5)*scale);
-	  radius = cvRound((r->width + r->height)*0.25*scale);
+
+	  // calculo de la posicion en la imagen original
+	  if (d->singleuser && d->lastframeok){
+	    color = colors[(i+1)%8];
+	    // se esta usando recorte
+	    // calculo de centro y radio
+	    center.x = cvRound(  r->x + r->width*0.5 + d->lastframepos.x - d->lastradius*2);
+	    center.y = cvRound(  r->y + r->height*0.5 + d->lastframepos.y - d->lastradius*1.5 );
+	    radius = cvRound((r->width + r->height)*0.25);
+	    
+	    // calculo del rectangulo (si se esta usando)
+	    CvPoint p1;
+	    CvPoint p2;
+	    p1.x=cvRound( d->lastframepos.x + d->lastradius*2);
+	    p1.y=cvRound( d->lastframepos.y + d->lastradius*1.5);
+	    p2.x=cvRound( d->lastframepos.x - d->lastradius*2);
+	    p2.y=cvRound( d->lastframepos.y - d->lastradius*1.5);
+	    cvRectangle(img, p1, p2 ,color,3,8,0);
+	  }else{
+	    // se está usando escalado
+	    center.x = cvRound((r->x + r->width*0.5)*scale);
+	    center.y = cvRound((r->y + r->height*0.5)*scale);
+	    radius = cvRound((r->width + r->height)*0.25*scale);
+	    
+	  }
+	  //printf("      x:%i y:%i r:%i \n", center.x, center.y, radius);
+
+	  // Dibujamos el circulo
 	  cvCircle( img, center, radius, color, 3, 8, 0 );
 
+	  // guardamos la posicion para usarla con el siguiente frame
+	  d->lastframepos.x = center.x;
+	  d->lastframepos.y = center.y;
+	  d->lastradius = radius;
+
+	  // guardamos los datos
 	  float* aux= new float[3];
 	  aux[0]=atan(-(center.x-320)/640.0);
 	  aux[1]=atan(-(center.y-240)/480.0);
@@ -227,6 +267,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       }
       // si no habia caras, no guardamos datos
       if (i==0){
+	  printf("no habia caras\n");
 	  (d->getdata())->setnodata();
       }
   }

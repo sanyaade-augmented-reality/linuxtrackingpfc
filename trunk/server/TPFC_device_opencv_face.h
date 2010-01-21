@@ -29,6 +29,7 @@ class TPFC_device_opencv_face : public TPFC_device{
     // Variables auxiliares para el recorte de frame
     bool lastframeok; // flag de si en el ultimo frame se habia detectado una cara
     CvPoint2D32f lastframepos; // centro de la cara del ultimo frame
+    int lastradius;
     
     // variable auxiliar para la gestion de la ventana
     // (para detectar cual es el primer device, que es el unico que debe hacerlo)
