@@ -208,7 +208,7 @@ int main( int argc, char** argv ){
 
 	  if ( input[1].compare("3dstereo")==0 || input[1].compare("stereo")==0){
 	    // comprobamos que tengamos los parametro adicional necesario
-	    if (input.size()!=4){
+	    if (input.size()<4){
 	      printf("Los dispositivos 3dstereo requieren el numero de id de los dispositivo fuente\n");
 	    }else{
 	      int source1 = str2int( input[2] );
@@ -229,6 +229,9 @@ int main( int argc, char** argv ){
 		}else if (!ok2){
 		  printf("%s",sourceok2.c_str());
 		}else{// si ambos son correctos, añadimos el dispositivo
+		  // si hay un 5o parametro, calculamos la distancia, si no dejamos la distancia
+		  // por defecto para wiimotes
+		  float distance = (input.size()==5)?str2int(input[4])/1000.0:0.036;
 		  dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
 		  printf("Añadido dispositivo %i: 3dstereo con fuentes %i %i\n",dev.size()-1, source1, source2);
 		  devadded = true;
@@ -702,7 +705,8 @@ int main( int argc, char** argv ){
 	  printf("                    cambia la forma de calcular la profundidad\n");
 	  printf("     setmerge (merge) <on, off> [id del dispositivo, el ultimo por defecto]\n");
 	  printf(" 		      Activa o desactiva la opcion de juntar los puntos\n");
-	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
+	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>");
+	  printf("                      [distancia entre sensores en mm]\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
 	  printf("     setscale (scale) <% de escala> [id del device]\n");
 	  printf("     setorientation (setorient, orient) <none, all, untagged> [center, forward]\n");
