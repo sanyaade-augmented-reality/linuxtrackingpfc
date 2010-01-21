@@ -80,8 +80,6 @@ int TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMe
         }
 	if (i>0){
 	  float* aux= new float[3];
-	  /*aux[0]=-(center.x-320)/640.0;;
-	  aux[1]=-(center.y-240)/480.0;*/
 	  aux[0]=atan(-(center.x-320)/640.0);
 	  aux[1]=atan(-(center.y-240)/480.0);
 	  aux[2]=radius;
@@ -92,7 +90,7 @@ int TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvMe
     }
     
 
-    cvShowImage( winname, img );
+    if (d->idnum()==firstinstance) cvShowImage( winname, img );
     cvReleaseImage( &gray );
     cvReleaseImage( &small_img );
     return i;
@@ -120,8 +118,8 @@ void* TPFC_device_opencv_face::facedetect(void * t){
 
   capture = cvCaptureFromCAM(d->camera());
   char* winname = new char[48];
-  sprintf(winname, "%s%i", "Face Detect on cam: ", d->idnum());
-  cvNamedWindow( winname );
+  sprintf(winname, "FaceDetect (cam: %i)", d->idnum());
+  if (d->idnum()==firstinstance) cvNamedWindow( winname );
   if( !capture ){
     d->stop();
     printf("Fallo al iniciar la captura en la webcam, abortando thread");
@@ -199,7 +197,7 @@ void* TPFC_device_opencv_face::facedetect(void * t){
   // limpieza para finalizar el thread
   cvReleaseImage( &frame_copy );
   cvReleaseCapture( &capture );
-  cvDestroyWindow("result");
+  if (d->idnum()==firstinstance) cvDestroyWindow(winname);
   if (storage){
       cvReleaseMemStorage(&storage);
   }if (cascade){
