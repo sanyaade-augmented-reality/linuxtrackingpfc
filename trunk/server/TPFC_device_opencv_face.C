@@ -42,7 +42,8 @@ void* TPFC_device_opencv_face::facedetect(void * t){
   // escala a usara
     double scale = 2.0;
 
-  string cascade_name = "haarcascades/haarcascade_frontalface_alt.xml";
+  // archivo de cascada
+  string cascade_name;
   if (!getconfig("facedetectcascade", &cascade_name) ){
     printf("No se han podido leer el path del archivo de cascada en la configuracion, abortando device.\n");
     d->stop();
