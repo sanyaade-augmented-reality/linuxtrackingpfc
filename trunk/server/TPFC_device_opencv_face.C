@@ -42,9 +42,7 @@ void* TPFC_device_opencv_face::facedetect(void * t){
   // escala a usara
     double scale = 2.0;
 
-  const char* cascade_name =
-    "haarcascades/haarcascade_frontalface_alt.xml";
-
+  string cascade_name = "haarcascades/haarcascade_frontalface_alt.xml";
   // accedemos al archivo de configuracion
   fstream indata;
   char filename[200];
@@ -73,18 +71,19 @@ void* TPFC_device_opencv_face::facedetect(void * t){
     }
   }
 
-
-
-
   // inicialización de lo necesario para el facedetect
   CvMemStorage* storage = 0;
   CvHaarClassifierCascade* cascade = 0;
   CvCapture* capture = 0;
   IplImage *frame, *frame_copy = 0;
   const char* input_name = 0;
-  cascade = (CvHaarClassifierCascade*)cvLoad( cascade_name, 0, 0, 0 );
+
+  
+  //cascade = (CvHaarClassifierCascade*)cvLoad( cascade_name, 0, 0, 0 );
+  cascade =cvLoadHaarClassifierCascade(cascade_name.c_str(),cvSize(60,60) );
+
   if( !cascade ){
-      fprintf( stderr, "ERROR: Could not load classifier cascade\n" );
+      fprintf( stderr, "ERROR: Could not load classifier cascade\n");
       d->stop();
   }
   storage = cvCreateMemStorage(0);
