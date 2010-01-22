@@ -1,15 +1,15 @@
-INCLUDE = -I/usr/local/include/opencv 
-LIBDIR  = 
+INCLUDE = -I/usr/local/include/opencv
+LIBDIR  = -L/home/plaga/bin/ARToolKit/lib
 
 #COMPILERFLAGS = -Wall -O2
 COMPILERFLAGS = -O2 -g
 CC = g++
 CFLAGS = $(COMPILERFLAGS) $(INCLUDE)
-LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread  -lquat -ltpfcc -lcwiid -lcv -lhighgui
+LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread  -lquat -ltpfcc -lcwiid -lcv -lhighgui -lARgsub -lARvideo -lAR -lglut -lGL -lgstreamer-0.10
 
 all: tpfcserver calibrate
 
-tpfcdev.o : TPFC_device.C TPFC_device.h
+tpfcdev.o : TPFC_device.C TPFC_device.h makefile
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
 tpfcdev3df2d.o : TPFC_device_3dfrom2d.C TPFC_device_3dfrom2d.h tpfcdev.o
@@ -36,7 +36,7 @@ tpfcdevopencvface.o : TPFC_device_opencv_face.C TPFC_device_opencv_face.h tpfcde
 tpfcdevwii.o : TPFC_device_wiimote.C TPFC_device_wiimote.h tpfcdev.o
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
-calibrate: calibrate.C
+calibrate: calibrate.C makefile
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
 
 tpfcserver : TPFC_server.C tpfcdev.o tpfcdev3df2d.o tpfcdev3dmerge.o tpfcdev3dmod.o tpfcdev3dpattern.o tpfcdev3dstereo.o tpfcdevartoolkit.o tpfcdevopencvface.o tpfcdevwii.o
