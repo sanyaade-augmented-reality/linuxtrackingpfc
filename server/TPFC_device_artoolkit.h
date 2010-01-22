@@ -18,10 +18,24 @@ class TPFC_device_artoolkit : public TPFC_device{
 
   private:
 
+    // thread encargado de la detección y funciones auxiliares
+    pthread_t art_thread;
+    static void* art_main(void * t);
+    static int mainLoop(int patt_id, int count);
+    static void draw( double trans[3][4] , int patt_id);
+    static void cleanup(void);
+
+    // variable auxiliar para la gestion de inicializaciones unicas
+    // (para detectar cual es el primer device, que es el unico que debe hacerlo)
+    static int firstinstance;
+
   public:
     // consctructora y creadora
     TPFC_device_artoolkit(int ident,int , char **);
     ~TPFC_device_artoolkit();
+
+    // sobrecarga de stop (para parar el thread)
+    void stop();
 
     // funcion que devuelve en un string la información relativa al dispositivo
     string info();
