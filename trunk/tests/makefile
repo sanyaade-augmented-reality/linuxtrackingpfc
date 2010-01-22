@@ -53,5 +53,5 @@ wii_leds : wii_leds.c
 
 # to clean up:
 clean:
-	rm cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker vrpn_tracker_examplenull_server vrpn_tracker_moving_server vrpn_tracker_from_opencv vrpn_tracker_from_wii_1led *.o *~
+	rm -f cube facedetect cube_face cube_wii wii_leds vrpn_wiimote_server vrpn_tracker_null_server vrpn_tracker_client cube_tracker vrpn_tracker_examplenull_server vrpn_tracker_moving_server vrpn_tracker_from_opencv vrpn_tracker_from_wii_1led *.o *~
 
