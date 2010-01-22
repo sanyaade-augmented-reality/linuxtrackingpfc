@@ -14,5 +14,5 @@ all: 3dDesktop
 
 # to clean up:
 clean:
-	rm 3dDesktop *.o *~
+	rm -f 3dDesktop *.o *~
 
