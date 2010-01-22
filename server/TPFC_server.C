@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <vrpn_Tracker.h>
 #include "TPFC_device.h"
+#include "TPFC_device_artoolkit.h"
 #include "TPFC_device_opencv_face.h"
 #include "TPFC_device_wiimote.h"
 #include "TPFC_device_3dfrom2d.h"
@@ -241,6 +242,12 @@ int main( int argc, char** argv ){
 	    }
 	  }else
 
+	  if ( input[1].compare("artoolkit")==0 || input[1].compare("art")==0){
+	    // añadimos el dispositivo
+	    dev.push_back( new TPFC_device_artoolkit(dev.size(), argc, argv) );
+
+	  }else
+
 
 	  if ( input[1].compare("wiimote")==0 || input[1].compare("wii")==0){
 	    if (input.size()==2){ // no tenemos direccion BT
@@ -258,6 +265,8 @@ int main( int argc, char** argv ){
 	      commands.push_back("# device wiimote "+btaux);
 	    }
 	  }else{
+
+	  
 
 
 	  if ( input[1].compare("3dmod")==0 || input[1].compare("mod")==0){
@@ -731,6 +740,7 @@ int main( int argc, char** argv ){
 	  printf("device (dev, d) <tipo> -> crea un nuevo dispositivo:\n");
 	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar> [multiusuario: on, off]\n");
 	  printf("dev wiimote (wii)\n");
+	  printf("dev artoolkit (art)\n");
 	  printf("dev 3dfrom2d (3f2) <id del dispositivo fuente>\n");
 	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm>\n");
 	  printf("                    [id del dispositivo, el ultimo por defecto]-> \n");
@@ -739,6 +749,7 @@ int main( int argc, char** argv ){
 	  printf(" 		      Activa o desactiva la opcion de juntar los puntos\n");
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>");
 	  printf("                      [distancia entre sensores en mm]\n");
+	  printf("dev 3dmerge (merge) <id de la fuente1> <id de la fuente2>.\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
 	  printf("     setscale (scale) <% de escala> [id del device]\n");
 	  printf("     setorientation (setorient, orient) <none, all, untagged> [center, forward]\n");
