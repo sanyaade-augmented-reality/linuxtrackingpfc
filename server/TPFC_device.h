@@ -36,7 +36,11 @@ class TPFC_device{
     // flag de funcionamiento
     enum { STOP, RUN, PAUSE } running;
 
-    
+    // funcion auxiliar para leer opciones del archivo de configuracion
+    // devuelve si se ha encontrado o no los datos
+    // target es el nombre de la opcion a buscar
+    // res el puntero al string resultado, no se modifica si se devuelve false
+    static bool getconfig(string target, string* res);
     // funcion auxiliar para partir strings
     static void StringExplode(string str, string separator, vector<string>* results);
     // funcion auxiliar para comprobar si existen los archivos

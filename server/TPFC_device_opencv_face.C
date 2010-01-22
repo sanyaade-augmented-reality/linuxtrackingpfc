@@ -43,32 +43,9 @@ void* TPFC_device_opencv_face::facedetect(void * t){
     double scale = 2.0;
 
   string cascade_name = "haarcascades/haarcascade_frontalface_alt.xml";
-  // accedemos al archivo de configuracion
-  fstream indata;
-  char filename[200];
-  // formateamos el nombre del archivo
-  sprintf(filename, "%s/.trackingpfc/tpfc.cfg",getenv ("HOME"));
-  indata.open(filename); // abrimos
-  if(!indata) { // Si no se puede abrir avisamos
-      fprintf(stderr, "No se ha podido leer la configuracion en '%s' deteniendo dispositivo.\n", filename);
-      d->stop();
-  }else{ // si se puede...
-    string l; // string auxiliar
-    vector<string> t;
-    bool notfound = true;
-    while ( !indata.eof() && notfound ) { //sigue leyendo hasta el EOF
-      getline(indata,l); // obtenemos una linea
-      t.clear();
-      StringExplode(l, " ", &t);
-      if (t[0].compare("facedetectcascade")==0){ // hemos encontrado la opcion que buscabamos
-	cascade_name=t[1].c_str();
-	notfound=false;
-      }
-    }
-    indata.close();
-    if (notfound){
-      fprintf(stderr,"El archivo de configuracion %s no contiene datos sobre la localizacion del archivo de cascada.\n",filename);
-    }
+  if (!getconfig("facedetectcascade", &cascade_name) ){
+    printf("No se han podido leer el path del archivo de cascada en la configuracion, abortando device.\n");
+    d->stop();
   }
 
   // inicialización de lo necesario para el facedetect
