@@ -128,6 +128,8 @@ int main( int argc, char** argv ){
 
     bool readinput = true; // flag que marca que debemos seguir leyendo de la entrada
 
+    bool artcreated = false; // flag que impide crear mas de un device artoolkit
+
     // comprobamos si teniamos como parametro un nombre de archivo
     if (argc>1){
       // en vez de abrir el archivo, cargamos la instruccion "load <archivo>" en loader
@@ -243,8 +245,15 @@ int main( int argc, char** argv ){
 	  }else
 
 	  if ( input[1].compare("artoolkit")==0 || input[1].compare("art")==0){
-	    // añadimos el dispositivo
-	    dev.push_back( new TPFC_device_artoolkit(dev.size(), argc, argv) );
+	    if (artcreated){
+	      // solo se permite una instancia, asi que avisamos al usuario
+	      printf("No se permite crear mas de un dispositivo del tipo artoolkit.\n");
+	    }else{
+	      // añadimos el dispositivo
+	      dev.push_back( new TPFC_device_artoolkit(dev.size(), argc, argv) );
+	      devadded = true; // flag de dispositivo creado 
+	      artcreated=true; // flag de art creado (para no permitir mas de una instancia
+	    }
 
 	  }else
 
@@ -353,7 +362,7 @@ int main( int argc, char** argv ){
 	  }else
 
 
-	    printf("'%s' no es un tipo de dispositivo valido.\n", input[1].c_str() );
+	  printf("'%s' no es un tipo de dispositivo valido.\n", input[1].c_str() );
 	  
 	  // si hemos llegado aqui y devadded==true, es que el comando ha creado un dev
 	  // lo guardamos en commands
