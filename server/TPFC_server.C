@@ -5,6 +5,7 @@
 #include "TPFC_device_wiimote.h"
 #include "TPFC_device_3dfrom2d.h"
 #include "TPFC_device_3dstereo.h"
+#include "TPFC_device_3dmerge.h"
 #include "TPFC_device_3dmod.h"
 #include "TPFC_device_3dpattern.h"
 
@@ -232,7 +233,7 @@ int main( int argc, char** argv ){
 		  // si hay un 5o parametro, calculamos la distancia, si no dejamos la distancia
 		  // por defecto para wiimotes
 		  float distance = (input.size()==5)?str2int(input[4])/1000.0:0.036;
-		  dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
+		  dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ,distance) );
 		  printf("Añadido dispositivo %i: 3dstereo con fuentes %i %i\n",dev.size()-1, source1, source2);
 		  devadded = true;
 		}
@@ -306,6 +307,37 @@ int main( int argc, char** argv ){
 		  printf("Añadido dispositivo %i: 3dmod con fuente %i ",dev.size()-1, source);
 		  printf("(%i puntos, %i mm)\n",str2int(input[3]), str2int(input[4]) );
 		  devadded=true;
+		}
+	      }
+	    }
+	  }else
+
+	  if ( input[1].compare("3dmerge")==0 || input[1].compare("merge")==0){
+	    // comprobamos que tengamos los parametro adicional necesario
+	    if (input.size()<4){
+	      printf("Los dispositivos 3dmerge requieren el numero de id de los dispositivo fuente\n");
+	    }else{
+	      int source1 = str2int( input[2] );
+	      int source2 = str2int( input[3] );
+	      // comprobamos que los ids sean validos y diferentes
+	      if (source1<0 || source1 >=dev.size()){
+		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n",source1);
+	      }else if (source2<0 || source2 >=dev.size()){
+		printf("No se puede establecer la fuente: no existe un dispositivo con ID %i\n",source2);
+	      }else{ //si lo son, comprobamos que los tipos de fuente sean correctos
+		string sourceok1=TPFC_device_3dmerge::checksource(dev[source1]);
+		string sourceok2=TPFC_device_3dmerge::checksource(dev[source2]);
+		bool ok1=(sourceok1.compare("ok")==0);
+		bool ok2=(sourceok2.compare("ok")==0);
+		// si alguno no lo es, devolvemos el error
+		if (!ok1){
+		  printf("%s",sourceok1.c_str());
+		}else if (!ok2){
+		  printf("%s",sourceok2.c_str());
+		}else{// si ambos son correctos, añadimos el dispositivo
+		  dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
+		  printf("Añadido dispositivo %i: 3dmerge con fuentes %i %i\n",dev.size()-1, source1, source2);
+		  devadded = true;
 		}
 	      }
 	    }
