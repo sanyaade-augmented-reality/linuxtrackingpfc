@@ -13,6 +13,13 @@ using namespace std;
 
 #include <quat.h>
 
+// para poder leer del archivo de configuracion
+#include <iostream>
+#include <fstream>
+#include <sstream>
+// para file exist
+#include <sys/stat.h>
+
 class TPFC_device{
   private:
     // id asignada a este dispositivo
@@ -27,7 +34,13 @@ class TPFC_device{
     // apuntador al buffer de datos
     TrackingPFC_data * data;
     // flag de funcionamiento
-    enum { STOP, RUN, PAUSE } running; 
+    enum { STOP, RUN, PAUSE } running;
+
+    
+    // funcion auxiliar para partir strings
+    static void StringExplode(string str, string separator, vector<string>* results);
+    // funcion auxiliar para comprobar si existen los archivos
+    static bool FileExists(string strFilename);
 
   public:
     // consctructora y creadora
