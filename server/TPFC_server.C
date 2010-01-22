@@ -264,7 +264,7 @@ int main( int argc, char** argv ){
 	      commands.push_back("# Version alternativa para volver a conectar el mismo mando:");
 	      commands.push_back("# device wiimote "+btaux);
 	    }
-	  }else{
+	  }else
 
 	  
 
@@ -354,7 +354,7 @@ int main( int argc, char** argv ){
 
 
 	    printf("'%s' no es un tipo de dispositivo valido.\n", input[1].c_str() );
-	  }
+	  
 	  // si hemos llegado aqui y devadded==true, es que el comando ha creado un dev
 	  // lo guardamos en commands
 	  if (devadded){
