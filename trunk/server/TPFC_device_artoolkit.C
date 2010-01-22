@@ -171,16 +171,29 @@ void* TPFC_device_artoolkit::art_main(void * t){
     printf("Image size (x,y) = (%d,%d)\n", xsize, ysize);
 
     /* set the initial camera parameters */
-    if( arParamLoad("Data/camera_para.dat", 1, &wparam) < 0 ) {
+    // obtenemos la ruta del archivo
+    string cam_dat;
+    if (!getconfig("artoolkitcam", &cam_dat) ){
+      printf("No se han podido leer el path del archivo de calibracion en la configuracion, abortando device.\n");
+      ((TPFC_device*)t)->stop();
+    }
+    if( arParamLoad(cam_dat.c_str(), 1, &wparam) < 0 ) {
         printf("Camera parameter load error !!\n");
         exit(0);
     }
+
     arParamChangeSize( &wparam, xsize, ysize, &cparam );
     arInitCparam( &cparam );
     printf("*** Camera Parameter ***\n");
     arParamDisp( &cparam );
-
-    if( (patt_id=arLoadPatt("Data/patt.hiro")) < 0 ) {
+    
+    // obtenemos la ruta del archivo
+    string pattern_path;
+    if (!getconfig("artoolkitpat", &pattern_path) ){
+      printf("No se han podido leer el path del archivo de patron en la configuracion, abortando device.\n");
+      ((TPFC_device*)t)->stop();
+    }
+    if( (patt_id=arLoadPatt(pattern_path.c_str())) < 0 ) {
         printf("pattern load error !!\n");
         exit(0);
     }
