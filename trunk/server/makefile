@@ -27,6 +27,9 @@ tpfcdev3dpattern.o : TPFC_device_3dpattern.C TPFC_device_3dpattern.h tpfcdev.o
 tpfcdev3dstereo.o : TPFC_device_3dstereo.C TPFC_device_3dstereo.h tpfcdev.o
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
+tpfcdevartoolkit.o : TPFC_device_artoolkit.C TPFC_device_artoolkit.h tpfcdev.o
+	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
+
 tpfcdevopencvface.o : TPFC_device_opencv_face.C TPFC_device_opencv_face.h tpfcdev.o
 	$(CC) $(CFLAGS) -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
@@ -36,7 +39,7 @@ tpfcdevwii.o : TPFC_device_wiimote.C TPFC_device_wiimote.h tpfcdev.o
 calibrate: calibrate.C
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
 
-tpfcserver : TPFC_server.C tpfcdev.o tpfcdev3df2d.o tpfcdev3dmerge.o tpfcdev3dmod.o tpfcdev3dpattern.o tpfcdev3dstereo.o tpfcdevopencvface.o tpfcdevwii.o
+tpfcserver : TPFC_server.C tpfcdev.o tpfcdev3df2d.o tpfcdev3dmerge.o tpfcdev3dmod.o tpfcdev3dpattern.o tpfcdev3dstereo.o tpfcdevartoolkit.o tpfcdevopencvface.o tpfcdevwii.o
 	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $^ $(LIBRARIES)
 	mkdir -p ~/.trackingpfc
 	cp cfgs/*.tpfc ~/.trackingpfc
