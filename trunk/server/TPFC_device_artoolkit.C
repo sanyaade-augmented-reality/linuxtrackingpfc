@@ -1,17 +1,40 @@
 #include "TPFC_device_artoolkit.h" 
 
-int mainx(int argc, char **argv);
+// incializacion de la variable estatica
+int TPFC_device_artoolkit::firstinstance=-1;
 
+// Creadora
 TPFC_device_artoolkit::TPFC_device_artoolkit(int ident,int argc, char **argv):TPFC_device(ident){
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,1);
 
-  mainx(argc,argv);
+  // si somos el primer device de este tipo, marcamos firstinstance
+  if (firstinstance==-1){
+    firstinstance=ident;
+    // inicializamos el glutInit para no tener que pasar argc y argv al thread
+    glutInit(&argc, argv);
+    // lanzamos el thread
+    pthread_create( &art_thread, NULL, art_main,this);
+  }else{
+    // como hay problemas al lanzar 2 instancias de artoolkit, avisamos al usuario
+    printf("Solo se permite un dispositivo del tipo artoolkit.\n");
+    // y detenemos el dispositivo
+    running= STOP;
+  }
+  
 }
 
+// Destructora
 TPFC_device_artoolkit::~TPFC_device_artoolkit(){
   free(data);
 }
+
+// Sobrecarga de stop, para esperar al thread
+void TPFC_device_artoolkit::stop(){
+   running= STOP;
+   pthread_join( art_thread, NULL);
+}
+
 
 // Informacion sobre el dispositivo
 string TPFC_device_artoolkit::info(){
@@ -30,16 +53,14 @@ string TPFC_device_artoolkit::checksource(TPFC_device* s){
 
 
 /* cleanup function called when program exits */
-static void cleanup(void)
-{
+void TPFC_device_artoolkit::cleanup(void){
     arVideoCapStop();
     arVideoClose();
     argCleanup();
 }
 
 
-static void draw( double trans[3][4] , int patt_id)
-{
+void TPFC_device_artoolkit::draw( double trans[3][4] , int patt_id){
     double    gl_para[16];
     GLfloat   mat_ambient[]     = {1.0, 0.0, 0.0, 1.0};
     GLfloat   mat_flash[]       = {1.0, 0.0, 0.0, 1.0};
@@ -78,8 +99,7 @@ static void draw( double trans[3][4] , int patt_id)
 
 
 /* main loop */
-static int mainLoop(int patt_id, int count)
-{
+int TPFC_device_artoolkit::mainLoop(int patt_id, int count){
     static int      contF = 0;
     ARUint8         *dataPtr;
     ARMarkerInfo    *marker_info;
@@ -134,11 +154,8 @@ static int mainLoop(int patt_id, int count)
 }
 
 
-
-
-int mainx(int argc, char **argv)
-{
-    glutInit(&argc, argv);
+// cuerpo principal del thread
+void* TPFC_device_artoolkit::art_main(void * t){
 
     int xsize, ysize;
     ARParam cparam;
@@ -170,14 +187,14 @@ int mainx(int argc, char **argv)
 
     /* open the graphics window */
     argInit( &cparam, 1.0, 0, 0, 0, 0 );
+
     // fin de init
 
     arVideoCapStart();
 
-    //argMainLoop( NULL, NULL, mainLoop );
+
     int count=0;
     while (1)
       count=mainLoop(patt_id, count);
 
-    return (0);
 }
