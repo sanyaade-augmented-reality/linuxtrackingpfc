@@ -3,13 +3,24 @@
 
 #include "TPFC_device.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <GL/gl.h>
+#include <GL/glut.h>
+
+#include <AR/ar.h>
+#include <AR/gsub.h>
+#include <AR/video.h>
+
+
 class TPFC_device_artoolkit : public TPFC_device{
 
   private:
 
   public:
     // consctructora y creadora
-    TPFC_device_artoolkit(int ident);
+    TPFC_device_artoolkit(int ident,int , char **);
     ~TPFC_device_artoolkit();
 
     // funcion que devuelve en un string la información relativa al dispositivo
