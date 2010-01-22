@@ -100,11 +100,10 @@ void TPFC_device_artoolkit::draw( double trans[3][4] , int patt_id){
 
 /* main loop */
 int TPFC_device_artoolkit::mainLoop(int patt_id, int count){
-    static int      contF = 0;
     ARUint8         *dataPtr;
     ARMarkerInfo    *marker_info;
     int             marker_num;
-    int             j, k;
+    int             k;
 
     /* grab a vide frame */
     if( (dataPtr = (ARUint8 *)arVideoGetImage()) == NULL ) {
@@ -127,26 +126,23 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count){
 
     /* check for object visibility */
     k = -1;
-    for( j = 0; j < marker_num; j++ ) {
+    for( int j = 0; j < marker_num; j++ ) {
         if( patt_id == marker_info[j].id ) {
             if( k == -1 ) k = j;
             else if( marker_info[k].cf < marker_info[j].cf ) k = j;
         }
     }
     if( k == -1 ) {
-        contF = 0;
         argSwapBuffers();
         return count;
     }
 
     /* get the transformation between the marker and the real camera */
-    int             patt_width     = 80.0;
+    int             patt_width     = 53.0;//80.0;
     double          patt_center[2] = {0.0, 0.0};
     double          patt_trans[3][4];
     arGetTransMatCont(&marker_info[k], patt_trans, patt_center, patt_width, patt_trans);
     
-    contF = 1;
-
     draw( patt_trans , patt_id);
 
     argSwapBuffers();
@@ -165,10 +161,10 @@ void* TPFC_device_artoolkit::art_main(void * t){
     ARParam  wparam;
 
     /* open the video path */
-    if( arVideoOpen( "" ) < 0 ) exit(0);
+    if( arVideoOpen( NULL ) < 0 ) exit(0);
     /* find the size of the window */
     if( arVideoInqSize(&xsize, &ysize) < 0 ) exit(0);
-    printf("Image size (x,y) = (%d,%d)\n", xsize, ysize);
+    //printf("Image size (x,y) = (%d,%d)\n", xsize, ysize);
 
     /* set the initial camera parameters */
     // obtenemos la ruta del archivo
@@ -184,8 +180,8 @@ void* TPFC_device_artoolkit::art_main(void * t){
 
     arParamChangeSize( &wparam, xsize, ysize, &cparam );
     arInitCparam( &cparam );
-    printf("*** Camera Parameter ***\n");
-    arParamDisp( &cparam );
+    //printf("*** Camera Parameter ***\n");
+    //arParamDisp( &cparam );
     
     // obtenemos la ruta del archivo
     string pattern_path;
@@ -207,7 +203,7 @@ void* TPFC_device_artoolkit::art_main(void * t){
 
 
     int count=0;
-    while (1)
+    while (((TPFC_device*)t)->alive())
       count=mainLoop(patt_id, count);
 
 }
