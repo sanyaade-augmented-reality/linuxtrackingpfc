@@ -133,6 +133,37 @@ string TPFC_device::checksource(TPFC_device*){
 
 
 
+// funcion auxiliar para leer el archivo de configuracion
+bool TPFC_device::getconfig(string target, string* res){
+
+  // accedemos al archivo de configuracion
+  fstream indata;
+  char filename[200];
+
+  // formateamos el nombre del archivo
+  sprintf(filename, "%s/.trackingpfc/tpfc.cfg",getenv ("HOME"));
+
+  indata.open(filename); // abrimos
+  
+  bool found = false;// flag de datos encontrados
+  if(indata){ // si se ha podido acceder...
+
+    string l; // string auxiliar
+    vector<string> t;
+    
+    while ( !indata.eof() && !found ) { //sigue leyendo hasta el EOF
+      getline(indata,l); // obtenemos una linea
+      t.clear();
+      StringExplode(l, " ", &t);
+      if (t[0].compare(target)==0){ // hemos encontrado la opcion que buscabamos
+	*res=t[1];
+	found=true;
+      }
+    }
+    indata.close();
+  }
+  return found;
+}
 
 // funcion auxiliar para parsear la entrada
 // (encontrada en http://www.infernodevelopment.com/perfect-c-string-explode-split)
@@ -177,3 +208,5 @@ bool TPFC_device::FileExists(string strFilename) {
   
   return(blnReturn);
 }
+
+
