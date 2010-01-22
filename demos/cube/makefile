@@ -17,5 +17,5 @@ oldcube : oldcube.C
 
 # to clean up:
 clean:
-	rm oldcube cube *.o *~
+	rm -f oldcube cube *.o *~
 

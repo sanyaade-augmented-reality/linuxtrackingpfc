@@ -31,5 +31,5 @@ install : libtpfcc.so.1.0.1
 
 # to clean up:
 clean:
-	rm *~ *.o *.so*
+	rm -f *~ *.o *.so*
 

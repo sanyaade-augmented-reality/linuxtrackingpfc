@@ -53,5 +53,5 @@ install : tpfcserver calibrate
 
 # to clean up:
 clean:
-	rm *~ *.o *.so* tpfcserver calibrate cfgs/*~
+	rm -f *~ *.o *.so* tpfcserver calibrate cfgs/*~
 
