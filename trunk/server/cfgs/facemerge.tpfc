@@ -1,0 +1,20 @@
+# Tracking PFC Server Sample Configuration file
+# Mezcla (filtrada por kalman)de 2 Opencv Facedetect con estimacion de distancia
+# para evitar la vibracion deberia ponerse un 3dmod con calibrado despues de cada 3dfrom2d
+
+device face 0
+device 3dfrom2d 0
+setmerge off
+setdeep size 170
+
+device face 1
+device 3dfrom2d 2
+setmerge off
+setdeep size 170
+
+
+device 3dmerge 2 3
+
+device 3dmod 4
+kalman
+server Tracker0
