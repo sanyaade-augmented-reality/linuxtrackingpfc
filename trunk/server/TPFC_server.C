@@ -335,7 +335,7 @@ int main( int argc, char** argv ){
 		}else if (!ok2){
 		  printf("%s",sourceok2.c_str());
 		}else{// si ambos son correctos, añadimos el dispositivo
-		  dev.push_back( new TPFC_device_3dstereo(dev.size(),dev[source1],dev[source2] ) );
+		  dev.push_back( new TPFC_device_3dmerge(dev.size(),dev[source1],dev[source2] ) );
 		  printf("Añadido dispositivo %i: 3dmerge con fuentes %i %i\n",dev.size()-1, source1, source2);
 		  devadded = true;
 		}
