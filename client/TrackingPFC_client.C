@@ -71,6 +71,11 @@ float* TrackingPFC_client::getlastpos(){
   return data->getlastpos();
 }
 
+
+TrackingPFC_data* TrackingPFC_client::getdata(){
+  return data;
+}
+
 // variables estaticas para el tamaño de la pantalla:
 // (se updatearan con la primera llamada a getDisplaySize
 float TrackingPFC_client::screensizex=0;
