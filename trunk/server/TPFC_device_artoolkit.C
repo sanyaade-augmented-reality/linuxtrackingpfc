@@ -136,14 +136,18 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device_artoolki
     }
     if( k == -1 ) {
         argSwapBuffers();
+	// no hay datos que reportar
+	d->getdata()->setnodata();
+	d->nullreport();
+	// devolvemos
         return count;
     }
 
     /* get the transformation between the marker and the real camera */
     int             patt_width     = d->pattsize;//80.0;
     double          patt_center[2] = {0.0, 0.0};
-    //double          patt_trans[3][4];
-    double          patt_trans[4][4];
+    // añadimos 1 mas para poder usarlo como un q_mat_type
+    double          patt_trans[4][4]; //patt_trans[3][4];
     arGetTransMatCont(&marker_info[k], patt_trans, patt_center, patt_width, patt_trans);
     
     // obtenemos los datos que nos interesan
@@ -160,8 +164,15 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device_artoolki
     res[4]=rot[Q_Y];
     res[5]=rot[Q_Z];
     res[6]=rot[Q_W];
-    d->getdata()->setnewdata(res);
-    d->report();
+    // a veces se reporta que el marcador esta detras de la camara, para evitar bugs
+    // no reportamos si eso ocurre
+    if (res[2]>0.0){
+      d->getdata()->setnewdata(res);
+      d->report();
+    }else{
+      d->getdata()->setnodata();
+      d->nullreport();
+    }
 
     draw( patt_trans);
 
