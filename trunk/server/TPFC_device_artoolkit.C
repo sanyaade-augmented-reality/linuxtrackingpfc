@@ -162,6 +162,7 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device_artoolki
     // quaternion de la rotación
     q_type rot, fix;
     q_from_col_matrix(rot, patt_trans);
+    // hay que rotar 180* en el eje x
     q_from_euler(fix,0,0,3.1415);
     q_mult(rot,rot,fix);
     res[3]=rot[Q_X];
