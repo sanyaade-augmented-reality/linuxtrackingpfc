@@ -60,7 +60,7 @@ void TPFC_device_artoolkit::cleanup(void){
 }
 
 
-void TPFC_device_artoolkit::draw( double trans[3][4] , int patt_id){
+void TPFC_device_artoolkit::draw( double trans[3][4]){
     double    gl_para[16];
     GLfloat   mat_ambient[]     = {1.0, 0.0, 0.0, 1.0};
     GLfloat   mat_flash[]       = {1.0, 0.0, 0.0, 1.0};
@@ -99,7 +99,7 @@ void TPFC_device_artoolkit::draw( double trans[3][4] , int patt_id){
 
 
 /* main loop */
-int TPFC_device_artoolkit::mainLoop(int patt_id, int count){
+int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device* d){
     ARUint8         *dataPtr;
     ARMarkerInfo    *marker_info;
     int             marker_num;
@@ -140,10 +140,28 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count){
     /* get the transformation between the marker and the real camera */
     int             patt_width     = 53.0;//80.0;
     double          patt_center[2] = {0.0, 0.0};
-    double          patt_trans[3][4];
+    //double          patt_trans[3][4];
+    double          patt_trans[4][4];
     arGetTransMatCont(&marker_info[k], patt_trans, patt_center, patt_width, patt_trans);
     
-    draw( patt_trans , patt_id);
+    // obtenemos los datos que nos interesan
+    double res[7];
+    // posicion del patron (en metros)
+    res[0]= -patt_trans[0][3]/1000;
+    res[1]= -patt_trans[1][3]/1000;
+    res[2]= patt_trans[2][3]/1000;
+    //printf("%f %f %f\n\n",res[0], res[1], res[2]);
+    // quaternion de la rotación
+    q_type rot;
+    q_from_row_matrix(rot, patt_trans);
+    res[3]=rot[Q_X];
+    res[4]=rot[Q_Y];
+    res[5]=rot[Q_Z];
+    res[6]=rot[Q_W];
+    d->getdata()->setnewdata(res);
+    d->report();
+
+    draw( patt_trans);
 
     argSwapBuffers();
     return count;
@@ -204,6 +222,6 @@ void* TPFC_device_artoolkit::art_main(void * t){
 
     int count=0;
     while (((TPFC_device*)t)->alive())
-      count=mainLoop(patt_id, count);
+      count=mainLoop(patt_id, count, (TPFC_device*)t);
 
 }
