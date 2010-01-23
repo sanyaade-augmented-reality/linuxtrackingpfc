@@ -24,9 +24,9 @@ TrackingPFC_data::TrackingPFC_data(TPFCdatatype t, int s){
   defaultdata[1]=0.0;
   defaultdata[2]=0.5;
   defaultdata[3]=0.0;
-  defaultdata[4]=1.0;
+  defaultdata[4]=0.0;
   defaultdata[5]=0.0;
-  defaultdata[6]=0.0;
+  defaultdata[6]=1.0;
   setnewdata(defaultdata, false);
 }
 

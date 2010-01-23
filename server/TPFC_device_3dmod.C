@@ -9,7 +9,11 @@ TPFC_device_3dmod::TPFC_device_3dmod(int ident, TPFC_device* s):TPFC_device(iden
   scale = 1.00; //100%, no se modifica
 
   // reorientacion
-  orientopt=NONE; // no se aplican cambios de orientacion
+  if (s->getdata()->datatype()!=TrackingPFC_data::TPFCDATA3DORI)
+    // si la fuente no tiene orientacion, por defecto se le da 1
+    orientopt=ALL; // no se aplican cambios de orientacion
+  else
+    orientopt=NONE; // no se aplican cambios de orientacion
   orientdir=FORWARD;
 
   // localizacion
@@ -169,9 +173,9 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 	  if (orientdir==FORWARD){
 	    // la orientacion debe ser el quaternion nulo (perpendicular al plano normal del sensor)
 	    newdot[3]=0;
-	    newdot[4]=1;
+	    newdot[4]=0;
 	    newdot[5]=0;
-	    newdot[6]=0;
+	    newdot[6]=1;
 	  }else{ //CENTER
 	    q_vec_type cent, norm;
 	    q_type rot;
@@ -233,7 +237,10 @@ void TPFC_device_3dmod::setscale(double s){
 }
 
 void TPFC_device_3dmod::setorientation(reorientopt o, reorientdir d){
-  orientopt=o;
+  if (!(source->getdata()->datatype()!=TrackingPFC_data::TPFCDATA3DORI && o==NONE))
+    orientopt=o;
+  else
+    printf("La fuente no tiene orientacion, no se puede desactivar la reorientacion, ignorando orden.\n");
   orientdir=d;
 }
 
