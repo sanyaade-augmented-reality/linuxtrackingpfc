@@ -27,6 +27,8 @@ class TPFC_device_artoolkit : public TPFC_device{
 
     // tamaño del marcador a usar
     double pattsize;
+    // threshold para la deteccion
+    int treshold;
 
     // variable auxiliar para la gestion de inicializaciones unicas
     // (para detectar cual es el primer device, que es el unico que debe hacerlo)
@@ -34,7 +36,7 @@ class TPFC_device_artoolkit : public TPFC_device{
 
   public:
     // consctructora y creadora
-    TPFC_device_artoolkit(int ident,double, int , char **);
+    TPFC_device_artoolkit(int ident,double,int, int , char **);
     ~TPFC_device_artoolkit();
 
     // sobrecarga de stop (para parar el thread)

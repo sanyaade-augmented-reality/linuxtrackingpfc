@@ -4,7 +4,7 @@
 int TPFC_device_artoolkit::firstinstance=-1;
 
 // Creadora
-TPFC_device_artoolkit::TPFC_device_artoolkit(int ident, double patsiz,int argc, char **argv):TPFC_device(ident){
+TPFC_device_artoolkit::TPFC_device_artoolkit(int ident, double patsiz, int t ,int argc, char **argv):TPFC_device(ident){
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,1);
 
@@ -12,6 +12,8 @@ TPFC_device_artoolkit::TPFC_device_artoolkit(int ident, double patsiz,int argc, 
   if (firstinstance==-1){
     // guardamos el tamaño del patron
     pattsize=patsiz;
+    // y el treshold
+    treshold=t;
     firstinstance=ident;
     // inicializamos el glutInit para no tener que pasar argc y argv al thread
     glutInit(&argc, argv);
@@ -119,7 +121,7 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device_artoolki
     argDispImage( dataPtr, 0,0 );
 
     /* detect the markers in the video frame */
-    if( arDetectMarker(dataPtr, 100, &marker_info, &marker_num) < 0 ) {
+    if( arDetectMarker(dataPtr, treshold, &marker_info, &marker_num) < 0 ) {
         cleanup();
         exit(0);
     }
