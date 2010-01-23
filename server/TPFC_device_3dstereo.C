@@ -169,6 +169,7 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
 	// variables para las posiciones de los puntos
 	double x,y,z;
 	double ang0, ang1;
+	pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
 	for (int dn =0; dn<totaldots;dn++){
 	  // calculo de la profundidad
 	  // pasamos los angulos al sistema de referencia necesario
@@ -198,6 +199,7 @@ void TPFC_device_3dstereo::report_from(TPFC_device* s){
 	    data->setmoredata(aux);
 	  free(aux);
 	}//for (int dn =0; dn<totaldots;dn++)
+	pthread_mutex_unlock( lock ); // obtenemos acceso exclusivo
       }// sideok
     } // needreport
     if (needreport){
