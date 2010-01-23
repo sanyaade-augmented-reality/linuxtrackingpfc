@@ -13,6 +13,8 @@
   bool useht; // flag de HT on/off
   bool follow; // flag de modo, true = follow, false=imitate
 
+  int winx, winy;
+
   double aspectratio;
 
 // inicializaciones
@@ -66,7 +68,7 @@ void output(float x, float y, char *string){
   // segun si tenemos activado o no el HT, llamamos
   // a la funcion del cliente o a la de glu
   if (useht)
-    track->htadjustPerspective(znear, zfar);
+    track->htadjustPerspective(znear, zfar, winx, winy);
   else
     gluPerspective(45.0, aspectratio, znear, zfar);
 
@@ -156,6 +158,8 @@ void output(float x, float y, char *string){
 // gestion de cambio de tamaño
 void reshape (int w, int h){
   glViewport (0, 0, (GLsizei) w, (GLsizei) h);
+  winx=w;
+  winy=h;
   aspectratio=(float)w/(float)h;
 }
 
@@ -187,10 +191,13 @@ int main(int argc, char** argv)
   follow = true;
 
   // inicializamos el aspect ratio a 1,6
-  aspectratio=1.6;
+  winx=960;
+  winy=600;
+  aspectratio=(float)winx/(float)winy;
 
   framen=0;
   sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   m:mode\n");
+
 
   char* trkname = (char*)"Tracker0@localhost";
   // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
@@ -202,7 +209,7 @@ int main(int argc, char** argv)
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize (960, 600); 
+  glutInitWindowSize (winx, winy); 
   glutInitWindowPosition (0,0);
   glutCreateWindow (argv[0]);
   //glutGameModeString( "1920x1200:32@60" ); //the settings for fullscreen mode
