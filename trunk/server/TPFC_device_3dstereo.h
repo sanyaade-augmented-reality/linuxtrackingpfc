@@ -12,6 +12,8 @@ class TPFC_device_3dstereo : public TPFC_device{
     TrackingPFC_data::datachunk** lastdata;
     // semaforo para exclusion mutua en el acceso a lastdata
     pthread_mutex_t* lock;
+    // semaforo para exclusion mutua al escribir los datos en data
+    pthread_mutex_t* lock2;
 
     double camdist; // distancia entre ambos sensores
     int left; // indice del sensor izquierdo
