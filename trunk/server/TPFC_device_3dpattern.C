@@ -123,10 +123,10 @@ void TPFC_device_3dpattern::report_from(TPFC_device* s){
 	    double zrot, yrot;
 	    if (xdist<0){ // el segundo punto esta mas a la derecha
 	      zrot=atan(ydist/xdist); 
-	      yrot=-atan(zdist/xdist); 
+	      yrot=atan(zdist/xdist); 
 	    }else{
 	      zrot=-atan(ydist/xdist); 
-	      yrot=atan(zdist/xdist); 
+	      yrot=-atan(zdist/xdist); 
 	    }
 	    //printf("z: %f, y:%f\n",zrot*360/6.2832,yrot*360/6.2832);
 	    // roll is rotation about X, pitch is rotation about Y, yaw is about Z.
