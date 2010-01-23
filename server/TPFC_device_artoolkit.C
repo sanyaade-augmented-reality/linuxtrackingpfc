@@ -4,12 +4,14 @@
 int TPFC_device_artoolkit::firstinstance=-1;
 
 // Creadora
-TPFC_device_artoolkit::TPFC_device_artoolkit(int ident,int argc, char **argv):TPFC_device(ident){
+TPFC_device_artoolkit::TPFC_device_artoolkit(int ident, double patsiz,int argc, char **argv):TPFC_device(ident){
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3DORI,1);
 
   // si somos el primer device de este tipo, marcamos firstinstance
   if (firstinstance==-1){
+    // guardamos el tamaño del patron
+    pattsize=patsiz;
     firstinstance=ident;
     // inicializamos el glutInit para no tener que pasar argc y argv al thread
     glutInit(&argc, argv);
@@ -99,7 +101,7 @@ void TPFC_device_artoolkit::draw( double trans[3][4]){
 
 
 /* main loop */
-int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device* d){
+int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device_artoolkit* d){
     ARUint8         *dataPtr;
     ARMarkerInfo    *marker_info;
     int             marker_num;
@@ -138,7 +140,7 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device* d){
     }
 
     /* get the transformation between the marker and the real camera */
-    int             patt_width     = 53.0;//80.0;
+    int             patt_width     = d->pattsize;//80.0;
     double          patt_center[2] = {0.0, 0.0};
     //double          patt_trans[3][4];
     double          patt_trans[4][4];
@@ -222,6 +224,6 @@ void* TPFC_device_artoolkit::art_main(void * t){
 
     int count=0;
     while (((TPFC_device*)t)->alive())
-      count=mainLoop(patt_id, count, (TPFC_device*)t);
+      count=mainLoop(patt_id, count, (TPFC_device_artoolkit*)t);
 
 }
