@@ -248,9 +248,11 @@ int main( int argc, char** argv ){
 	    if (artcreated){
 	      // solo se permite una instancia, asi que avisamos al usuario
 	      printf("No se permite crear mas de un dispositivo del tipo artoolkit.\n");
+	    }else if (input.size()<3){
+	      printf("Los devices artoolkit requieren como parametro el tamaño del marcador a usar (en milimetros).\n");
 	    }else{
 	      // añadimos el dispositivo
-	      dev.push_back( new TPFC_device_artoolkit(dev.size(), argc, argv) );
+	      dev.push_back( new TPFC_device_artoolkit(dev.size(), str2int(input[2]),argc, argv) );
 	      devadded = true; // flag de dispositivo creado 
 	      artcreated=true; // flag de art creado (para no permitir mas de una instancia
 	    }
@@ -749,7 +751,7 @@ int main( int argc, char** argv ){
 	  printf("device (dev, d) <tipo> -> crea un nuevo dispositivo:\n");
 	  printf("dev opencvfacedetect (face) <numero de dispositivo de video a usar> [multiusuario: on, off]\n");
 	  printf("dev wiimote (wii)\n");
-	  printf("dev artoolkit (art)\n");
+	  printf("dev artoolkit (art) <tamaño del marcador en milimetros>\n");
 	  printf("dev 3dfrom2d (3f2) <id del dispositivo fuente>\n");
 	  printf("     setdeep (deep) <fija, rotacion, size, onlysize> <distancia en mm>\n");
 	  printf("                    [id del dispositivo, el ultimo por defecto]-> \n");
