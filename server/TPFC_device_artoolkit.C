@@ -121,7 +121,7 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device_artoolki
     argDispImage( dataPtr, 0,0 );
 
     /* detect the markers in the video frame */
-    if( arDetectMarker(dataPtr, treshold, &marker_info, &marker_num) < 0 ) {
+    if( arDetectMarker(dataPtr, d->treshold, &marker_info, &marker_num) < 0 ) {
         cleanup();
         exit(0);
     }
