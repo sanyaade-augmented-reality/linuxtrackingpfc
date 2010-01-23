@@ -144,6 +144,8 @@ void output(float x, float y, char *string){
   glutSolidCube (1.0);
   glTranslatef(-2,0,0);
   glutSolidCube (1.0);
+  glTranslatef(1,0,-4);
+  glutSolidCube (1.0);
 
   
 

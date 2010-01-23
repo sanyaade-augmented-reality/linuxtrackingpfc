@@ -160,8 +160,10 @@ int TPFC_device_artoolkit::mainLoop(int patt_id, int count, TPFC_device_artoolki
     res[2]= patt_trans[2][3]/1000;
     //printf("%f %f %f\n\n",res[0], res[1], res[2]);
     // quaternion de la rotación
-    q_type rot;
-    q_from_row_matrix(rot, patt_trans);
+    q_type rot, fix;
+    q_from_col_matrix(rot, patt_trans);
+    q_from_euler(fix,0,0,3.1415);
+    q_mult(rot,rot,fix);
     res[3]=rot[Q_X];
     res[4]=rot[Q_Y];
     res[5]=rot[Q_Z];
