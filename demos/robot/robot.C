@@ -479,7 +479,7 @@ void display(void){
 	// pero solo si no estamos usando HT
 	q_type zero;
 	zero[Q_X]=0;zero[Q_Y]=0;zero[Q_Z]=0;zero[Q_W]=1;
-	q_slerp (diff, diff, zero, 0.75);
+	q_slerp (diff, diff, zero, 0.5);
       }
 
       // obtenemos la matriz
