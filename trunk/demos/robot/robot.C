@@ -83,6 +83,11 @@ void init(void){
   glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
   glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
 
+  glEnable(GL_BLEND);
+  glEnable(GL_LINE_SMOOTH);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+
 }
 
 // funcion auxiliar para calcular las normales
@@ -339,6 +344,27 @@ void display(void){
     gluLookAt(0, 0, 12,  0, 0, -1.0,  0.0, 1.0, 0.0);
   }
 
+  glDisable(GL_LIGHTING);
+    glLineWidth(1.5);
+  float i;
+  glColor3f(0.2, 0.2, 0.2);
+  for (i=-100.0;i<=0.0;i+=5.0){
+   glBegin(GL_LINES);
+    glVertex3f(-100.0, -5.0, i);
+    glVertex3f( 100.0, -5.0, i);
+    glVertex3f(-100.0,  5.0, i);
+    glVertex3f( 100.0,  5.0, i);
+   glEnd();
+  }
+  for (i=-100.0;i<=100.0;i+=5.0){
+   glBegin(GL_LINES);
+    glVertex3f( i,  5.0,   0);
+    glVertex3f( i,  5.0, -100);
+    glVertex3f( i, -5.0,   0);
+    glVertex3f( i, -5.0, -100);
+   glEnd();
+  }
+  glEnable(GL_LIGHTING);
 
   // añadimos mensajes
   char buffer[160];
