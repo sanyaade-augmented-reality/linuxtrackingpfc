@@ -25,7 +25,7 @@ class TrackingPFC_data{
       
       public:
       // constructora
-      datachunk(double* f, int c, bool r = true, datachunk* n=NULL);
+      datachunk(double* f, int c, bool r = true, datachunk* n=NULL, int tag =0);
       // copiadora
       datachunk(datachunk* d, int dsize);
       // destructora
@@ -83,13 +83,13 @@ class TrackingPFC_data{
     // funciona tb para datos 2d, simplemente ignora el 3r parametro
     int setnewpos(double, double, double f = 0.0);
     // añade un nuevo report con los datos de d, d debe tener tamaño dsize
-    int setnewdata(const float* d, bool real = true);
-    int setnewdata(const double* d, bool real = true);
+    int setnewdata(const float* d, bool real = true, int tag =0);
+    int setnewdata(const double* d, bool real = true, int tag =0);
 
     // Escritoras avanzadas
     // añadir información de otro punto adicional al ultimo report
-    void setmoredata(const float* d, bool real = true);
-    void setmoredata(const double* d, bool real = true);
+    void setmoredata(const float* d, bool real = true, int tag =0);
+    void setmoredata(const double* d, bool real = true, int tag =0);
     // añadir un nuevo report vacio y con el flag de datos no validos
     int setnodata(bool real = true);
     // añadir tag a algun datachunk del ultimo report

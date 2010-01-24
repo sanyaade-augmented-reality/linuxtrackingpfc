@@ -122,7 +122,7 @@ int TrackingPFC_data::setnewpos(double x, double y, double z){
 
 // añade un nuevo chunk a los datos, con tiempo actual y los datos de d
 // no comprueba que los datos sean del tamaño correcto (que debe ser ==dsize)
-int TrackingPFC_data::setnewdata(const float* d, bool real){
+int TrackingPFC_data::setnewdata(const float* d, bool real , int tag){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // aumentamos el indice
   ind=(ind+1)%size;
@@ -137,11 +137,11 @@ int TrackingPFC_data::setnewdata(const float* d, bool real){
   for (int i =0; i<dsize;i++)
     aux[i]=d[i];
   // creamos un datachunk nuevo insertandolo en el buffer
-  data[ind]= new datachunk(aux, count, real);
+  data[ind]= new datachunk(aux, count, real, NULL, tag);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
   return count;
 }
-int TrackingPFC_data::setnewdata(const double* d, bool real){
+int TrackingPFC_data::setnewdata(const double* d, bool real, int tag){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // aumentamos el indice
   ind=(ind+1)%size;
@@ -156,13 +156,13 @@ int TrackingPFC_data::setnewdata(const double* d, bool real){
   for (int i =0; i<dsize;i++)
     aux[i]=d[i];
   // creamos un datachunk nuevo insertandolo en el buffer
-  data[ind]= new datachunk(aux, count, real);
+  data[ind]= new datachunk(aux, count, real, NULL, tag);
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
   return count;
 }
 
 // añade informacion sobre otro punto al ultimo report
-void TrackingPFC_data::setmoredata(const float* d, bool real){
+void TrackingPFC_data::setmoredata(const float* d, bool real, int tag){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // no debemos incrementar ind ni count ya que estamos ante el mismo report.
   // creamos un nuevo vector para los datos
@@ -170,14 +170,12 @@ void TrackingPFC_data::setmoredata(const float* d, bool real){
   // y lo rellenamos
   for (int i =0; i<dsize;i++)
     aux[i]=d[i];
-  // creamos un datachunk nuevo insertandolo en el buffer, el datachunk que antes ocupaba
-  // data[ind] ahora esta en data[ind]->next
-  //data[ind]= new datachunk(aux, count, real, data[ind]);
-  data[ind]->append( new datachunk(aux, count, real));
+  // añadimos el nuevo datachunk al report
+  data[ind]->append( new datachunk(aux, count, real, NULL, tag));
   
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
-void TrackingPFC_data::setmoredata(const double* d, bool real){
+void TrackingPFC_data::setmoredata(const double* d, bool real, int tag){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // no debemos incrementar ind ni count ya que estamos ante el mismo report.
   // creamos un nuevo vector para los datos
@@ -185,9 +183,8 @@ void TrackingPFC_data::setmoredata(const double* d, bool real){
   // y lo rellenamos
   for (int i =0; i<dsize;i++)
     aux[i]=d[i];
-  // creamos un datachunk nuevo insertandolo en el buffer, el datachunk que antes ocupaba
-  // data[ind] ahora esta en data[ind]->next
-  data[ind]= new datachunk(aux, count, real, data[ind]);
+  // añadimos el nuevo datachunk al report
+  data[ind]->append( new datachunk(aux, count, real, NULL, tag));
   
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
@@ -237,11 +234,11 @@ bool TrackingPFC_data::isreal(){
 
 // STRUCT DATACHUNK
 // constructora
-TrackingPFC_data::datachunk::datachunk(double* f, int c, bool r, datachunk* n){
+TrackingPFC_data::datachunk::datachunk(double* f, int c, bool r, datachunk* n, int t){
   data= f;
   time=clock();
   count = c;
-  tag=0;
+  tag=t;
   valid=true;
   real=r;
   next=n;
