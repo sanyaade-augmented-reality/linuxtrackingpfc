@@ -38,8 +38,8 @@ int lastreport;
 int lastreportsize;
 vector<time_t> lasttime;
 vector<double*> lastpos;
-GLfloat lightskinColor[4] = {0.7, 0.7, 0.5, 1.0};
-GLfloat darkskinColor[4] = {0.3, 0.2, 0.1, 1.0};
+GLfloat lightskinColor[4] = {233.0/355.0, 132.0/255.0, 20.0/255.0, 1.0};
+GLfloat darkskinColor[4] = {197.0/355.0, 112.0/255.0, 58.0/255.0, 1.0};
 GLfloat eyesColor[4] = {0.0, 0.0, 0.1, 1.0};
 
 // inicializaciones
@@ -56,15 +56,15 @@ void init(void){
 
   // luces
   GLfloat lightZeroPosition[] = {5, 0, 5, 1.0};
-  GLfloat lightZeroColor[] = {1.0, 1.0, 1.0, 1.0};
+  GLfloat lightZeroColor[] = {0.5, 0.5, 0.5, 1.0};
   glLightfv(GL_LIGHT0, GL_POSITION, lightZeroPosition);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor);
   glEnable(GL_LIGHT0);
-  /*GLfloat lightOnePosition[] = {-5, 0, 5, 1.0};
-  GLfloat lightOneColor[] = {1, 1, 1, 1.0};
+  GLfloat lightOnePosition[] = {-5, 0, 5, 1.0};
+  GLfloat lightOneColor[] = {0.5, 0.5, 0.5, 1.0};
   glLightfv(GL_LIGHT1, GL_POSITION, lightOnePosition);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, lightOneColor);
-  glEnable(GL_LIGHT1);*/
+  glEnable(GL_LIGHT1);
 
   static float modelAmb[4] = {0.2, 0.2, 0.2, 1.0};
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
