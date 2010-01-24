@@ -89,6 +89,12 @@ void init(void){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 
+  static float fog_color[] = {0.0, 0.0, 0.0, 1.0};
+  glEnable(GL_FOG);
+  glFogi(GL_FOG_MODE, GL_EXP);
+  glFogf(GL_FOG_DENSITY, 0.012);
+  glFogfv(GL_FOG_COLOR, fog_color);
+
 }
 
 // funcion auxiliar para calcular las normales
@@ -345,6 +351,7 @@ void display(void){
     gluLookAt(0, 0, 12,  0, 0, -1.0,  0.0, 1.0, 0.0);
   }
 
+  glEnable(GL_FOG);
   glDisable(GL_LIGHTING);
     glLineWidth(1.5);
   float i;
@@ -366,6 +373,7 @@ void display(void){
    glEnd();
   }
   glEnable(GL_LIGHTING);
+  glDisable(GL_FOG);
 
   // añadimos mensajes
   char buffer[160];
