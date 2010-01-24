@@ -172,7 +172,8 @@ void TrackingPFC_data::setmoredata(const float* d, bool real){
     aux[i]=d[i];
   // creamos un datachunk nuevo insertandolo en el buffer, el datachunk que antes ocupaba
   // data[ind] ahora esta en data[ind]->next
-  data[ind]= new datachunk(aux, count, real, data[ind]);
+  //data[ind]= new datachunk(aux, count, real, data[ind]);
+  data[ind]->append( new datachunk(aux, count, real));
   
   pthread_mutex_unlock( lock ); // liberamos el acceso exclusivo
 }
@@ -328,4 +329,12 @@ TrackingPFC_data::datachunk* TrackingPFC_data::datachunk::getchunk(int n){
   for (int i =0; i<n;i++)
     aux=aux->next;
   return aux;
+}
+
+void TrackingPFC_data::datachunk::append(datachunk* n){
+  datachunk* aux= this;
+  while (aux->next!=NULL){
+    aux=aux->next;
+  }
+  aux->next=n;
 }
