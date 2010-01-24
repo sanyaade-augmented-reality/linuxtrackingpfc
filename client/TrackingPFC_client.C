@@ -210,7 +210,7 @@ void TrackingPFC_client::setdata(float * f, int sensor){
   // si aun no hemos recibido ningun report, añadimos el dato normalmente
   if (reports.size()==0){
     reports.push_back(sensor);
-    data->setnewdata(f);
+    data->setnewdata(f, true, sensor);
   }else{ // si no, tenemos que comprobar que ese sensor no este incluido ya en ese report
     bool found = false;
     for (int i =0; i<reports.size() && !found;i++)
@@ -218,13 +218,13 @@ void TrackingPFC_client::setdata(float * f, int sensor){
     // si ese sensor no esta aun en ese report, lo añadimos
     if ( !found){
       reports.push_back(sensor);
-      data->setmoredata(f); // usamos setmore ya que estamos ante un report que ya contiene almenos un dato
+      data->setmoredata(f, true, sensor); // usamos setmore ya que estamos ante un report que ya contiene almenos un dato
     }else{
       // limpiamos el vector
       reports.clear();
       // y añadimos los datos con normalidad
       reports.push_back(sensor);
-      data->setnewdata(f);
+      data->setnewdata(f, true, sensor);
     }
   }
   pthread_mutex_unlock( lock ); // liberamos el acceso
