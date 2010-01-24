@@ -43,6 +43,7 @@ class TrackingPFC_data{
       int size();  // cantidad de puntos en el report (si no es valido devuelve 0)
       void setvalid(bool);
       void settag(int,int n = 0);
+      void append(datachunk*); // añade un nuevo datachunk
 
       private:
       // auxiliares
