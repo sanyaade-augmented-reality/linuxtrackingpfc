@@ -38,6 +38,9 @@ int lastreport;
 int lastreportsize;
 vector<time_t> lasttime;
 vector<double*> lastpos;
+GLfloat lightskinColor[4] = {0.7, 0.7, 0.5, 1.0};
+GLfloat darkskinColor[4] = {0.3, 0.2, 0.1, 1.0};
+GLfloat eyesColor[4] = {0.0, 0.0, 0.1, 1.0};
 
 // inicializaciones
 void init(void){
@@ -109,6 +112,9 @@ void leye(){
 
   float v15[]={-1.3,0.9,2.5}; float v16[]={2.3, 0.9,2.5}; float v17[]={2.4, 0,2.5};
   float v18[]={1.4, -0.9,2.5}; float v19[]={-0.3, -0.9,2.5};
+
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, lightskinColor);
+
   // tapa trasera
   calcNorm(v0,v1,v2);
   glBegin(GL_POLYGON);
@@ -137,6 +143,8 @@ void leye(){
   glBegin(GL_POLYGON);
     glVertex3fv(v19);glVertex3fv(v18);glVertex3fv(v17);glVertex3fv(v16);glVertex3fv(v15);
   glEnd();
+
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, eyesColor);
   glTranslatef(0,0,2.0);
   glutSolidSphere (0.75,32,32);
   glTranslatef(0,0,-2.0);
@@ -155,6 +163,7 @@ void reye(){
   float v15[]={1.3,0.9,2.5}; float v16[]={-2.3, 0.9,2.5}; float v17[]={-2.4, 0,2.5};
   float v18[]={-1.4, -0.9,2.5}; float v19[]={0.3, -0.9,2.5};
 
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, lightskinColor);
   // tapa trasera
   calcNorm(v4,v3,v2);
   glBegin(GL_POLYGON);
@@ -183,20 +192,23 @@ void reye(){
   glBegin(GL_POLYGON);
     glVertex3fv(v15);glVertex3fv(v16);glVertex3fv(v17);glVertex3fv(v18);glVertex3fv(v19);
   glEnd();
+
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, eyesColor);
   glTranslatef(0,0,2.0);
   glutSolidSphere (0.75,32,32);
   glTranslatef(0,0,-2.0);
 }
 void eyes(float angle){
   glRotatef(-angle, 0,0,1);
-  glTranslatef(1.6,0,0);
+  glTranslatef(1.6,0.3,0);
   leye();
-  glTranslatef(-1.6,0,0);
+  glTranslatef(-1.6,-0.3,0);
   glRotatef(angle, 0,0,1);
+
   glRotatef(angle, 0,0,1);
-  glTranslatef(-1.6,0,0);
+  glTranslatef(-1.6,0.3,0);
   reye();
-  glTranslatef(1.6,0,0);
+  glTranslatef(1.6,-0.3,0);
   glRotatef(-angle, 0,0,1);
 
   float v0[]={ 1.6,  0.3,  1};
@@ -207,6 +219,8 @@ void eyes(float angle){
   float v5[]={-1.6,  0.3, -1};
   float v6[]={-1.6, -0.3, -1};
   float v7[]={-1.6, -0.3,  1};
+
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, darkskinColor);
   // laterales
   poly(v0,v3,v2,v1);
   poly(v4,v5,v6,v7);
@@ -228,6 +242,8 @@ void body(){
   float v5[]={-0.3 , 0.0, -0.3};
   float v6[]={-0.3 ,-5.0, -0.3};
   float v7[]={-0.3 ,-5.0,  0.3};
+  
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, darkskinColor);
   // laterales
   poly(v0,v3,v2,v1);
   poly(v4,v5,v6,v7);
@@ -479,9 +495,9 @@ void display(void){
   
   // Un cubo
   //glColor3f(1.0, 0.0, 0.0);
-  GLfloat skinColor[4] = {0.5, 0.5, 0.5, 1.0};
+  /*GLfloat skinColor[4] = {0.2, 0.2, 0.2, 1.0};
   glMaterialfv(GL_FRONT, GL_DIFFUSE, skinColor);
-  /*glutSolidCube (4.0);
+  glutSolidCube (4.0);
   GLfloat skinColor2[4] = {1.0, 1.0, 1.0, 1.0};
   glMaterialfv(GL_FRONT, GL_DIFFUSE, skinColor2);
   glTranslatef(1,1,2);
@@ -492,9 +508,9 @@ void display(void){
   glutSolidCube (1.0);*/
   if ((mode==FOLLOW && lifeforms==0) || mode==STOP){
     glRotatef(20,1,0,0);
-    eyes(25);
+    eyes(30);
   }else
-    eyes(3);
+    eyes(10);
   
 
 
