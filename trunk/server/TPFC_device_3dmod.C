@@ -181,7 +181,7 @@ void TPFC_device_3dmod::report_from(TPFC_device* s){
 	    q_type rot;
 	    q_vec_set(norm,0,0,-1);
 	    q_vec_set(cent,-newdot[0],-newdot[1],-newdot[2]);
-	    q_from_two_vecs(rot,norm,cent);
+	    q_from_two_vecs(rot,cent,norm);
 	    newdot[3]=rot[Q_X];
 	    newdot[4]=rot[Q_Y];
 	    newdot[5]=rot[Q_Z];
