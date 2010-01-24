@@ -22,7 +22,7 @@ void TPFC_device::report_to(TPFC_device* l){
 
 // Reportar a los listeners que hay nuevos datos (enviando solo el aviso, no los datos en si)
 // y enviar los datos via vrpn_tracker si es que existe uno (en esta caso si que se envian los datos)
-void TPFC_device::report(){
+void TPFC_device::report(bool onlytagged){
   // recorremos la lista de listeners enviando el aviso
   for (int i =0; i<listeners.size();i++){
     listeners[i]-> report_from(this);
@@ -37,26 +37,29 @@ void TPFC_device::report(){
     vrpn_gettimeofday(&current_time, NULL);
     const double* aux;
     for (int i =0; i<d->size() && i<sensors;i++){
-      aux= d->getdata(i);
-      position[0]=aux[0];
-      position[1]=aux[1];
-      // si el tipo de datos no tiene los 7 campos requeridos, rellenamos con un quaternion nulo
-      if (data->datasize()>=3)
-	position[2]=aux[2];
-      else
-	position[2]=0.0;
-      if (data->datasize()>=4){
-	quaternion[0]=aux[3];
-	quaternion[1]=aux[4];
-	quaternion[2]=aux[5];
-	quaternion[3]=aux[6];
-      }else{
-	quaternion[0]=0.0;
-	quaternion[1]=0.0;
-	quaternion[2]=0.0;
-	quaternion[3]=1.0;
+      // si estamos en modo solo taggeds y no tiene tag, no reportamos
+      if (!onlytagged || (onlytagged && d->gettag(i)!=0) ){
+	aux= d->getdata(i);
+	position[0]=aux[0];
+	position[1]=aux[1];
+	// si el tipo de datos no tiene los 7 campos requeridos, rellenamos con un quaternion nulo
+	if (data->datasize()>=3)
+	  position[2]=aux[2];
+	else
+	  position[2]=0.0;
+	if (data->datasize()>=4){
+	  quaternion[0]=aux[3];
+	  quaternion[1]=aux[4];
+	  quaternion[2]=aux[5];
+	  quaternion[3]=aux[6];
+	}else{
+	  quaternion[0]=0.0;
+	  quaternion[1]=0.0;
+	  quaternion[2]=0.0;
+	  quaternion[3]=1.0;
+	}
+	server->report_pose(i,current_time, position, quaternion);
       }
-      server->report_pose(i,current_time, position, quaternion);
     }
     server->mainloop();
     // si habia mas puntos de los que podemos reportar por el numero fijado en sensors, avisamos
