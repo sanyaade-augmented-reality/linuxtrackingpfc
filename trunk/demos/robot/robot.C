@@ -92,7 +92,7 @@ void init(void){
   static float fog_color[] = {0.0, 0.0, 0.0, 1.0};
   glEnable(GL_FOG);
   glFogi(GL_FOG_MODE, GL_EXP);
-  glFogf(GL_FOG_DENSITY, 0.012);
+  glFogf(GL_FOG_DENSITY, 0.0125);
   glFogfv(GL_FOG_COLOR, fog_color);
 
 }
