@@ -213,7 +213,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       if (!d->singleuser){
 	// Buscando a mas de un usuario
 	faces = cvHaarDetectObjects( small_img, cascade, storage,
-					  1.1, 2, 0
+					  1.1, 3, 0
 					  //|CV_HAAR_FIND_BIGGEST_OBJECT
 					  //|CV_HAAR_DO_ROUGH_SEARCH
 					  |CV_HAAR_DO_CANNY_PRUNING
