@@ -55,10 +55,9 @@ void TPFC_device_3dmerge::report_from(TPFC_device* s){
 	}else{
 	  datad[1]->setnodata();
 	}
-      }else{
-	// si no son validos guardamos un chunk no valido en nuestros datos y damos un nullreport
-	data->setnodata();
       }
+      // si no son validos guardamos un chunk no valido en nuestros datos y damos un nullreport
+      data->setnodata();
       nullreport();
     }else{// si son validos...
       // obtenemos el numero de puntos del report
@@ -79,10 +78,8 @@ void TPFC_device_3dmerge::report_from(TPFC_device* s){
 	  datad[1]->settag(1);
 	  t1=1;
 	}
-	data-> setnewdata(datad[0]->getlastdata()->getdata());
-	data-> setmoredata(datad[1]->getlastdata()->getdata());
-	data->settag(t0,0);
-	data->settag(t1,1);
+	data-> setnewdata(datad[0]->getlastdata()->getdata(),true, t0);
+	data-> setmoredata(datad[1]->getlastdata()->getdata(),true, t1);
       }else{
 	// recorremos los puntos del report
 	for (int dn=0; dn<n; dn++){
