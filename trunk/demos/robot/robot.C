@@ -11,7 +11,10 @@
   TrackingPFC_client* track;
 
   bool useht; // flag de HT on/off
-  bool follow; // flag de modo, true = follow, false=imitate
+  int mode;
+#define FOLLOW 0
+#define IMITATE 1
+#define STOP 2
 
   int winx, winy;
 
@@ -96,14 +99,14 @@ void output(float x, float y, char *string){
   output(-7,-4.5,buffer ); 
   sprintf(buffer, "HeadTrack %s", useht?"on":"off");   
   output(5.3,-3.5,buffer );
-  sprintf(buffer, "Mode: %s", follow?"follow":"imitate");   
+  sprintf(buffer, "Mode: %s", (mode==FOLLOW)?"follow":((mode==IMITATE)?"imitate":"stop"));   
   output(5.3,-4.0,buffer );
   sprintf(buffer, "Frame %i", framen);   
   output(5.3,-4.5,buffer );
   framen++;
   output(-7.0, 4.5, mensaje );
 
-  if (follow){
+  if (mode==FOLLOW){
     float* pos = track->getlastpos();
     q_vec_type vn, dir;
     // inversa al vector posicion
@@ -126,7 +129,7 @@ void output(float x, float y, char *string){
     qogl_matrix_type mat;
     q_to_ogl_matrix(mat, diff);
     glMultMatrixd(mat);
-  }else{ // modo imitacion
+  }else if (mode==IMITATE){ // modo imitacion
     float* pos = track->getlastpos();
     q_type diff;
     diff[Q_X]=pos[3];
@@ -180,7 +183,7 @@ void keyboard(unsigned char key, int x, int y){
 	useht=!useht;
 	break;
     case 109: // m
-	follow = !follow;
+	mode = (mode+1)%3;
 	break;
     default:
       printf("Key %i not supported\n", key);
@@ -192,8 +195,8 @@ int main(int argc, char** argv)
 {
   // marcamos flag de usar ht a falso
   useht=false;
-  // y el flag de modo a cierto (follow)
-  follow = true;
+  // y el modo a follow
+  mode = FOLLOW;
 
   // inicializamos el aspect ratio a 1,6
   winx=960;
