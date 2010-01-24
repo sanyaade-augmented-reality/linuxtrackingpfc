@@ -27,6 +27,11 @@ double aspectratio;
 // variables auxiliares para el calculo de usuarios
 int lifeforms;
 int diffcount;
+int mainuser;
+int newuser;
+time_t newusertime;
+bool followingnewuser;
+bool thereismainuser;
 
 // datos sobre los reports
 int lastreport;
@@ -142,15 +147,10 @@ void display(void){
   }else{
     gluLookAt(0, 0, 12,  0, 0, -1.0,  0.0, 1.0, 0.0);
   }
+
+
   // añadimos mensajes
   char buffer[160];
-  float * lastpos = track->getlastpos();
-  sprintf(buffer, "X %f", lastpos[0]);   
-  output(-7,-3.5,buffer ); 
-  sprintf(buffer, "Y %f", lastpos[1]);   
-  output(-7,-4.0,buffer ); 
-  sprintf(buffer, "Z %f", lastpos[2]);   
-  output(-7,-4.5,buffer );
   sprintf(buffer, "HeadTrack %s", useht?"on":"off");   
   output(5.3,-3.5,buffer );
   sprintf(buffer, "Mode: %s", (mode==FOLLOW)?"follow":((mode==IMITATE)?"imitate":"stop"));   
@@ -182,10 +182,57 @@ void display(void){
     // añadimos un mensaje adicional
     sprintf(buffer, "%i lifeforms", lifeforms);   
     output(5.3,-3.0,buffer ); 
-
+    
     if (lifeforms>0){
+      thereismainuser=true;
+      // determinacion de usuario al que seguimos
+      if (mainuser==-1 || lifeforms==1){
+	for (int s =0; s<lasttime.size();s++){
+	  if ( difftime(time(NULL),lasttime[s])<2){
+	    if (mainuser!=s)
+	      printf("Adquirido sensor %i como usario principal\n",s);
+	    mainuser=s;
+	  }
+	}
+      }
+
+      // si hay nuevos usuarios y no estamos siguiendo ya a uno nuevo, 
+      // lo deeterminamos
+      if (lifeforms>1 && newuser==-1){
+	for (int s =0; s<lasttime.size();s++){
+	  if ( difftime(time(NULL),lasttime[s])<2 && s!=mainuser){
+	    printf("Detectado nuevo usuario en el sensor %i\n",s);
+	    newuser=s;
+	    newusertime = time(NULL);
+	  }
+	}
+      }else if (lifeforms==1 && newuser!=-1){
+	newuser=-1;
+	printf("El nuevo usuario ha desparecido\n");
+      }
+
+      int activeuser;
+      if (newuser!=-1 && difftime(time(NULL),newusertime)<5){
+	activeuser = newuser;
+	followingnewuser=true;
+      }else{
+	activeuser = mainuser;
+	if (followingnewuser){
+	  followingnewuser=false;
+	  printf("Se ha perdido el interes en el nuevo usuario\n");
+	}
+      }
+
       
-      float* pos = track->getlastpos();
+      double* pos = lastpos[activeuser];
+      // añadimos mensajes de posicion
+      sprintf(buffer, "X %f", pos[0]);   
+      output(-7,-3.5,buffer ); 
+      sprintf(buffer, "Y %f", pos[1]);   
+      output(-7,-4.0,buffer ); 
+      sprintf(buffer, "Z %f", pos[2]);   
+      output(-7,-4.5,buffer );
+
       q_vec_type vn, dir;
       // inversa al vector posicion
       dir[Q_X]=pos[0];
@@ -210,10 +257,28 @@ void display(void){
       qogl_matrix_type mat;
       q_to_ogl_matrix(mat, diff);
       glMultMatrixd(mat);
-    }//lifeforms>0
+    }else{
+      // no hay formas de vida, no estamos siguiendo a ningun usuario
+      mainuser=-1;
+      if (thereismainuser){
+	printf("No hay usuarios a la vista\n");
+	thereismainuser=false;
+	// bajamos otros flags para evitar mensajes extraños despues
+	followingnewuser=false;
+	newuser=-1;
+      }
+    }
 
   }else if (mode==IMITATE){ // modo imitacion
+    // añadimos mensajes de posicion
     float* pos = track->getlastpos();
+    sprintf(buffer, "X %f", pos[0]);   
+    output(-7,-3.5,buffer ); 
+    sprintf(buffer, "Y %f", pos[1]);   
+    output(-7,-4.0,buffer ); 
+    sprintf(buffer, "Z %f", pos[2]);   
+    output(-7,-4.5,buffer );
+    
     q_type diff;
     diff[Q_X]=pos[3];
     diff[Q_Y]=pos[4];
@@ -223,6 +288,15 @@ void display(void){
     qogl_matrix_type mat;
     q_to_ogl_matrix(mat, diff);
     glMultMatrixd(mat);
+  }else{
+    // modo stop, simplemente añadimos los mensajes de posicion
+    float* pos = track->getlastpos();
+    sprintf(buffer, "X %f", pos[0]);   
+    output(-7,-3.5,buffer ); 
+    sprintf(buffer, "Y %f", pos[1]);   
+    output(-7,-4.0,buffer ); 
+    sprintf(buffer, "Z %f", pos[2]);   
+    output(-7,-4.5,buffer );
   }
   
   
@@ -288,6 +362,11 @@ int main(int argc, char** argv)
 
   lifeforms=0;
   diffcount=0;
+  mainuser=-1;
+  newuser=-1;
+
+  followingnewuser=false;
+  thereismainuser=false;
 
   lastreport=-1;
 
