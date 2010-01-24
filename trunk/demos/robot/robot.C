@@ -117,6 +117,11 @@ void output(float x, float y, char *string){
     // quaternion que pasa de vn a dir
     q_type diff;
     q_from_two_vecs(diff, vn, dir);
+    // dividimos la rotacion a la mitad (por alguna razon el efecto queda mejor)
+    q_type zero;
+    zero[Q_X]=0;zero[Q_Y]=0;zero[Q_Z]=0;zero[Q_W]=1;
+    q_slerp (diff, diff, zero, 0.5);
+
     // obtenemos la matriz
     qogl_matrix_type mat;
     q_to_ogl_matrix(mat, diff);
