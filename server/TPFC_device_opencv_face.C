@@ -213,13 +213,13 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       if (!d->singleuser){
 	// Buscando a mas de un usuario
 	faces = cvHaarDetectObjects( small_img, cascade, storage,
-					  1.1, 3, 0
+					  1.1, 2, 0
 					  //|CV_HAAR_FIND_BIGGEST_OBJECT
-					  |CV_HAAR_DO_ROUGH_SEARCH
-					  //|CV_HAAR_DO_CANNY_PRUNING
+					  //|CV_HAAR_DO_ROUGH_SEARCH
+					  |CV_HAAR_DO_CANNY_PRUNING
 					  //|CV_HAAR_SCALE_IMAGE
-					  ,cvSize(50, 50) );
-      }if (d->wrongframes==0){
+					  ,cvSize(30, 30) );
+      }else if (d->wrongframes==0){
 	// Buscando un solo usuario, frame anterior correcto
 	// aqui podemos poner minsize == 0, ya que la imagen es pequeña
 	// y el tiempo de busqueda (aunque no haya cara) es pequeño
@@ -268,6 +268,7 @@ void TPFC_device_opencv_face::detect_and_draw( IplImage* img, double scale,  CvM
       CvPoint center;
       int radius;
       // bucle de procesado de caras
+      
       for( i = 0; i < (faces ? faces->total : 0); i++ ){
 	  CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
 	  CvScalar color = colors[i%8];
