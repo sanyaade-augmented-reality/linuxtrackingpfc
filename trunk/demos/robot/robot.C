@@ -15,7 +15,8 @@ TrackingPFC_client* track;
 
 // flags de funcionamiento
 bool useht; // flag de HT on/off
-int mode;
+int mode; // modo (follow, imitate, stop
+bool old; // flag de usar el modelo viejo
 
 #define FOLLOW 0
 #define IMITATE 1
@@ -377,7 +378,8 @@ void display(void){
   framen++;
   output(-7.0, 4.5, mensaje );
   
-  body();
+  if (!old)
+    body();
 
   if (mode==FOLLOW){
     TrackingPFC_data::datachunk* data = track->getdata()->getlastdata();
@@ -518,25 +520,26 @@ void display(void){
     output(-7,-4.5,buffer );
   }
   
-  
-  // Un cubo
-  //glColor3f(1.0, 0.0, 0.0);
-  /*GLfloat skinColor[4] = {0.2, 0.2, 0.2, 1.0};
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, skinColor);
-  glutSolidCube (4.0);
-  GLfloat skinColor2[4] = {1.0, 1.0, 1.0, 1.0};
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, skinColor2);
-  glTranslatef(1,1,2);
-  glutSolidCube (1.0);
-  glTranslatef(-2,0,0);
-  glutSolidCube (1.0);
-  glTranslatef(1,0,-4);
-  glutSolidCube (1.0);*/
-  if ((mode==FOLLOW && lifeforms==0) || mode==STOP){
-    glRotatef(20,1,0,0);
-    eyes(30);
-  }else
-    eyes(10);
+  if (old){//,pdeñp viejo
+    // Un cubo
+    GLfloat skinColor[4] = {0.2, 0.2, 0.2, 1.0};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, skinColor);
+    glutSolidCube (4.0);
+    GLfloat skinColor2[4] = {1.0, 1.0, 1.0, 1.0};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, skinColor2);
+    glTranslatef(1,1,2);
+    glutSolidCube (1.0);
+    glTranslatef(-2,0,0);
+    glutSolidCube (1.0);
+    glTranslatef(1,0,-4);
+    glutSolidCube (1.0);
+  }else{ // modelo nuevo
+    if ((mode==FOLLOW && lifeforms==0) || mode==STOP){
+      glRotatef(20,1,0,0);
+      eyes(30);
+    }else
+      eyes(10);
+  }
   
 
 
@@ -565,6 +568,9 @@ void keyboard(unsigned char key, int x, int y){
     case 109: // m
 	mode = (mode+1)%3;
 	break;
+    case 111: // o
+	old=!old;
+	break;
     default:
       printf("Key %i not supported\n", key);
       break;
@@ -577,6 +583,8 @@ int main(int argc, char** argv)
   useht=false;
   // y el modo a follow
   mode = FOLLOW;
+  // usamos el modelo nuevo
+  old=false;
 
   // inicializamos el aspect ratio a 1,6
   winx=960;
@@ -594,7 +602,7 @@ int main(int argc, char** argv)
   lastreport=-1;
 
   framen=0;
-  sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   m:mode\n");
+  sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   m->mode   o->old_model\n");
 
 
   char* trkname = (char*)"Tracker0@localhost";
