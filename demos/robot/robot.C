@@ -28,9 +28,11 @@ double aspectratio;
 int lifeforms;
 int diffcount;
 
-// count y time del ultimo report
+// datos sobre los reports
 int lastreport;
-time_t lasttime;
+int lastreportsize;
+vector<time_t> lasttime;
+vector<double*> lastpos;
 
 // inicializaciones
 void init(void){
@@ -70,6 +72,46 @@ void output(float x, float y, char *string){
     glutBitmapCharacter(font, string[i]);
   }
   glEnable(GL_LIGHTING);
+}
+
+// Funcion auxiliar que procesa el datachunk actual y updatea los datos
+// devuelve el numero de usuarios detectados (en positivo si hay nuevos datos
+// en negativo si no hay nuevos datos
+int updateusers(TrackingPFC_data::datachunk* data ){
+  bool newdata = false;
+  // si es un report nuevo, o tiene mas datos que antes, updateamos
+  if (data->getcount()>lastreport || lastreportsize<data->size()){
+    // guardamos el nuevo report count
+    lastreport=data->getcount();
+    lastreportsize= data->size();
+    // recorremos los puntos del report updateando
+    int n = lastreportsize;
+    for (int dn =0; dn<n;dn++){
+      int sensor = data->gettag(dn);
+      // comprobamos que no sea un sensor nuevo
+      // si lo es, creamos sus datos
+      while (lasttime.size()<=sensor){
+	time_t t0 =0;
+	lasttime.push_back(time(&t0));
+	lastpos.push_back(new double[3]);
+      }
+      lasttime[sensor]=time(NULL);
+      const double* aux = data->getdata(dn);
+      lastpos[sensor][0]=aux[0];
+      lastpos[sensor][1]=aux[1];
+      lastpos[sensor][2]=aux[2];
+    }// recorrido por los puntos
+    newdata=true;
+  } // updates por nuevo report
+  
+  // llegados aqui, tenemos en lasttime y lastpos los datos necesarios
+  int valid=0;
+  for (int s =0; s<lasttime.size();s++){
+    if ( difftime(time(NULL),lasttime[s])<2)
+      valid++;
+  }
+  lifeforms=valid;
+  return newdata?valid:-valid;
 }
    
 void display(void){
@@ -120,37 +162,23 @@ void display(void){
 
   if (mode==FOLLOW){
     TrackingPFC_data::datachunk* data = track->getdata()->getlastdata();
-    bool newdata=false;
-    // si es un report nuevo, updateamos
-    if (data->getcount()>lastreport){
-      lastreport=data->getcount();
-      lasttime= time(NULL);
-      newdata=true;
-    }
-    
-    // comprobamos que el report no sea demasiado viejo
-    double t= difftime(time(NULL),lasttime);
-    if (t>1){
-      printf("El report es viejo\n");
-      lifeforms =0;
-      diffcount=0;
-    }else{
-      
-      if (data->size()!=lifeforms){
-	printf("recuento de lifeforms no coincide\n");
-	if (newdata)
-	  diffcount++;
-      }else{
-	printf("lifeforms ok\n");
-	if (newdata)
-	  diffcount-=2;
-	if (diffcount<0) diffcount=0;
-      }
+    // actualizamos las estructuras de datos
+    int detectedusers= updateusers(data);
 
-      if (diffcount>10){
-	lifeforms = data->size();
-      }
+    // actualizamos diffcount y lifeform (solo si hay nuevos datos)
+    if (detectedusers>0){
+      if(detectedusers!=lifeforms)
+	diffcount++;
+      else
+	diffcount-=2;
+      if (diffcount<0) diffcount =0;
     }
+    // si despues de 10 updates sigue habiendo discrepancias, se cambia el valor
+    if (diffcount>10){
+      lifeforms=detectedusers;
+      diffcount=0;
+    }
+
     // añadimos un mensaje adicional
     sprintf(buffer, "%i lifeforms", lifeforms);   
     output(5.3,-3.0,buffer ); 
@@ -262,7 +290,6 @@ int main(int argc, char** argv)
   diffcount=0;
 
   lastreport=-1;
-  lasttime=time(NULL);
 
   framen=0;
   sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   m:mode\n");
