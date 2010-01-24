@@ -8,7 +8,14 @@ class TPFC_device_3dmerge : public TPFC_device{
   private:
     TPFC_device* sources[2];
 
+    TrackingPFC_data * datad[2]; // bufer de datas para modo different
+
     pthread_mutex_t* lock; // semaforo para la exclusión mutua
+
+    // flag para saber si hay que diferenciar las fuentes por sensores
+    // si esta a cierto solo se aceptará un punto por sensor
+    // y se guardara un punto para cada sensor
+    bool different; 
 
   public:
     // consctructora y creadora
@@ -17,6 +24,9 @@ class TPFC_device_3dmerge : public TPFC_device{
 
     // sobrecarga de report from, que en este caso es la que realizará los calculos del device
     void report_from(TPFC_device*);
+
+    // cambiar el modo 
+    void setdifferent (bool);
 
     // funcion que devuelve en un string la información relativa al dispositivo
     string info();
