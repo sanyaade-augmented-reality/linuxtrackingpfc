@@ -4,21 +4,33 @@
 #include <string.h>
 #include <TrackingPFC_client.h>
 #include <quat.h>
+#include <time.h>
 
-  GLint framen;
-  GLchar mensaje[100];
+// Variables auxiliares para los mensajes
+GLint framen;
+GLchar mensaje[100];
 
-  TrackingPFC_client* track;
+// Cliente
+TrackingPFC_client* track;
 
-  bool useht; // flag de HT on/off
-  int mode;
+// flags de funcionamiento
+bool useht; // flag de HT on/off
+int mode;
+
 #define FOLLOW 0
 #define IMITATE 1
 #define STOP 2
 
-  int winx, winy;
+int winx, winy;
+double aspectratio;
 
-  double aspectratio;
+// variables auxiliares para el calculo de usuarios
+int lifeforms;
+int diffcount;
+
+// count y time del ultimo report
+int lastreport;
+time_t lasttime;
 
 // inicializaciones
 void init(void){
@@ -60,7 +72,7 @@ void output(float x, float y, char *string){
   glEnable(GL_LIGHTING);
 }
    
-  void display(void){
+void display(void){
 
   GLfloat znear =1.0;
   GLfloat zfar =100.0;
@@ -71,7 +83,7 @@ void output(float x, float y, char *string){
   // segun si tenemos activado o no el HT, llamamos
   // a la funcion del cliente o a la de glu
   if (useht)
-    track->htadjustPerspective(znear, zfar, winx, winy);
+    track->htadjustPerspective(znear, zfar);
   else
     gluPerspective(45.0, aspectratio, znear, zfar);
 
@@ -96,7 +108,7 @@ void output(float x, float y, char *string){
   sprintf(buffer, "Y %f", lastpos[1]);   
   output(-7,-4.0,buffer ); 
   sprintf(buffer, "Z %f", lastpos[2]);   
-  output(-7,-4.5,buffer ); 
+  output(-7,-4.5,buffer );
   sprintf(buffer, "HeadTrack %s", useht?"on":"off");   
   output(5.3,-3.5,buffer );
   sprintf(buffer, "Mode: %s", (mode==FOLLOW)?"follow":((mode==IMITATE)?"imitate":"stop"));   
@@ -107,28 +119,71 @@ void output(float x, float y, char *string){
   output(-7.0, 4.5, mensaje );
 
   if (mode==FOLLOW){
-    float* pos = track->getlastpos();
-    q_vec_type vn, dir;
-    // inversa al vector posicion
-    dir[Q_X]=pos[0];
-    dir[Q_Y]=pos[1];
-    dir[Q_Z]=pos[2];
-    // vector normal al display
-    vn[Q_X]=0;
-    vn[Q_Y]=0;
-    vn[Q_Z]=1;
-    // quaternion que pasa de vn a dir
-    q_type diff;
-    q_from_two_vecs(diff, vn, dir);
-    // dividimos la rotacion a la mitad (por alguna razon el efecto queda mejor)
-    q_type zero;
-    zero[Q_X]=0;zero[Q_Y]=0;zero[Q_Z]=0;zero[Q_W]=1;
-    q_slerp (diff, diff, zero, 0.5);
+    TrackingPFC_data::datachunk* data = track->getdata()->getlastdata();
+    bool newdata=false;
+    // si es un report nuevo, updateamos
+    if (data->getcount()>lastreport){
+      lastreport=data->getcount();
+      lasttime= time(NULL);
+      newdata=true;
+    }
+    
+    // comprobamos que el report no sea demasiado viejo
+    double t= difftime(time(NULL),lasttime);
+    if (t>1){
+      printf("El report es viejo\n");
+      lifeforms =0;
+      diffcount=0;
+    }else{
+      
+      if (data->size()!=lifeforms){
+	printf("recuento de lifeforms no coincide\n");
+	if (newdata)
+	  diffcount++;
+      }else{
+	printf("lifeforms ok\n");
+	if (newdata)
+	  diffcount-=2;
+	if (diffcount<0) diffcount=0;
+      }
 
-    // obtenemos la matriz
-    qogl_matrix_type mat;
-    q_to_ogl_matrix(mat, diff);
-    glMultMatrixd(mat);
+      if (diffcount>10){
+	lifeforms = data->size();
+      }
+    }
+    // añadimos un mensaje adicional
+    sprintf(buffer, "%i lifeforms", lifeforms);   
+    output(5.3,-3.0,buffer ); 
+
+    if (lifeforms>0){
+      
+      float* pos = track->getlastpos();
+      q_vec_type vn, dir;
+      // inversa al vector posicion
+      dir[Q_X]=pos[0];
+      dir[Q_Y]=pos[1];
+      dir[Q_Z]=pos[2];
+      // vector normal al display
+      vn[Q_X]=0;
+      vn[Q_Y]=0;
+      vn[Q_Z]=1;
+      // quaternion que pasa de vn a dir
+      q_type diff;
+      q_from_two_vecs(diff, vn, dir);
+      if (!useht){
+	// dividimos la rotacion a la mitad (por alguna razon el efecto queda mejor)
+	// pero solo si no estamos usando HT
+	q_type zero;
+	zero[Q_X]=0;zero[Q_Y]=0;zero[Q_Z]=0;zero[Q_W]=1;
+	q_slerp (diff, diff, zero, 0.5);
+      }
+
+      // obtenemos la matriz
+      qogl_matrix_type mat;
+      q_to_ogl_matrix(mat, diff);
+      glMultMatrixd(mat);
+    }//lifeforms>0
+
   }else if (mode==IMITATE){ // modo imitacion
     float* pos = track->getlastpos();
     q_type diff;
@@ -202,6 +257,12 @@ int main(int argc, char** argv)
   winx=960;
   winy=600;
   aspectratio=(float)winx/(float)winy;
+
+  lifeforms=0;
+  diffcount=0;
+
+  lastreport=-1;
+  lasttime=time(NULL);
 
   framen=0;
   sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   m:mode\n");
