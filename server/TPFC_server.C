@@ -599,6 +599,39 @@ int main( int argc, char** argv ){
 	  }
 	}else
 
+	// Diferenciar fuente (3dmerge)
+	if ( input[0].compare("setdifferent")==0 || input[0].compare("different")==0 || input[0].compare("diff")==0){
+	  // comprobamos que el ultimo dispositivo sea valido
+	  if (dev.size()==0){
+	    printf("Aun no se ha creado ningun dispositivo, ignorando comando.\n");
+	  }else
+	  // comprobamos el numero de parametros
+	  if (input.size()>3 || input.size()<2){
+	    printf("El comando setdifferent requiere un parametro (on, off), o dos (si se quiere aplicar a otro dispositivo)\n");
+	  }else{
+	    // Seleccionamos la id del device
+	    int auxid = (input.size()==3)?str2int(input[2]):dev.size()-1;
+	    // y comprobamos que sea del tipo correcto
+	    string aux = dev[auxid]->info();
+	    if ( (aux.substr(0,7)).compare("3dmerge")!=0){
+	      printf("No se puede aplicar setdifferent al dispositivo %i, no es del tipo 3dmerge\n",auxid);
+	    }else {
+	      // llamamos con la opcion adecuada:
+	      if (input[1].compare("on")==0){
+		((TPFC_device_3dmerge*)dev[auxid])->setdifferent(true);
+		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
+	      }else if (input[1].compare("off")==0){
+		((TPFC_device_3dmerge*)dev[auxid])->setdifferent(false);
+		commands.push_back(s);
+		printf("Opcion cambiada correctamente\n");
+	      }else{
+		printf("La opcion '%s' no es valida para setdifferent, opciones posibles: on, off\n",input[1].c_str());
+	      }
+	    }
+	  }
+	}else
+
 	// añadir tracker
 	if ( input[0].compare("addserver")==0 || input[0].compare("server")==0 || input[0].compare("addtracker")==0 || input[0].compare("tracker")==0){
 	  // comprobamos primero que haya un device al que añadir el tracker
@@ -761,6 +794,7 @@ int main( int argc, char** argv ){
 	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>");
 	  printf("                      [distancia entre sensores en mm]\n");
 	  printf("dev 3dmerge (merge) <id de la fuente1> <id de la fuente2>.\n");
+	  printf("     different (diff) <on/off> [id del device]\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
 	  printf("     setscale (scale) <% de escala> [id del device]\n");
 	  printf("     setorientation (setorient, orient) <none, all, untagged> [center, forward]\n");
