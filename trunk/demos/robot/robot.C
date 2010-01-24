@@ -45,24 +45,56 @@ void init(void){
   glClearColor (0.0, 0.0, 0.0, 0.0);
   // tipo de shader
   glShadeModel (GL_FLAT);
-
-  // luces
-  GLfloat lightZeroPosition[] = {5, 0, 5, 1.0};
-  GLfloat lightZeroColor[] = {1.0, 1.0, 1.0, 1.0};
-  GLfloat lightOnePosition[] = {-5, 0, 5, 1.0};
-  GLfloat lightOneColor[] = {1, 1, 1, 1.0};
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
-  glLightfv(GL_LIGHT0, GL_POSITION, lightZeroPosition);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor);
-  glLightfv(GL_LIGHT1, GL_POSITION, lightOnePosition);
-  glLightfv(GL_LIGHT1, GL_DIFFUSE, lightOneColor);
-  glEnable(GL_LIGHT0);
-  //glEnable(GL_LIGHT1);
-
   // activamos los modos
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
+  glEnable(GL_NORMALIZE);
+
+  // luces
+  GLfloat lightZeroPosition[] = {5, 0, 5, 1.0};
+  GLfloat lightZeroColor[] = {1.0, 1.0, 1.0, 1.0};
+  glLightfv(GL_LIGHT0, GL_POSITION, lightZeroPosition);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor);
+  glEnable(GL_LIGHT0);
+  /*GLfloat lightOnePosition[] = {-5, 0, 5, 1.0};
+  GLfloat lightOneColor[] = {1, 1, 1, 1.0};
+  glLightfv(GL_LIGHT1, GL_POSITION, lightOnePosition);
+  glLightfv(GL_LIGHT1, GL_DIFFUSE, lightOneColor);
+  glEnable(GL_LIGHT1);*/
+
+  static float modelAmb[4] = {0.2, 0.2, 0.2, 1.0};
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
+  glLightModelf(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+  glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+
+
+
+  static float matAmb[4] = {0.2, 0.2, 0.2, 1.0};
+  static float matDiff[4] = {0.8, 0.8, 0.8, 1.0};
+  static float matSpec[4] = {0.4, 0.4, 0.4, 1.0};
+  static float matEmission[4] = {0.0, 0.0, 0.0, 1.0};
+  glMaterialfv(GL_FRONT, GL_AMBIENT, matAmb);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, matDiff);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
+  glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
+  glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
+
+}
+
+// funcion auxiliar para calcular las normales
+void calcNorm(float v0[3],float v1[3],float v2[3]){
+  q_vec_type vec1, vec2, vn;
+  q_vec_set(vec1, v0[0]-v1[0], v0[1]-v1[1], v0[2]-v1[2]);
+  q_vec_set(vec2, v0[0]-v2[0], v0[1]-v2[1], v0[2]-v2[2]);
+  q_vec_cross_product(vn,vec1,vec2);
+  glNormal3f(vn[Q_X],vn[Q_Y],vn[Q_Z]);
+}
+void poly(float v0[3],float v1[3],float v2[3], float v3[3]){
+  calcNorm(v0,v1,v2);
+  glBegin(GL_POLYGON);
+    glVertex3fv(v0);glVertex3fv(v1);glVertex3fv(v2);glVertex3fv(v3);
+  glEnd();
 }
 
 void leye(){
@@ -77,65 +109,36 @@ void leye(){
 
   float v15[]={-1.3,0.9,2.5}; float v16[]={2.3, 0.9,2.5}; float v17[]={2.4, 0,2.5};
   float v18[]={1.4, -0.9,2.5}; float v19[]={-0.3, -0.9,2.5};
-
   // tapa trasera
+  calcNorm(v0,v1,v2);
   glBegin(GL_POLYGON);
     glVertex3fv(v0);glVertex3fv(v1);glVertex3fv(v2);glVertex3fv(v3);glVertex3fv(v4);
   glEnd();
   // tapas laterales
-  glBegin(GL_POLYGON);
-    glVertex3fv(v5);glVertex3fv(v6);glVertex3fv(v1);glVertex3fv(v0);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v9);glVertex3fv(v5);glVertex3fv(v0);glVertex3fv(v4);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v8);glVertex3fv(v9);glVertex3fv(v4);glVertex3fv(v3);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v7);glVertex3fv(v8);glVertex3fv(v3);glVertex3fv(v2);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v6);glVertex3fv(v7);glVertex3fv(v2);glVertex3fv(v1);
-  glEnd();
+  poly(v5,v6,v1,v0);
+  poly(v9,v5,v0,v4);
+  poly(v8,v9,v4,v3);
+  poly(v7,v8,v3,v2);
+  poly(v6,v7,v2,v1);
   // bordes
-  glBegin(GL_POLYGON);
-    glVertex3fv(v6);glVertex3fv(v5);glVertex3fv(v10);glVertex3fv(v11);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v7);glVertex3fv(v6);glVertex3fv(v11);glVertex3fv(v12);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v8);glVertex3fv(v7);glVertex3fv(v12);glVertex3fv(v13);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v9);glVertex3fv(v8);glVertex3fv(v13);glVertex3fv(v14);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v5);glVertex3fv(v9);glVertex3fv(v14);glVertex3fv(v10);
-  glEnd();
-  // borde interior  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v11);glVertex3fv(v10);glVertex3fv(v15);glVertex3fv(v16);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v12);glVertex3fv(v11);glVertex3fv(v16);glVertex3fv(v17);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v13);glVertex3fv(v12);glVertex3fv(v17);glVertex3fv(v18);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v14);glVertex3fv(v13);glVertex3fv(v18);glVertex3fv(v19);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v10);glVertex3fv(v14);glVertex3fv(v19);glVertex3fv(v15);
-  glEnd();
-  // tapa delantera    
+  poly(v6,v5,v10,v11);
+  poly(v7,v6,v11,v12);
+  poly(v8,v7,v12,v13);
+  poly(v9,v8,v13,v14);
+  poly(v5,v9,v14,v10);
+  // borde interior
+  poly(v11,v10,v15,v16);
+  poly(v12,v11,v16,v17);
+  poly(v13,v12,v17,v18);
+  poly(v14,v13,v18,v19);
+  poly(v10,v14,v19,v15);
+  // tapa delantera
+  calcNorm(v19,v18,v17);
   glBegin(GL_POLYGON);
     glVertex3fv(v19);glVertex3fv(v18);glVertex3fv(v17);glVertex3fv(v16);glVertex3fv(v15);
   glEnd();
   glTranslatef(0,0,2.0);
-  //glutSolidSphere (0.75,32,32);
+  glutSolidSphere (0.75,32,32);
   glTranslatef(0,0,-2.0);
 }
 
@@ -153,71 +156,49 @@ void reye(){
   float v18[]={-1.4, -0.9,2.5}; float v19[]={0.3, -0.9,2.5};
 
   // tapa trasera
+  calcNorm(v4,v3,v2);
   glBegin(GL_POLYGON);
     glVertex3fv(v4);glVertex3fv(v3);glVertex3fv(v2);glVertex3fv(v1);glVertex3fv(v0);
   glEnd();
   // tapas laterales
-  glBegin(GL_POLYGON);
-    glVertex3fv(v0);glVertex3fv(v1);glVertex3fv(v6);glVertex3fv(v5);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v4);glVertex3fv(v0);glVertex3fv(v5);glVertex3fv(v9);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v3);glVertex3fv(v4);glVertex3fv(v9);glVertex3fv(v8);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v2);glVertex3fv(v3);glVertex3fv(v8);glVertex3fv(v7);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v1);glVertex3fv(v2);glVertex3fv(v7);glVertex3fv(v6);
-  glEnd();
+  poly(v0,v1,v6,v5);
+  poly(v4,v0,v5,v9);
+  poly(v3,v4,v9,v8);
+  poly(v2,v3,v8,v7);
+  poly(v1,v2,v7,v6);
   // bordes
-  glBegin(GL_POLYGON);
-    glVertex3fv(v11);glVertex3fv(v10);glVertex3fv(v5);glVertex3fv(v6);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v12);glVertex3fv(v11);glVertex3fv(v6);glVertex3fv(v7);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v13);glVertex3fv(v12);glVertex3fv(v7);glVertex3fv(v8);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v14);glVertex3fv(v13);glVertex3fv(v8);glVertex3fv(v9);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v10);glVertex3fv(v14);glVertex3fv(v9);glVertex3fv(v5);
-  glEnd();
-  // borde interior  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v16);glVertex3fv(v15);glVertex3fv(v10);glVertex3fv(v11);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v17);glVertex3fv(v16);glVertex3fv(v11);glVertex3fv(v12);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v18);glVertex3fv(v17);glVertex3fv(v12);glVertex3fv(v13);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v19);glVertex3fv(v18);glVertex3fv(v13);glVertex3fv(v14);
-  glEnd();  
-  glBegin(GL_POLYGON);
-    glVertex3fv(v15);glVertex3fv(v19);glVertex3fv(v14);glVertex3fv(v10);
-  glEnd();
-  // tapa delantera    
+  poly(v11,v10,v5,v6);
+  poly(v12,v11,v6,v7);
+  poly(v13,v12,v7,v8);
+  poly(v14,v13,v8,v9);
+  poly(v10,v14,v9,v5);
+  // borde interior
+  poly(v16,v15,v10,v11);
+  poly(v17,v16,v11,v12);
+  poly(v18,v17,v12,v13);
+  poly(v19,v18,v13,v14);
+  poly(v15,v19,v14,v10);
+  // tapa delantera
+  calcNorm(v15,v16,v17);
   glBegin(GL_POLYGON);
     glVertex3fv(v15);glVertex3fv(v16);glVertex3fv(v17);glVertex3fv(v18);glVertex3fv(v19);
   glEnd();
   glTranslatef(0,0,2.0);
-  //glutSolidSphere (0.75,32,32);
+  glutSolidSphere (0.75,32,32);
   glTranslatef(0,0,-2.0);
 }
-void eyes(){
+void eyes(float angle){
+  glRotatef(-angle, 0,0,1);
   glTranslatef(1.6,0,0);
   leye();
-  glTranslatef(-3.2,0,0);
+  glTranslatef(-1.6,0,0);
+  glRotatef(angle, 0,0,1);
+  glRotatef(angle, 0,0,1);
+  glTranslatef(-1.6,0,0);
   reye();
   glTranslatef(1.6,0,0);
+  glRotatef(-angle, 0,0,1);
+
   float v0[]={ 1.6,  0.3,  1};
   float v1[]={ 1.6,  0.3, -1};
   float v2[]={ 1.6, -0.3, -1};
@@ -227,28 +208,16 @@ void eyes(){
   float v6[]={-1.6, -0.3, -1};
   float v7[]={-1.6, -0.3,  1};
   // laterales
-  glBegin(GL_POLYGON);
-    glVertex3fv(v0);glVertex3fv(v3);glVertex3fv(v2);glVertex3fv(v1);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v4);glVertex3fv(v5);glVertex3fv(v6);glVertex3fv(v7);
-  glEnd();
+  poly(v0,v3,v2,v1);
+  poly(v4,v5,v6,v7);
   //frente
-  glBegin(GL_POLYGON);
-    glVertex3fv(v0);glVertex3fv(v4);glVertex3fv(v7);glVertex3fv(v3);
-  glEnd();
+  poly(v0,v4,v7,v3);
   // arriba
-  glBegin(GL_POLYGON);
-    glVertex3fv(v1);glVertex3fv(v5);glVertex3fv(v4);glVertex3fv(v0);
-  glEnd();
+  poly(v1,v5,v4,v0);
   // atras
-  glBegin(GL_POLYGON);
-    glVertex3fv(v2);glVertex3fv(v6);glVertex3fv(v5);glVertex3fv(v1);
-  glEnd();
+  poly(v2,v6,v5,v1);
   // abajo
-  glBegin(GL_POLYGON);
-    glVertex3fv(v3);glVertex3fv(v7);glVertex3fv(v6);glVertex3fv(v2);
-  glEnd();
+  poly(v3,v7,v6,v2);
 }
 void body(){
   float v0[]={ 0.3,  0.0,  0.3};
@@ -260,28 +229,16 @@ void body(){
   float v6[]={-0.3 ,-5.0, -0.3};
   float v7[]={-0.3 ,-5.0,  0.3};
   // laterales
-  glBegin(GL_POLYGON);
-    glVertex3fv(v0);glVertex3fv(v3);glVertex3fv(v2);glVertex3fv(v1);
-  glEnd();
-  glBegin(GL_POLYGON);
-    glVertex3fv(v4);glVertex3fv(v5);glVertex3fv(v6);glVertex3fv(v7);
-  glEnd();
+  poly(v0,v3,v2,v1);
+  poly(v4,v5,v6,v7);
   //frente
-  glBegin(GL_POLYGON);
-    glVertex3fv(v0);glVertex3fv(v4);glVertex3fv(v7);glVertex3fv(v3);
-  glEnd();
+  poly(v0,v4,v7,v3);
   // arriba
-  glBegin(GL_POLYGON);
-    glVertex3fv(v1);glVertex3fv(v5);glVertex3fv(v4);glVertex3fv(v0);
-  glEnd();
+  poly(v1,v5,v4,v0);
   // atras
-  glBegin(GL_POLYGON);
-    glVertex3fv(v2);glVertex3fv(v6);glVertex3fv(v5);glVertex3fv(v1);
-  glEnd();
+  poly(v2,v6,v5,v1);
   // abajo
-  glBegin(GL_POLYGON);
-    glVertex3fv(v3);glVertex3fv(v7);glVertex3fv(v6);glVertex3fv(v2);
-  glEnd();
+  poly(v3,v7,v6,v2);
 }
 // Funcion auxiliar para mostrar mensajes
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
@@ -533,7 +490,11 @@ void display(void){
   glutSolidCube (1.0);
   glTranslatef(1,0,-4);
   glutSolidCube (1.0);*/
-  eyes();
+  if ((mode==FOLLOW && lifeforms==0) || mode==STOP){
+    glRotatef(20,1,0,0);
+    eyes(25);
+  }else
+    eyes(3);
   
 
 
