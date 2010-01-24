@@ -439,11 +439,11 @@ void display(void){
       q_type diff;
       q_from_two_vecs(diff, vn, dir);
       if (!useht){
-	// dividimos la rotacion a la mitad (por alguna razon el efecto queda mejor)
+	// dividimos la rotacion a la 1/4 (por alguna razon el efecto queda mejor)
 	// pero solo si no estamos usando HT
 	q_type zero;
 	zero[Q_X]=0;zero[Q_Y]=0;zero[Q_Z]=0;zero[Q_W]=1;
-	q_slerp (diff, diff, zero, 0.5);
+	q_slerp (diff, diff, zero, 0.75);
       }
 
       // obtenemos la matriz
