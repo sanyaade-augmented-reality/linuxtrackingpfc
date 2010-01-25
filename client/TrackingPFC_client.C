@@ -241,6 +241,9 @@ float TrackingPFC_client::getDisplaySize(int xy){
 int TrackingPFC_client::isalive(){
   return alive;
 }
+int TrackingPFC_client::sensors(){
+  return data.size();
+}
 
 
 // modificadoras
