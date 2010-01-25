@@ -10,8 +10,11 @@ void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_
   // nos aseguramos de que el sensor tiene espacio en el vector
   while (trk->data.size()<=t.sensor){
     trk->data.push_back(new float[7]);
+    struct timeval tv;
+    gettimeofday(&tv, &(trk->tz));
+    trk->time.push_back(tv);
   }
-
+  // guardamos los datos
   trk->data[t.sensor][0]=t.pos[0];
   trk->data[t.sensor][1]=t.pos[1];
   trk->data[t.sensor][2]=t.pos[2];
@@ -19,6 +22,8 @@ void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_
   trk->data[t.sensor][4]=t.quat[1];
   trk->data[t.sensor][5]=t.quat[2];
   trk->data[t.sensor][6]=t.quat[3];
+  // actualizamos el tiempo
+  gettimeofday(&(trk->time[t.sensor]), &(trk->tz));
   pthread_mutex_unlock( trk->lock ); // liberamos el acceso
   
   if (trk->callback_func!=NULL)
@@ -37,6 +42,9 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
   data[0][4]=0;
   data[0][5]=0;
   data[0][6]=1;
+  struct timeval tv;
+  gettimeofday(&tv, &tz);
+  time.push_back(tv);
   
   alive=1;
   tracker = new vrpn_Tracker_Remote(tname);
@@ -79,11 +87,22 @@ void* TrackingPFC_client::mainloop_executer(void * t){
 }
 
 // consultoras
-const float* TrackingPFC_client::getlastpos(int sensor){
-  if (data.size()>sensor)
-    return data[sensor];
-  else
+float* TrackingPFC_client::getlastpos(int sensor){
+  if (data.size()<=sensor){
     return NULL;
+  }else{
+    float * res = new float[8];
+    pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+    // copiamos los datos
+    for (int i =0; i<7;i++)
+      res[i]=data[sensor][i];
+    // en la 8a posicion está el tiempo que hace desde que se recibieron los datos
+    struct timeval current;
+    gettimeofday(&current, &tz);
+    res[7]=diff(&current, &(time[sensor]));
+    pthread_mutex_unlock( lock ); // liberamos
+    return res;
+  }
 }
 
 
@@ -159,11 +178,20 @@ void TrackingPFC_client::StringExplode(string str, string separator, vector<stri
 }
 // funcion auxiliar para pasar de str a int
 // (por Martin Gieseking, encontrada en http://bytes.com/topic/c/answers/132109-string-integer)
-int str2int (const string &str) {
+int TrackingPFC_client::str2int (const string &str) {
   stringstream ss(str);
   int n;
   ss >> n;
   return n;
+}
+
+
+// funcion auxiliar para calcular la diferencia (en segundos, con precision de microsecs)
+double TrackingPFC_client::diff(struct timeval * x,struct timeval * y){
+  double secs = x->tv_sec-y->tv_sec;
+  double usecs = x->tv_usec-y->tv_usec;
+  usecs=usecs/1000000.0;
+  return (double)(secs+usecs);
 }
 
 // funcion auxiliar para los otros get display sizes
@@ -218,29 +246,13 @@ int TrackingPFC_client::isalive(){
 // modificadoras
 void TrackingPFC_client::setdata(float * f, int sensor){
   pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
-  /*// si aun no hemos recibido ningun report, añadimos el dato normalmente
-  if (reports.size()==0){
-    reports.push_back(sensor);
-    data->setnewdata(f, true, sensor);
-  }else{ // si no, tenemos que comprobar que ese sensor no este incluido ya en ese report
-    bool found = false;
-    for (int i =0; i<reports.size() && !found;i++)
-      if (reports[i]==sensor) found = true;
-    // si ese sensor no esta aun en ese report, lo añadimos
-    if ( !found){
-      reports.push_back(sensor);
-      data->setmoredata(f, true, sensor); // usamos setmore ya que estamos ante un report que ya contiene almenos un dato
-    }else{
-      // limpiamos el vector
-      reports.clear();
-      // y añadimos los datos con normalidad
-      reports.push_back(sensor);
-      data->setnewdata(f, true, sensor);
-    }
-  }*/
+  
   // nos aseguramos de que el sensor tiene espacio en el vector
   while (data.size()<=sensor){
     data.push_back(new float[7]);
+    struct timeval tv;
+    gettimeofday(&tv, &tz);
+    time.push_back(tv);
   }
 
   data[sensor][0]=f[0];
@@ -250,6 +262,7 @@ void TrackingPFC_client::setdata(float * f, int sensor){
   data[sensor][4]=f[1];
   data[sensor][5]=f[2];
   data[sensor][6]=f[3];
+  gettimeofday(&(time[sensor]), &tz);
   pthread_mutex_unlock( lock ); // liberamos el acceso
 }
 
