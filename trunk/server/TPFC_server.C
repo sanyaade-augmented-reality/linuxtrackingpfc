@@ -412,8 +412,6 @@ int main( int argc, char** argv ){
 		aux[4]=str2double(input[5]);
 		aux[5]=str2double(input[6]);
 		aux[6]=str2double(input[7]);
-		printf("enviando %s %s %s\n", input[1].c_str(), input[2].c_str(), input[3].c_str());
-		printf("enviando %f %f %f\n", aux[0], aux[1], aux[2]);
 		// el numero de puntos es irrelevante cuando se llama con los datos
 		((TPFC_device_3dmod*)dev[auxid])->calibrate(str2int(input[1]), 0,  aux );
 		free (aux);
