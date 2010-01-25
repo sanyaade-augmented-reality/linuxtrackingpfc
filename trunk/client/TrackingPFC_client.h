@@ -21,13 +21,10 @@ using namespace std;
 class TrackingPFC_client{
   private:
     // datos recibidos
-    TrackingPFC_data * data;
+    vector<float*> data;
   
     int alive; // indicador de si el thrad de mainloop debe seguir funcionando 1=si, 2=no
 
-    vector<int> reports; // lista de puntos de los que se ha recibido report hasta el momento
-			 // cuando se detecte que de un sensor ya se han recibido datos, se entenderá
-			 // que estamos ante un report nuevo
     pthread_mutex_t* lock; // semaforo para la exclusión mutua para que 2 callbacks no escriban a la vez
 
     float mdl2scr; // ratio de la escala modelo / mundo real (o pantalla)
@@ -78,10 +75,9 @@ class TrackingPFC_client{
     static float getDisplayHeightMM();
 
     // consultoras y escritoras de los datos
-    float* getlastpos();
+    const float* getlastpos();
     void setdata(float*, int);
     int isalive();
-    TrackingPFC_data* getdata();
     
     void setvirtualdisplaysize(float);
     void setvirtualdisplaydistance(float);
