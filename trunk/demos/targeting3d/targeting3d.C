@@ -6,19 +6,23 @@
 #include <quat.h>
 #include <time.h>
 
+// Tamaños de la sala
 #define ALTO 8
 #define ANCHO 50
 #define FONDO 150
 #define CERCA 50
 
+// Tamaño y numero de pelotas
 #define MAXBALLSIZE 3
 #define MINBALLSIZE 1
 #define BALLSUB 32
 #define TOTALBALLS 75
 
-#define UPDATETIME 0.033 // 30 frames por segundo
+// Framerate
+#define UPDATETIME 0.016 // 60 frames por segundo
 
-
+// Tiempo tras el cual deja de considerarse activo un sensor
+#define ALIVETIME 0.2
 
 // Variables auxiliares para los mensajes
 GLint framen;
@@ -27,22 +31,29 @@ GLchar mensaje[100];
 // Cliente
 TrackingPFC_client* track;
 
+// Propiedades de la ventana
 int winx, winy;
 float aspectratio;
+// informacion del mouse
+int mousepos[2];
+bool buttonpressed;
 
-bool useht;
+// Flags de control
+bool useht; // usar HT
 
 // control de tiempo para el redraw
 struct timeval lastframeupdate;
 struct timezone tz;
 
-// struct ball
+// Informacion sobre las esferas
 typedef struct ball{
   float pos[3];
   float col[3];
   float size;
 } ball;
 ball balls[TOTALBALLS];
+
+
 
 // inicializaciones
 void init(void){
@@ -76,6 +87,7 @@ void init(void){
   glLightModelf(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
   glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 
+  // Material por defecto
   static float matAmb[4] = {0.2, 0.2, 0.2, 1.0};
   static float matDiff[4] = {0.8, 0.8, 0.8, 1.0};
   static float matSpec[4] = {0.4, 0.4, 0.4, 1.0};
@@ -86,11 +98,13 @@ void init(void){
   glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
   glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
 
+  // Antialiasing para las lineas
   glEnable(GL_BLEND);
   glEnable(GL_LINE_SMOOTH);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
+  // Niebla
   static float fog_color[] = {0.0, 0.0, 0.0, 1.0};
   glEnable(GL_FOG);
   glFogi(GL_FOG_MODE, GL_EXP2);
@@ -102,7 +116,7 @@ void init(void){
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 void output(float x, float y, char *string){
   glDisable(GL_LIGHTING);
-  glColor3f(1.0, 1.0, 1.0);
+  
   int len, i;
   glRasterPos2f(x, y);
   len = (int) strlen(string);
@@ -112,17 +126,18 @@ void output(float x, float y, char *string){
   glEnable(GL_LIGHTING);
 }
 
+// Funcion auxiliar para dar un random float entre 0 y 1
 inline float randomf(float rango){
   return ((float)rand()/(float)RAND_MAX)*rango;
 }
 
+// Resetea posicion, tamaño y color de las esferas
 void resetballs(){
   srand ( time(NULL) );
   for (int i =0; i<TOTALBALLS;i++){
+    // posiciones
     balls[i].pos[0]=randomf(ANCHO*2)-ANCHO;
-    // posicion vertical, puede ir de ballsize/2-alto a alto-ballsize/2
     balls[i].pos[1]=randomf(ALTO*2)-ALTO;
-    // puede ir de ballsize/2-FONDO a CERCA-ballsize/2
     balls[i].pos[2]=-randomf(CERCA+FONDO)+CERCA;
     //colores
     balls[i].col[0]=randomf(1);
@@ -132,21 +147,80 @@ void resetballs(){
     balls[i].size = randomf(MAXBALLSIZE-MINBALLSIZE)+MINBALLSIZE;
   }
 }
+// Dibuja las esferas
 void drawballs(){
   for (int i =0; i<TOTALBALLS;i++){
+    // color
     GLfloat ballcolor[4] = {balls[i].col[0], balls[i].col[1], balls[i].col[2], 1.0};
     glMaterialfv(GL_FRONT, GL_DIFFUSE, ballcolor);
+    // posicion
+    glPushMatrix();
     glTranslatef(balls[i].pos[0], balls[i].pos[1], balls[i].pos[2]);
+    // la esfera
     glutSolidSphere(balls[i].size,BALLSUB,BALLSUB);
-    glTranslatef(-balls[i].pos[0], -balls[i].pos[1], -balls[i].pos[2]);
+    // volvemos a la posicion original
+    glPopMatrix();
   }
 }
+
+// Dibuja el rayo y calcula las intersecciones
+void ray(){
+  float* pos = track->getlastpos(1);
+  if (pos==NULL || pos[7]>ALIVETIME){
+    glColor3f(1.0, 0.0, 0.0);
+    char buffer[160];
+    sprintf(buffer, "No hay sensor!");   
+    output(5.3,-3.5,buffer );
+  }else{	
+    // calculamos la posicion del sensor
+    float scale = track->getscale();
+    pos[0]*=scale;
+    pos[1]*=scale;
+    pos[2]*=scale;
+    // la del cursor
+    float curspos[3];
+    curspos[0]=(((float)mousepos[0]/(float)winx)-0.5)*16.0;
+    curspos[1]=-(((float)mousepos[1]/(float)winy)-0.5)*10.0;
+    curspos[2]=0.0; // el cursor esta en el plano de la pantalla
+    
+    // obtenemos el vector distancia
+    float dist[3];
+    dist[0]=curspos[0]-pos[0];
+    dist[1]=curspos[1]-pos[1];
+    dist[2]=curspos[2]-pos[2];
+    
+    // obtenemos el factor por el que hay que multiplicar distancia para llegar a zfar
+    float fact = -(FONDO+100.0)/dist[2];
+
+    // y obtenemos en que punto del fondo va a parar el rayo
+    float fondopos[3];
+    // sumamos curpos+fact*dist para obtener el rayo completo
+    fondopos[0]=curspos[0]+dist[0]*fact;
+    fondopos[1]=curspos[1]+dist[1]*fact;
+    fondopos[2]=curspos[2]+dist[2]*fact;
+
+    // dibujamos el rayo
+    glEnable(GL_FOG);
+    glDisable(GL_LIGHTING);
+    glLineWidth(8.0);
+    glColor4f(0.3, 0.8, 0.99, 0.7);
+    glBegin(GL_LINES);
+      glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
+      glVertex3f(pos[0],pos[1],pos[2]);
+    glEnd();
+    glEnable(GL_LIGHTING);
+    glDisable(GL_FOG);
+
+  }
+}
+// Redibuja la escena
 void display(void){
 
   GLfloat znear =0.1;
   GLfloat zfar =FONDO+100.0;
 
-  float* pos = track->getlastpos();;
+  // Obtenemos la posicion del sensor 0 (el usuario)
+  float* pos = track->getlastpos();
 
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity ();
@@ -172,6 +246,8 @@ void display(void){
     gluLookAt(0, 0, 12,  0, 0, -1.0,  0.0, 1.0, 0.0);
   }
 
+  // Lineas del techo y el suelo
+  // activamos niebla y desactivamos la iluminacion
   glEnable(GL_FOG);
   glDisable(GL_LIGHTING);
     glLineWidth(1.5);
@@ -195,13 +271,12 @@ void display(void){
     glVertex3f( i, -ALTO-MAXBALLSIZE, -FONDO);
    glEnd();
   }
+  // devolvemos la niebla y la iluminacion a su estado normal
   glEnable(GL_LIGHTING);
   glDisable(GL_FOG);
-
-  
-
   
   // añadimos mensajes
+  glColor3f(1.0, 1.0, 1.0);
   char buffer[160];
   sprintf(buffer, "HeadTrack %s", useht?"on":"off");   
   output(5.3,-4.0,buffer );
@@ -216,7 +291,10 @@ void display(void){
   sprintf(buffer, "Z %f", pos[2]);   
   output(-7,-4.5,buffer );
 
+  // Dibujamos la escena
   drawballs();
+  if (buttonpressed)
+    ray();
 
   glutSwapBuffers(); //swap the buffers
 }
@@ -237,10 +315,10 @@ void keyboard(unsigned char key, int x, int y){
 	delete(track);
 	exit(0);
 	break;
-    case 104: // h
+    case 104: // h -> activar/desactivar HT
 	useht=!useht;
 	break;
-    case 114: // r
+    case 114: // r -> resetear esferas
 	resetballs();
 	break;
     default:
@@ -248,7 +326,8 @@ void keyboard(unsigned char key, int x, int y){
       break;
   }
 }
-// funcion auxiliar para calcular la diferencia (en segundos, con precision de microsecs)
+
+// funcion auxiliar para calcular tiempos (en segundos, con precision de microsecs)
 double diff(struct timeval * x,struct timeval * y){
   double secs = x->tv_sec-y->tv_sec;
   double usecs = x->tv_usec-y->tv_usec;
@@ -256,7 +335,7 @@ double diff(struct timeval * x,struct timeval * y){
   return (double)(secs+usecs);
 }
 
-// funcion que repinta la escena
+// funcion que controla los fps
 void redraw(){
   // solo repintamos si ha pasado UPDATETIME
   struct timeval current;
@@ -271,32 +350,57 @@ void redraw(){
   }
 }
 
+
+void motion(int x, int y){
+  float selx, sely;
+  mousepos[0] = x;
+  mousepos[1] = y;
+  lastframeupdate.tv_sec--;
+  redraw();
+}
+
+void mouse(int b, int s, int x, int y){
+  if (s == GLUT_DOWN) {
+    buttonpressed=true;
+  } else {
+    buttonpressed=false;
+  }
+  motion(x, y);
+}
+
+
 int main(int argc, char** argv)
 {
-  // marcamos flag de usar ht a falso
+  // marcamos flag de usar ht a cierto
   useht=true;
   
-  // inicializamos el aspect ratio a 1,6
+  // inicializamos las propiedades de la ventana y el raton
   winx=960;
   winy=600;
   aspectratio=(float)winx/(float)winy;
+  mousepos[0]=0;
+  mousepos[1]=0;
+  buttonpressed=false;
 
+  // frames y mensaje
   framen=0;
   sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   r->reset\n");
 
+  // inicializamos las esferas
   resetballs();
 
   // inicializamos lastframeupdate
   gettimeofday(&lastframeupdate, &tz);
 
+  // Inicializamos el cliente
   char* trkname = (char*)"Tracker0@localhost";
   // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
   // se espera un nombre valido y libre, si no lo es, la aplicación fallara
   if (argc>1)
     trkname=argv[1];
-
   track = new TrackingPFC_client(trkname);
 
+  // preparamos opengl
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowSize (winx, winy); 
@@ -309,7 +413,9 @@ int main(int argc, char** argv)
   glutDisplayFunc(display); 
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
+  glutMotionFunc(motion);
+  glutMouseFunc(mouse);
   glutIdleFunc(redraw);
   glutMainLoop();
-return 0;
+  return 0;
 }
