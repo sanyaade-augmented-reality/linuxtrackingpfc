@@ -82,6 +82,7 @@ class TrackingPFC_client{
 
     // consultoras y escritoras de los datos
     float* getlastpos(int sensor=0);
+    float getlasttime(int sensor=0);
     void setdata(float*, int);
     int isalive();
     int sensors();
