@@ -13,6 +13,12 @@ GLchar mensaje[100];
 // Cliente
 TrackingPFC_client* track;
 
+// 33.3 frames por segundo
+#define UPDATETIME 0.03 
+// control de tiempo para el redraw
+struct timeval lastframeupdate;
+struct timezone tz;
+
 // flags de funcionamiento
 bool useht; // flag de HT on/off
 int mode; // modo (follow, imitate, stop
@@ -34,11 +40,7 @@ time_t newusertime;
 bool followingnewuser;
 bool thereismainuser;
 
-// datos sobre los reports
-int lastreport;
-int lastreportsize;
-vector<time_t> lasttime;
-vector<double*> lastpos;
+
 GLfloat lightskinColor[4] = {233.0/355.0, 132.0/255.0, 20.0/255.0, 1.0};
 GLfloat darkskinColor[4] = {197.0/355.0, 112.0/255.0, 58.0/255.0, 1.0};
 GLfloat eyesColor[4] = {0.0, 0.0, 0.1, 1.0};
@@ -287,46 +289,6 @@ void output(float x, float y, char *string){
   glEnable(GL_LIGHTING);
 }
 
-// Funcion auxiliar que procesa el datachunk actual y updatea los datos
-// devuelve el numero de usuarios detectados (en positivo si hay nuevos datos
-// en negativo si no hay nuevos datos
-int updateusers(TrackingPFC_data::datachunk* data ){
-  bool newdata = false;
-  // si es un report nuevo, o tiene mas datos que antes, updateamos
-  if (data->getcount()>lastreport || lastreportsize<data->size()){
-    // guardamos el nuevo report count
-    lastreport=data->getcount();
-    lastreportsize= data->size();
-    // recorremos los puntos del report updateando
-    int n = lastreportsize;
-    for (int dn =0; dn<n;dn++){
-      int sensor = data->gettag(dn);
-      // comprobamos que no sea un sensor nuevo
-      // si lo es, creamos sus datos
-      while (lasttime.size()<=sensor){
-	time_t t0 =0;
-	lasttime.push_back(time(&t0));
-	lastpos.push_back(new double[3]);
-      }
-      lasttime[sensor]=time(NULL);
-      const double* aux = data->getdata(dn);
-      lastpos[sensor][0]=aux[0];
-      lastpos[sensor][1]=aux[1];
-      lastpos[sensor][2]=aux[2];
-    }// recorrido por los puntos
-    newdata=true;
-  } // updates por nuevo report
-  
-  // llegados aqui, tenemos en lasttime y lastpos los datos necesarios
-  int valid=0;
-  for (int s =0; s<lasttime.size();s++){
-    if ( difftime(time(NULL),lasttime[s])<2)
-      valid++;
-  }
-  lifeforms=valid;
-  return newdata?valid:-valid;
-}
-   
 void display(void){
 
   GLfloat znear =0.1;
@@ -395,9 +357,8 @@ void display(void){
     body();
 
   if (mode==FOLLOW){
-    TrackingPFC_data::datachunk* data = track->getdata()->getlastdata();
-    // actualizamos las estructuras de datos
-    int detectedusers= updateusers(data);
+    
+    int detectedusers= 0;
 
     // actualizamos diffcount y lifeform (solo si hay nuevos datos)
     if (detectedusers>0){
@@ -421,25 +382,25 @@ void display(void){
       thereismainuser=true;
       // determinacion de usuario al que seguimos
       if (mainuser==-1 || lifeforms==1){
-	for (int s =0; s<lasttime.size();s++){
+	/*for (int s =0; s<lasttime.size();s++){
 	  if ( difftime(time(NULL),lasttime[s])<2){
 	    if (mainuser!=s)
 	      printf("Adquirido sensor %i como usario principal\n",s);
 	    mainuser=s;
 	  }
-	}
+	}*/
       }
 
       // si hay nuevos usuarios y no estamos siguiendo ya a uno nuevo, 
       // lo deeterminamos
       if (lifeforms>1 && newuser==-1){
-	for (int s =0; s<lasttime.size();s++){
+	/*for (int s =0; s<lasttime.size();s++){
 	  if ( difftime(time(NULL),lasttime[s])<2 && s!=mainuser){
 	    printf("Detectado nuevo usuario en el sensor %i\n",s);
 	    newuser=s;
 	    newusertime = time(NULL);
 	  }
-	}
+	}*/
       }else if (lifeforms==1 && newuser!=-1){
 	newuser=-1;
 	printf("El nuevo usuario ha desparecido\n");
@@ -458,7 +419,7 @@ void display(void){
       }
 
       
-      double* pos = lastpos[activeuser];
+      float* pos = track->getlastpos();
       // añadimos mensajes de posicion
       sprintf(buffer, "X %f", pos[0]);   
       output(-7,-3.5,buffer ); 
@@ -589,6 +550,30 @@ void keyboard(unsigned char key, int x, int y){
   }
 }
 
+// funcion auxiliar para calcular la diferencia (en segundos, con precision de microsecs)
+double diff(struct timeval * x,struct timeval * y){
+  double secs = x->tv_sec-y->tv_sec;
+  double usecs = x->tv_usec-y->tv_usec;
+  usecs=usecs/1000000.0;
+  return (double)(secs+usecs);
+}
+
+// funcion que repinta la escena
+void redraw(){
+  // solo repintamos si ha pasado UPDATETIME
+  struct timeval current;
+  gettimeofday(&current, &tz);
+  double sincelast=diff(&current, &lastframeupdate);
+  
+  if ( sincelast>=UPDATETIME){
+    // updateamos
+    lastframeupdate.tv_sec= current.tv_sec;
+    lastframeupdate.tv_usec= current.tv_usec;
+    glutPostRedisplay();
+  }
+}
+
+
 int main(int argc, char** argv)
 {
   // marcamos flag de usar ht a falso
@@ -611,7 +596,9 @@ int main(int argc, char** argv)
   followingnewuser=false;
   thereismainuser=false;
 
-  lastreport=-1;
+  // inicializamos lastframeupdate
+  gettimeofday(&lastframeupdate, &tz);
+
 
   framen=0;
   sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   m->mode   o->old_model\n");
@@ -637,7 +624,7 @@ int main(int argc, char** argv)
   glutDisplayFunc(display); 
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
-  glutIdleFunc(glutPostRedisplay);
+  glutIdleFunc(redraw);
   glutMainLoop();
 return 0;
 }
