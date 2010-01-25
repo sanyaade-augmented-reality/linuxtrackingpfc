@@ -267,6 +267,9 @@ void body(){
   poly(v2,v6,v5,v1);
   // abajo
   poly(v3,v7,v6,v2);
+  glTranslatef(0,-9,0);
+  glutSolidCube(10);
+  glTranslatef(0,9,0);
 }
 // Funcion auxiliar para mostrar mensajes
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
