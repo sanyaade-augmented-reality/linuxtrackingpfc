@@ -6,6 +6,12 @@
 #include <quat.h>
 #include <time.h>
 
+// 33.3 frames por segundo
+#define UPDATETIME 0.03 
+// control de tiempo para el redraw
+struct timeval lastframeupdate;
+struct timezone tz;
+
 // Variables auxiliares para los mensajes
 GLint framen;
 GLchar mensaje[100];
@@ -13,17 +19,10 @@ GLchar mensaje[100];
 // Cliente
 TrackingPFC_client* track;
 
-// 33.3 frames por segundo
-#define UPDATETIME 0.03 
-// control de tiempo para el redraw
-struct timeval lastframeupdate;
-struct timezone tz;
-
 // flags de funcionamiento
 bool useht; // flag de HT on/off
 int mode; // modo (follow, imitate, stop
 bool old; // flag de usar el modelo viejo
-
 #define FOLLOW 0
 #define IMITATE 1
 #define STOP 2
@@ -36,21 +35,33 @@ int lifeforms;
 int diffcount;
 int mainuser;
 int newuser;
-time_t newusertime;
+timeval newusertime;
 bool followingnewuser;
-bool thereismainuser;
+
+#define INACTIVITYTIME 0.5
+#define INTERESTTIME 5
+#define FRAMESTOAKNOWLEDGE 5
 
 
 GLfloat lightskinColor[4] = {233.0/355.0, 132.0/255.0, 20.0/255.0, 1.0};
 GLfloat darkskinColor[4] = {197.0/355.0, 112.0/255.0, 58.0/255.0, 1.0};
 GLfloat eyesColor[4] = {0.0, 0.0, 0.1, 1.0};
 
+
+// funcion auxiliar para calcular la diferencia (en segundos, con precision de microsecs)
+double diff(struct timeval * x,struct timeval * y){
+  double secs = x->tv_sec-y->tv_sec;
+  double usecs = x->tv_usec-y->tv_usec;
+  usecs=usecs/1000000.0;
+  return (double)(secs+usecs);
+}
+
 // inicializaciones
 void init(void){
   // color de fondo
   glClearColor (0.0, 0.0, 0.0, 0.0);
   // tipo de shader
-  glShadeModel (GL_FLAT);
+  glShadeModel (GL_SMOOTH);
   // activamos los modos
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -358,18 +369,35 @@ void display(void){
 
   if (mode==FOLLOW){
     
-    int detectedusers= 0;
-
-    // actualizamos diffcount y lifeform (solo si hay nuevos datos)
-    if (detectedusers>0){
-      if(detectedusers!=lifeforms)
-	diffcount++;
-      else
-	diffcount-=2;
-      if (diffcount<0) diffcount =0;
+    // contamos los usuarios
+    vector<int> users;
+    vector<float> userst;
+    float aux;
+    // recorremos la lista de sensores obteniendo la antiguedad de los datos
+    // y guardando el numero de los que estan por debajo del umbral
+    // y su antiguedad
+    for (int i =0; i<track->sensors();i++){
+      aux=track->getlasttime(i);
+      if (aux<INACTIVITYTIME){
+	users.push_back(i);
+      }
+      userst.push_back(aux);
     }
+
+    int detectedusers=users.size();
+
+    // actualizamos diffcount y lifeform 
+    
+    if(detectedusers!=lifeforms)
+      diffcount++;
+    else
+      diffcount-=2; // para evitar falsos positivos se penaliza doble
+    // aseguramos que diffcount no baje de 0
+    if (diffcount<0)
+      diffcount =0;
+    
     // si despues de 10 updates sigue habiendo discrepancias, se cambia el valor
-    if (diffcount>10){
+    if (diffcount>FRAMESTOAKNOWLEDGE){
       lifeforms=detectedusers;
       diffcount=0;
     }
@@ -379,47 +407,55 @@ void display(void){
     output(5.3,-3.0,buffer ); 
     
     if (lifeforms>0){
-      thereismainuser=true;
+      
       // determinacion de usuario al que seguimos
-      if (mainuser==-1 || lifeforms==1){
-	/*for (int s =0; s<lasttime.size();s++){
-	  if ( difftime(time(NULL),lasttime[s])<2){
-	    if (mainuser!=s)
-	      printf("Adquirido sensor %i como usario principal\n",s);
-	    mainuser=s;
-	  }
-	}*/
+      // siempre que haya usuarios detectados, si no teniamos mainuser o el anterior
+      // ha desaparecido obtenemos uno nuevo
+      if ( users.size()>0 && (mainuser==-1 ||  userst[mainuser]>=INACTIVITYTIME ) ){
+	printf("Adquirido sensor %i como usario principal\n",users[0]);
+	mainuser=users[0];
+	// si mainuser era el nuevo usuario, desactivamos el flag para no avisar
+	// de que se ha perdido interes en él y ponemos a -1 el id de newuser
+	if (mainuser==newuser && followingnewuser){
+	  followingnewuser=false;
+	  newuser=-1;
+	}
       }
 
       // si hay nuevos usuarios y no estamos siguiendo ya a uno nuevo, 
       // lo deeterminamos
-      if (lifeforms>1 && newuser==-1){
-	/*for (int s =0; s<lasttime.size();s++){
-	  if ( difftime(time(NULL),lasttime[s])<2 && s!=mainuser){
-	    printf("Detectado nuevo usuario en el sensor %i\n",s);
-	    newuser=s;
-	    newusertime = time(NULL);
-	  }
-	}*/
+      if (users.size()>1 && lifeforms>1 && newuser==-1){
+	
+	if (users[0]!=mainuser){
+	  newuser=users[0];
+	}else{
+	  newuser=users[1];
+	}
+	printf("Detectado nuevo usuario en el sensor %i\n",newuser);
+	gettimeofday(&newusertime, &tz);
       }else if (lifeforms==1 && newuser!=-1){
 	newuser=-1;
-	printf("El nuevo usuario ha desparecido\n");
+	if (followingnewuser)
+	  printf("El nuevo usuario ha desparecido\n");
       }
 
+      // Comprobamos que no haya pasado el tiempo de interes
       int activeuser;
-      if (newuser!=-1 && difftime(time(NULL),newusertime)<5){
+      struct timeval current;
+      gettimeofday(&current, &tz);
+      if (newuser!=-1 && diff(&current,&newusertime)<INTERESTTIME){
 	activeuser = newuser;
 	followingnewuser=true;
       }else{
 	activeuser = mainuser;
 	if (followingnewuser){
-	  followingnewuser=false;
 	  printf("Se ha perdido el interes en el nuevo usuario\n");
 	}
+	followingnewuser=false;
       }
 
       
-      float* pos = track->getlastpos();
+      float* pos = track->getlastpos(activeuser);
       // añadimos mensajes de posicion
       sprintf(buffer, "X %f", pos[0]);   
       output(-7,-3.5,buffer ); 
@@ -452,16 +488,13 @@ void display(void){
       qogl_matrix_type mat;
       q_to_ogl_matrix(mat, diff);
       glMultMatrixd(mat);
-    }else{
+    }else{ //lifeforms ==0
       // no hay formas de vida, no estamos siguiendo a ningun usuario
-      mainuser=-1;
-      if (thereismainuser){
+      if (mainuser!=-1)
 	printf("No hay usuarios a la vista\n");
-	thereismainuser=false;
-	// bajamos otros flags para evitar mensajes extraños despues
-	followingnewuser=false;
-	newuser=-1;
-      }
+      mainuser=-1;
+      newuser=-1;
+      
     }
 
   }else if (mode==IMITATE){ // modo imitacion
@@ -550,14 +583,6 @@ void keyboard(unsigned char key, int x, int y){
   }
 }
 
-// funcion auxiliar para calcular la diferencia (en segundos, con precision de microsecs)
-double diff(struct timeval * x,struct timeval * y){
-  double secs = x->tv_sec-y->tv_sec;
-  double usecs = x->tv_usec-y->tv_usec;
-  usecs=usecs/1000000.0;
-  return (double)(secs+usecs);
-}
-
 // funcion que repinta la escena
 void redraw(){
   // solo repintamos si ha pasado UPDATETIME
@@ -593,9 +618,6 @@ int main(int argc, char** argv)
   mainuser=-1;
   newuser=-1;
 
-  followingnewuser=false;
-  thereismainuser=false;
-
   // inicializamos lastframeupdate
   gettimeofday(&lastframeupdate, &tz);
 
@@ -603,6 +625,7 @@ int main(int argc, char** argv)
   framen=0;
   sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   m->mode   o->old_model\n");
 
+  followingnewuser=false;
 
   char* trkname = (char*)"Tracker0@localhost";
   // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
