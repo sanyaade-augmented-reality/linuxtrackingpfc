@@ -6,6 +6,11 @@
 #include <quat.h>
 #include <time.h>
 
+#define PI 3.14159265
+
+// Defines de movimiento
+#define MOVUNIT 0.06
+#define ROTUNIT 1.5
 
 // Cliente
 TrackingPFC_client* track;
@@ -300,8 +305,26 @@ void reshape (int w, int h){
   winy=h;
   aspectratio=(float)w/(float)h;
 }
+// funcion que recomputa el movimiento
+// solo uno de los valores puede ser distinto de 0
 void move(float forward, float left, float ccw){
-
+  // pos[0] -> posicion x, pos[1]->posicion y, pos[2] -> rotacion
+  if (ccw!=0){
+    pos[2]+=ccw;
+  }
+  if (forward!=0){
+    pos[0]=pos[0]+sin(2*PI*pos[2]/360.0)*forward;
+    pos[1]=pos[1]+cos(2*PI*pos[2]/360.0)*forward;
+  }
+  if (left!=0){
+    pos[0]=pos[0]+sin(2*PI*(90-pos[2])/360.0)*left;
+    pos[1]=pos[1]-cos(2*PI*(90-pos[2])/360.0)*left;
+  }
+  // correcciones
+  if(pos[0]<-5)pos[0]=-5;
+  if(pos[0]>5)pos[0]=5;
+  if(pos[1]<-5)pos[1]=-5;
+  if(pos[1]>5)pos[1]=5;
 }
 // gestion de teclado
 void keyboard(unsigned char key, int x, int y){
@@ -312,22 +335,22 @@ void keyboard(unsigned char key, int x, int y){
 	exit(0);
 	break;
     case 119: // w (avanzar)
-	move(0.01,0,0);
+	move(MOVUNIT,0,0);
 	break;
     case 115: // s (retroceder)
-	move(-0.01,0,0);
+	move(-MOVUNIT,0,0);
 	break;
     case 97: // a (girar izq)
-	move(0,0,0.01);
+	move(0,0,ROTUNIT);
 	break;
     case 100: // d (girar der)
-	move(0,0,-0.01);
+	move(0,0,-ROTUNIT);
 	break;
     case 113: // q (izquierda)
-	move(0,0.01,0);
+	move(0,MOVUNIT,0);
 	break;
     case 101: // e (derecha)
-	move(0,-0.01,0);
+	move(0,-MOVUNIT,0);
 	break;
     
     default:
@@ -345,7 +368,7 @@ int main(int argc, char** argv)
 
   pos[0]=0.0;
   pos[1]=0.0;
-  pos[2]=45.0;
+  pos[2]=0.0;
 
   char* trkname = (char*)"Tracker0@localhost";
   // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
