@@ -46,7 +46,7 @@ int tpfccgetDisplayHeight(CTrackingPFC_client* c){
   return ((TrackingPFC_client*)c)->getDisplayHeight();
 }
 
-float* tpfccgetlastpos(CTrackingPFC_client* c){
+const float* tpfccgetlastpos(CTrackingPFC_client* c){
   return ((TrackingPFC_client*)c)->getlastpos();
 }
 

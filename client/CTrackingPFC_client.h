@@ -11,7 +11,7 @@ float tpfccgetDisplaySizex(CTrackingPFC_client* c);
 float tpfccgetDisplaySizey(CTrackingPFC_client* c);
 int tpfccgetDisplayWidth(CTrackingPFC_client* c);
 int tpfccgetDisplayHeight(CTrackingPFC_client* c);
-float* tpfccgetlastpos(CTrackingPFC_client* c);
+const float* tpfccgetlastpos(CTrackingPFC_client* c);
 
 #ifdef __cplusplus
 }

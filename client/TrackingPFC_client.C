@@ -7,24 +7,35 @@ void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_
   // obtenemos el tracker desde los argumentos
   TrackingPFC_client * trk= (TrackingPFC_client*)(userdata);
 
-  float* aux = new float[7];
-  aux[0]=t.pos[0];
-  aux[1]=t.pos[1];
-  aux[2]=t.pos[2];
-  aux[3]=t.quat[0];
-  aux[4]=t.quat[1];
-  aux[5]=t.quat[2];
-  aux[6]=t.quat[3];
-  trk->setdata(aux, t.sensor);
-  free(aux);
+  // nos aseguramos de que el sensor tiene espacio en el vector
+  while (trk->data.size()<=t.sensor){
+    trk->data.push_back(new float[7]);
+  }
 
+  trk->data[t.sensor][0]=t.pos[0];
+  trk->data[t.sensor][1]=t.pos[1];
+  trk->data[t.sensor][2]=t.pos[2];
+  trk->data[t.sensor][3]=t.quat[0];
+  trk->data[t.sensor][4]=t.quat[1];
+  trk->data[t.sensor][5]=t.quat[2];
+  trk->data[t.sensor][6]=t.quat[3];
+  
   if (trk->callback_func!=NULL)
     trk->callback_func(trk);
 }
 
 // Creadora
 TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPFC_client*)){
-  data = new TrackingPFC_data();
+  //creacion de los datos
+  data.push_back(new float[7]);
+  // rellenamos con unos valores estandar
+  data[0][0]=0;
+  data[0][1]=0;
+  data[0][2]=1;
+  data[0][3]=0;
+  data[0][4]=0;
+  data[0][5]=0;
+  data[0][6]=1;
   
   alive=1;
   tracker = new vrpn_Tracker_Remote(tname);
@@ -67,14 +78,10 @@ void* TrackingPFC_client::mainloop_executer(void * t){
 }
 
 // consultoras
-float* TrackingPFC_client::getlastpos(){
-  return data->getlastpos();
+const float* TrackingPFC_client::getlastpos(){
+  return data[0];
 }
 
-
-TrackingPFC_data* TrackingPFC_client::getdata(){
-  return data;
-}
 
 // variables estaticas para el tamaño de la pantalla:
 // (se updatearan con la primera llamada a getDisplaySize
@@ -206,7 +213,7 @@ int TrackingPFC_client::isalive(){
 
 // modificadoras
 void TrackingPFC_client::setdata(float * f, int sensor){
-  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  /*pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
   // si aun no hemos recibido ningun report, añadimos el dato normalmente
   if (reports.size()==0){
     reports.push_back(sensor);
@@ -227,7 +234,7 @@ void TrackingPFC_client::setdata(float * f, int sensor){
       data->setnewdata(f, true, sensor);
     }
   }
-  pthread_mutex_unlock( lock ); // liberamos el acceso
+  pthread_mutex_unlock( lock ); // liberamos el acceso*/
 }
 
 
@@ -262,7 +269,7 @@ void TrackingPFC_client::htadjustPerspective(float m_dCamDistMin, float m_dCamDi
   scrx= winx*getDisplaySizex()/getDisplayWidth();
   scry= winy*getDisplaySizey()/getDisplayHeight();
   
-  float* lastpos= data->getlastpos();
+  const float* lastpos= getlastpos();
   float obsx, obsy, obsz;
   obsx=lastpos[0];
   obsy=lastpos[1];
@@ -293,7 +300,7 @@ void TrackingPFC_client::htgluLookAt(float eyex, float eyey, float eyez,
     
    
 
-  float* lastpos= data->getlastpos();
+  const float* lastpos= getlastpos();
   float obsx, obsy, obsz;
   obsx=lastpos[0];
   obsy=lastpos[1];
