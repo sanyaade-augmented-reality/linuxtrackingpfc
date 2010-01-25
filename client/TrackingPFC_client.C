@@ -104,6 +104,20 @@ float* TrackingPFC_client::getlastpos(int sensor){
     return res;
   }
 }
+// consultoras
+float TrackingPFC_client::getlasttime(int sensor){
+  if (data.size()<=sensor){
+    return -1;
+  }else{
+    float res;
+    pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+    struct timeval current;
+    gettimeofday(&current, &tz);
+    res=diff(&current, &(time[sensor]));
+    pthread_mutex_unlock( lock ); // liberamos
+    return res;
+  }
+}
 
 
 // variables estaticas para el tamaño de la pantalla:
