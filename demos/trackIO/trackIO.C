@@ -312,7 +312,7 @@ void redraw(){
 // funcion que updatea la posicion si es necesario
 void updatepos(){
   // obtenemos los datos del tracker
-  float* pos = track->getlastpos();
+  const float* pos = track->getlastpos();
   // creamos el QUAT
   q_type rot;
   rot[Q_X]=pos[3];
