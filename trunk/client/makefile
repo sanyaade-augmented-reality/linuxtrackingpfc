@@ -10,16 +10,13 @@ LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread  -lquat -lglut -lGL
 
 all: libtpfcc.so.1.0.1
 
-ctpfcc.o : CTrackingPFC_client.C CTrackingPFC_client.h tpfcd.o tpfcc.o
+ctpfcc.o : CTrackingPFC_client.C CTrackingPFC_client.h tpfcc.o
 	$(CXX) $(CFLAGS) -shared -fpic -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
-tpfcc.o : TrackingPFC_client.C TrackingPFC_client.h tpfcd.o
+tpfcc.o : TrackingPFC_client.C TrackingPFC_client.h
 	$(CXX) $(CFLAGS) -shared -fpic -c -o $@ $(LIBDIR) $< $(LIBRARIES)
 
-tpfcd.o : TrackingPFC_data.C TrackingPFC_data.h
-	$(CXX) $(CFLAGS) -shared -fpic -c -o $@ $(LIBDIR) $< $(LIBRARIES)
-
-libtpfcc.so.1.0.1 : tpfcc.o tpfcd.o ctpfcc.o
+libtpfcc.so.1.0.1 : tpfcc.o ctpfcc.o
 	$(CC) $(CFLAGS) -shared -Wl,-soname,libtpfcc.so.1 -o $@ $(LIBDIR) $^ -lc $(LIBRARIES)
 
 install : libtpfcc.so.1.0.1
