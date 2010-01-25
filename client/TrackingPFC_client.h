@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <GL/glut.h>
-#include "TrackingPFC_data.h"
+
 #define RADFACTOR 3.14159265/180.0
 
 #include <iostream>
