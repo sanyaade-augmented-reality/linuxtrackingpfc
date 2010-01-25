@@ -6,8 +6,8 @@
 #include <quat.h>
 #include <time.h>
 
-// 33.3 frames por segundo
-#define UPDATETIME 0.03 
+// 30 frames por segundo
+#define UPDATETIME 0.033
 // control de tiempo para el redraw
 struct timeval lastframeupdate;
 struct timezone tz;
