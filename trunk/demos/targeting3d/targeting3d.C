@@ -16,7 +16,7 @@
 #define BALLSUB 32
 #define TOTALBALLS 75
 
-#define UPDATETIME 0.03 // 33.3 frames por segundo
+#define UPDATETIME 0.033 // 30 frames por segundo
 
 
 
@@ -144,7 +144,7 @@ void drawballs(){
 void display(void){
 
   GLfloat znear =0.1;
-  GLfloat zfar =FONDO+50.0;
+  GLfloat zfar =FONDO+100.0;
 
   float* pos = track->getlastpos();;
 
@@ -286,6 +286,7 @@ int main(int argc, char** argv)
 
   resetballs();
 
+  // inicializamos lastframeupdate
   gettimeofday(&lastframeupdate, &tz);
 
   char* trkname = (char*)"Tracker0@localhost";

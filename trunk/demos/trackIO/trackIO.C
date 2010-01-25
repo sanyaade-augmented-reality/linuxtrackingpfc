@@ -14,7 +14,7 @@
 #define MOVUNIT 0.06
 #define ROTUNIT 1.5
 
-#define UPDATETIME 0.03 // 33.3 frames por segundo
+#define UPDATETIME 0.033 // 30 frames por segundo
 
 #define TRESHOLD 0.4 // angulo (en radianes) a partir del que se detecta
 
