@@ -258,6 +258,9 @@ int TrackingPFC_client::isalive(){
 int TrackingPFC_client::sensors(){
   return data.size();
 }
+float TrackingPFC_client::getscale(){
+  return mdl2scr;
+}
 
 
 // modificadoras

@@ -85,10 +85,17 @@ class TrackingPFC_client{
     float getlasttime(int sensor=0);
     void setdata(float*, int);
     int isalive();
+
+    // numero de sensores (puede aumentar con el tiempo)
     int sensors();
     
+    // configurar el tamaño o la distancia de la pantalla virtual
     void setvirtualdisplaysize(float);
     void setvirtualdisplaydistance(float);
+
+    // devuelve la escala por la que hay que multiplicar las posiciones reales
+    // para obtener la posicion en la escena
+    float getscale();
     
     // llamadas glut y GL modificadas para usar tracking
     void htgluLookAt(float,float,float,  float,float,float,  float,float,float);
