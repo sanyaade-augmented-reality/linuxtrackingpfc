@@ -329,8 +329,8 @@ int updateusers(TrackingPFC_data::datachunk* data ){
    
 void display(void){
 
-  GLfloat znear =1.0;
-  GLfloat zfar =100.0;
+  GLfloat znear =0.1;
+  GLfloat zfar =150.0;
 
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity ();
