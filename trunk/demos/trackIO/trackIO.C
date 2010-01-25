@@ -5,12 +5,18 @@
 #include <TrackingPFC_client.h>
 #include <quat.h>
 #include <time.h>
+//#include <sys/time.h>
+
 
 #define PI 3.14159265
 
 // Defines de movimiento
 #define MOVUNIT 0.06
 #define ROTUNIT 1.5
+
+#define UPDATETIME 0.03 // 33.3 frames por segundo
+
+#define TRESHOLD 0.4 // angulo (en radianes) a partir del que se detecta
 
 // Cliente
 TrackingPFC_client* track;
@@ -27,6 +33,10 @@ GLfloat floorColor[4] = {0.5, 0.5, 0.5, 1.0};
 
 // datos relativos al robot
 double pos[3]; // pos x, pos y, rotacion
+struct timeval lastupdate;
+struct timezone tz;
+  
+
 
 // inicializaciones
 void init(void){
@@ -256,7 +266,90 @@ void body(){
   glutSolidCube(10);
   glTranslatef(0,9,0);
 }
+// funcion que recomputa el movimiento
+// solo uno de los valores puede ser distinto de 0
+void move(float forward, float left, float ccw){
+  // pos[0] -> posicion x, pos[1]->posicion y, pos[2] -> rotacion
+  if (ccw!=0){
+    pos[2]+=ccw;
+  }
+  if (forward!=0){
+    pos[0]=pos[0]+sin(2*PI*pos[2]/360.0)*forward;
+    pos[1]=pos[1]+cos(2*PI*pos[2]/360.0)*forward;
+  }
+  if (left!=0){
+    pos[0]=pos[0]+sin(2*PI*(90-pos[2])/360.0)*left;
+    pos[1]=pos[1]-cos(2*PI*(90-pos[2])/360.0)*left;
+  }
+  // correcciones
+  if(pos[0]<-5)pos[0]=-5;
+  if(pos[0]>5)pos[0]=5;
+  if(pos[1]<-5)pos[1]=-5;
+  if(pos[1]>5)pos[1]=5;
+}
+// funcion auxiliar para calcular la diferencia (en segundos, con precision de microsecs)
+double diff(struct timeval * x,struct timeval * y){
+  double secs = x->tv_sec-y->tv_sec;
+  double usecs = x->tv_usec-y->tv_usec;
+  usecs=usecs/1000000.0;
+  return (double)(secs+usecs);
+}
 
+// funcion que repinta la escena
+void redraw(){
+  // solo repintamos si ha pasado UPDATETIME
+  struct timeval current;
+  gettimeofday(&current, &tz);
+  double sincelast=diff(&current, &lastupdate);
+  
+  if ( sincelast>=UPDATETIME){
+    // updateamos
+    lastupdate.tv_sec= current.tv_sec;
+    lastupdate.tv_usec= current.tv_usec;
+    glutPostRedisplay();
+  }
+}
+// funcion que updatea la posicion si es necesario
+void updatepos(){
+  // obtenemos los datos del tracker
+  float* pos = track->getlastpos();
+  // creamos el QUAT
+  q_type rot;
+  rot[Q_X]=pos[3];
+  rot[Q_Y]=pos[4];
+  rot[Q_Z]=pos[5];
+  rot[Q_W]=pos[6];
+  // obtenemos los angulos de euler
+  q_vec_type euler;
+  q_to_euler(euler, rot);
+  // Assumes roll is rotation about X, pitch is rotation about Y, yaw is about Z.
+  // void q_to_euler(q_vec_type yawPitchRoll, const q_type q);
+
+  q_vec_print(euler);
+  
+  // avance
+  double fwd = 0.0;
+  if (euler[Q_Z]<-TRESHOLD)
+    fwd=-MOVUNIT;
+  if (euler[Q_Z]>TRESHOLD)
+    fwd=MOVUNIT;
+  
+  // strafe
+  double left = 0.0;
+  if (euler[Q_X]<-TRESHOLD)
+    left=-MOVUNIT;
+  if (euler[Q_X]>TRESHOLD)
+    left=MOVUNIT;
+  // giro
+  double ccw = 0.0;
+  if (euler[Q_Y]<-TRESHOLD)
+    ccw=ROTUNIT;
+  if (euler[Q_Y]>TRESHOLD)
+    ccw=-ROTUNIT;
+
+
+  move(fwd, left, ccw);
+}
 void display(void){
 
   GLfloat znear =1.0;
@@ -275,7 +368,7 @@ void display(void){
   gluLookAt(0, 7, 12,  0, 0, 0,  0.0, 1.0, 0.0);
 
   // recalculamos las posiciones
-  
+  updatepos();
 
   glPushMatrix();
   glTranslatef(pos[0],0,pos[1]);
@@ -305,27 +398,7 @@ void reshape (int w, int h){
   winy=h;
   aspectratio=(float)w/(float)h;
 }
-// funcion que recomputa el movimiento
-// solo uno de los valores puede ser distinto de 0
-void move(float forward, float left, float ccw){
-  // pos[0] -> posicion x, pos[1]->posicion y, pos[2] -> rotacion
-  if (ccw!=0){
-    pos[2]+=ccw;
-  }
-  if (forward!=0){
-    pos[0]=pos[0]+sin(2*PI*pos[2]/360.0)*forward;
-    pos[1]=pos[1]+cos(2*PI*pos[2]/360.0)*forward;
-  }
-  if (left!=0){
-    pos[0]=pos[0]+sin(2*PI*(90-pos[2])/360.0)*left;
-    pos[1]=pos[1]-cos(2*PI*(90-pos[2])/360.0)*left;
-  }
-  // correcciones
-  if(pos[0]<-5)pos[0]=-5;
-  if(pos[0]>5)pos[0]=5;
-  if(pos[1]<-5)pos[1]=-5;
-  if(pos[1]>5)pos[1]=5;
-}
+
 // gestion de teclado
 void keyboard(unsigned char key, int x, int y){
   switch (key) {
@@ -361,14 +434,19 @@ void keyboard(unsigned char key, int x, int y){
 
 int main(int argc, char** argv)
 {
+  
+  
   // inicializamos el aspect ratio a 1,6
   winx=960;
   winy=600;
   aspectratio=(float)winx/(float)winy;
 
+  // inicializamos las posiciones
   pos[0]=0.0;
   pos[1]=0.0;
   pos[2]=0.0;
+  // y el lastupdate
+  gettimeofday(&lastupdate, &tz);
 
   char* trkname = (char*)"Tracker0@localhost";
   // si se ha llamado con un parametro, asumimos que es un nombre de tracker alternativo
@@ -390,7 +468,7 @@ int main(int argc, char** argv)
   glutDisplayFunc(display); 
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
-  glutIdleFunc(glutPostRedisplay);
+  glutIdleFunc(redraw);
   glutMainLoop();
 return 0;
 }
