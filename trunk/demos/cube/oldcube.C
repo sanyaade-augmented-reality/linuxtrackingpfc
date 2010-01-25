@@ -34,7 +34,7 @@ void output(float x, float y, char *string){
    
 void display(void)
 {
-   float* lastpos = track->getlastpos();
+   const float* lastpos = track->getlastpos();
    GLfloat mld2scr= 16/(track->getDisplaySizex());
    obsx = lastpos[0]*mld2scr;
    obsy = lastpos[1]*mld2scr;

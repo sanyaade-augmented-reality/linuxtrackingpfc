@@ -80,7 +80,7 @@ void display(void)
 
    glColor3f(1.0, 1.0, 1.0);
    char buffer[160];
-   float * lastpos = track->getlastpos();
+   const float * lastpos = track->getlastpos();
    sprintf(buffer, "X %f", lastpos[0]);   
    output(-7,-3.5,buffer ); 
    sprintf(buffer, "Y %f", lastpos[1]);   
