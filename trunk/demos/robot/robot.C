@@ -210,18 +210,19 @@ void reye(){
   glutSolidSphere (0.75,32,32);
   glTranslatef(0,0,-2.0);
 }
-void eyes(float angle){
-  glRotatef(-angle, 0,0,1);
+void eyes(float eyes, float head){
+  glRotatef(head,1,0,0);
+  glRotatef(-eyes, 0,0,1);
   glTranslatef(1.6,0.3,0);
   leye();
   glTranslatef(-1.6,-0.3,0);
-  glRotatef(angle, 0,0,1);
+  glRotatef(eyes, 0,0,1);
 
-  glRotatef(angle, 0,0,1);
+  glRotatef(eyes, 0,0,1);
   glTranslatef(-1.6,0.3,0);
   reye();
   glTranslatef(1.6,-0.3,0);
-  glRotatef(-angle, 0,0,1);
+  glRotatef(-eyes, 0,0,1);
 
   float v0[]={ 1.6,  0.3,  1};
   float v1[]={ 1.6,  0.3, -1};
@@ -244,6 +245,7 @@ void eyes(float angle){
   poly(v2,v6,v5,v1);
   // abajo
   poly(v3,v7,v6,v2);
+  glRotatef(-head,1,0,0);
 }
 void body(){
   float v0[]={ 0.3,  0.0,  0.3};
@@ -267,9 +269,9 @@ void body(){
   poly(v2,v6,v5,v1);
   // abajo
   poly(v3,v7,v6,v2);
-  glTranslatef(0,-9,0);
+  /*glTranslatef(0,-9,0);
   glutSolidCube(10);
-  glTranslatef(0,9,0);
+  glTranslatef(0,9,0);*/
 }
 // Funcion auxiliar para mostrar mensajes
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
@@ -546,10 +548,9 @@ void display(void){
     glutSolidCube (1.0);
   }else{ // modelo nuevo
     if ((mode==FOLLOW && lifeforms==0) || mode==STOP){
-      glRotatef(20,1,0,0);
-      eyes(30);
+      eyes(30,20);
     }else
-      eyes(10);
+      eyes(10,0);
   }
   
 
