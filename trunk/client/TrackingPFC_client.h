@@ -22,6 +22,8 @@ class TrackingPFC_client{
   private:
     // datos recibidos
     vector<float*> data;
+    vector<timeval> time;
+    struct timezone tz;
   
     int alive; // indicador de si el thrad de mainloop debe seguir funcionando 1=si, 2=no
 
@@ -52,6 +54,10 @@ class TrackingPFC_client{
 
     // funcion auxiliar para partir strings
     static void StringExplode(string str, string separator, vector<string>* results);
+    // pasar de str a int
+    static int str2int (const string &str);
+    // calcular la diferencia entre 2 timevals (devuelve en secs, con precision de microsecs
+    static double diff(struct timeval * x,struct timeval * y);
 
   public:
     // placeholder para el callback personalizado (si es necesario)
@@ -75,7 +81,7 @@ class TrackingPFC_client{
     static float getDisplayHeightMM();
 
     // consultoras y escritoras de los datos
-    const float* getlastpos(int sensor=0);
+    float* getlastpos(int sensor=0);
     void setdata(float*, int);
     int isalive();
     
