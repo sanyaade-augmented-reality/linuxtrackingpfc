@@ -6,7 +6,7 @@ void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_
 
   // obtenemos el tracker desde los argumentos
   TrackingPFC_client * trk= (TrackingPFC_client*)(userdata);
-
+  pthread_mutex_lock( trk->lock ); // liberamos el acceso
   // nos aseguramos de que el sensor tiene espacio en el vector
   while (trk->data.size()<=t.sensor){
     trk->data.push_back(new float[7]);
@@ -19,6 +19,7 @@ void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_
   trk->data[t.sensor][4]=t.quat[1];
   trk->data[t.sensor][5]=t.quat[2];
   trk->data[t.sensor][6]=t.quat[3];
+  pthread_mutex_unlock( trk->lock ); // liberamos el acceso
   
   if (trk->callback_func!=NULL)
     trk->callback_func(trk);
@@ -78,8 +79,11 @@ void* TrackingPFC_client::mainloop_executer(void * t){
 }
 
 // consultoras
-const float* TrackingPFC_client::getlastpos(){
-  return data[0];
+const float* TrackingPFC_client::getlastpos(int sensor){
+  if (data.size()>sensor)
+    return data[sensor];
+  else
+    return NULL;
 }
 
 
@@ -213,8 +217,8 @@ int TrackingPFC_client::isalive(){
 
 // modificadoras
 void TrackingPFC_client::setdata(float * f, int sensor){
-  /*pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
-  // si aun no hemos recibido ningun report, añadimos el dato normalmente
+  pthread_mutex_lock( lock ); // obtenemos acceso exclusivo
+  /*// si aun no hemos recibido ningun report, añadimos el dato normalmente
   if (reports.size()==0){
     reports.push_back(sensor);
     data->setnewdata(f, true, sensor);
@@ -233,8 +237,20 @@ void TrackingPFC_client::setdata(float * f, int sensor){
       reports.push_back(sensor);
       data->setnewdata(f, true, sensor);
     }
+  }*/
+  // nos aseguramos de que el sensor tiene espacio en el vector
+  while (data.size()<=sensor){
+    data.push_back(new float[7]);
   }
-  pthread_mutex_unlock( lock ); // liberamos el acceso*/
+
+  data[sensor][0]=f[0];
+  data[sensor][1]=f[1];
+  data[sensor][2]=f[2];
+  data[sensor][3]=f[0];
+  data[sensor][4]=f[1];
+  data[sensor][5]=f[2];
+  data[sensor][6]=f[3];
+  pthread_mutex_unlock( lock ); // liberamos el acceso
 }
 
 
