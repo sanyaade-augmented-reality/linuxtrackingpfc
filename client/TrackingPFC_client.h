@@ -75,7 +75,7 @@ class TrackingPFC_client{
     static float getDisplayHeightMM();
 
     // consultoras y escritoras de los datos
-    const float* getlastpos();
+    const float* getlastpos(int sensor=0);
     void setdata(float*, int);
     int isalive();
     
