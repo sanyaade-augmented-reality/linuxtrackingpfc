@@ -84,6 +84,7 @@ class TrackingPFC_client{
     float* getlastpos(int sensor=0);
     void setdata(float*, int);
     int isalive();
+    int sensors();
     
     void setvirtualdisplaysize(float);
     void setvirtualdisplaydistance(float);
