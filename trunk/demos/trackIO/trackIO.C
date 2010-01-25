@@ -325,8 +325,6 @@ void updatepos(){
   // Assumes roll is rotation about X, pitch is rotation about Y, yaw is about Z.
   // void q_to_euler(q_vec_type yawPitchRoll, const q_type q);
 
-  q_vec_print(euler);
-  
   // avance
   double fwd = 0.0;
   if (euler[Q_Z]<-TRESHOLD)
@@ -424,6 +422,13 @@ void keyboard(unsigned char key, int x, int y){
 	break;
     case 101: // e (derecha)
 	move(0,-MOVUNIT,0);
+	break;
+    case 114: // r (reset)
+	// reinicializamos las posiciones
+	pos[0]=0.0;
+	pos[1]=0.0;
+	pos[2]=0.0;
+  
 	break;
     
     default:
