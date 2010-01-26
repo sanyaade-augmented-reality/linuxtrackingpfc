@@ -15,7 +15,7 @@
 // Tamaño y numero de pelotas
 #define MAXBALLSIZE 3
 #define MINBALLSIZE 1
-#define BALLSUB 32
+#define BALLSUB 40
 #define TOTALBALLS 75
 
 // Framerate
@@ -40,6 +40,7 @@ bool buttonpressed;
 
 // Flags de control
 bool useht; // usar HT
+bool laser; // usar laser o linterna?
 
 // control de tiempo para el redraw
 struct timeval lastframeupdate;
@@ -70,7 +71,7 @@ void init(void){
   glEnable(GL_LIGHTING);
   glEnable(GL_NORMALIZE);
 
-  // luces
+  // luces Normales
   GLfloat lightZeroPosition[] = {5, 0, 5, 1.0};
   GLfloat lightZeroColor[] = {0.5, 0.5, 0.5, 1.0};
   glLightfv(GL_LIGHT0, GL_POSITION, lightZeroPosition);
@@ -86,6 +87,29 @@ void init(void){
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
   glLightModelf(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
   glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+
+
+  // SPOT
+  float noAmbient[] = {0.0f, 0.0f, 0.4f, 1.0f};       //low ambient light
+  float diffuse[]   = {1.0f, 1.0f, 1.0f, 1.0f};
+  //properties of the light
+  glLightfv(GL_LIGHT2, GL_AMBIENT, noAmbient);
+  glLightfv(GL_LIGHT2, GL_DIFFUSE, diffuse);
+  //angle of the cone light emitted by the spot : value between 0 to 180
+  glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 7);
+  //exponent propertie defines the concentration of the light
+  glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 15.0f);
+  // Poicion y direccion
+  float position[]  = {0.0f, 0.0f, 0.0f, 1.0f};
+  glLightfv(GL_LIGHT2, GL_POSITION, position);
+  float direction[] = {0, 0, -1};
+  glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, direction);
+  //light attenuation (default values used here : no attenuation with the distance)
+  glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.5f);
+  glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.01f);
+  glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
+  //glEnable(GL_LIGHT2);
+
 
   // Material por defecto
   static float matAmb[4] = {0.2, 0.2, 0.2, 1.0};
@@ -230,7 +254,7 @@ void ray(){
     glColor3f(1.0, 0.0, 0.0);
     char buffer[160];
     sprintf(buffer, "No hay sensor!");   
-    output(5.3,-3.5,buffer );
+    output(5.3,-3.0,buffer );
   }else{	
     // calculamos la posicion del sensor
     float scale = track->getscale();
@@ -327,7 +351,7 @@ void display(void){
 
   // Obtenemos la posicion del sensor 0 (el usuario)
   float* pos = track->getlastpos();
-
+  
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity ();
 
@@ -380,11 +404,39 @@ void display(void){
   // devolvemos la niebla y la iluminacion a su estado normal
   glEnable(GL_LIGHTING);
   glDisable(GL_FOG);
+
+  // si estamos en modo linterna, updateamos la posicion de LIGHT2
+  if (!laser){
+    
+    float* sensorpos = track->getlastpos(1);
+    if (sensorpos==NULL || sensorpos[7]>ALIVETIME){
+      glColor3f(1.0, 0.0, 0.0);
+      char buffer[160];
+      sprintf(buffer, "No hay sensor!");   
+      output(5.3,-3.0,buffer );
+    }else{
+      // calculamos la posicion del sensor
+      float scale = track->getscale();
+      float aux[4];
+      aux[0]=sensorpos[0]*scale;
+      aux[1]=sensorpos[1]*scale;
+      aux[2]=sensorpos[2]*scale;
+      aux[3]=1.0;
+      glLightfv(GL_LIGHT2, GL_POSITION, aux);
+      // la del cursor
+      aux[0]=(((float)mousepos[0]/(float)winx)-0.5)*16.0-aux[0];
+      aux[1]=-(((float)mousepos[1]/(float)winy)-0.5)*10.0-aux[1];
+      aux[2]=-aux[2];
+      glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, aux);
+    }
+  }
   
   // añadimos mensajes
   glColor3f(1.0, 1.0, 1.0);
   char buffer[160];
   sprintf(buffer, "HeadTrack %s", useht?"on":"off");   
+  output(5.3,-3.5,buffer );
+  sprintf(buffer, "Mode: %s", laser?"laser":"flashlight");   
   output(5.3,-4.0,buffer );
   sprintf(buffer, "Frame %i", framen);   
   output(5.3,-4.5,buffer );
@@ -399,7 +451,7 @@ void display(void){
 
   // Dibujamos la escena
   drawballs();
-  if (buttonpressed)
+  if (laser && buttonpressed)
     ray();
 
   glutSwapBuffers(); //swap the buffers
@@ -426,6 +478,20 @@ void keyboard(unsigned char key, int x, int y){
 	break;
     case 114: // r -> resetear esferas
 	resetballs();
+	break;
+    case 109: // m (modo)
+    case 108: // L (luces, laser)
+    case 102: // f (flashlight)
+	laser=!laser;
+	if (laser){
+	  glEnable(GL_LIGHT0);
+	  glEnable(GL_LIGHT1);
+	  glDisable(GL_LIGHT2);
+	}else{
+	  glDisable(GL_LIGHT0);
+	  glDisable(GL_LIGHT1);
+	  glEnable(GL_LIGHT2);
+	}
 	break;
     default:
       printf("Key %i not supported\n", key);
@@ -479,6 +545,8 @@ int main(int argc, char** argv)
 {
   // marcamos flag de usar ht a cierto
   useht=true;
+  // y el modo a laser
+  laser=true;
   
   // inicializamos las propiedades de la ventana y el raton
   winx=960;
@@ -490,7 +558,7 @@ int main(int argc, char** argv)
 
   // frames y mensaje
   framen=0;
-  sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   r->reset\n");
+  sprintf(mensaje,"Keys:  esc-> exit   h->Headtrack   r->reset   m->modo\n");
 
   // inicializamos las esferas
   resetballs();
