@@ -2,7 +2,7 @@ INCLUDE = -I/usr/local/include/opencv
 LIBDIR  = -L/home/plaga/bin/ARToolKit/lib
 
 #COMPILERFLAGS = -Wall -O2
-COMPILERFLAGS = -O2 -g
+COMPILERFLAGS = -O2
 CC = g++
 CFLAGS = $(COMPILERFLAGS) $(INCLUDE)
 LIBRARIES = -lvrpnserver -lvrpnatmel -lpthread -lquat -lcwiid -lcv -lhighgui -lARgsub -lARvideo -lAR -lglut -lGL -lgstreamer-0.10
