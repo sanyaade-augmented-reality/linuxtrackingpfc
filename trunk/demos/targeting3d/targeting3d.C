@@ -269,7 +269,7 @@ void ray(){
     if (ind!=-1){
       
       // reducimos la esfera
-      balls[ind].size=balls[ind].size/1.1;
+      balls[ind].size=balls[ind].size/1.02;
       
       float fondopos[3];
       // sumamos curpos+fact*dist para obtener el rayo completo
@@ -286,7 +286,8 @@ void ray(){
 	glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
 	glVertex3f(pos[0],pos[1],pos[2]);
       glEnd();
-      impact(curspos[0],curspos[1],0.9, 0.1, 0.1);
+      if (fact>=1) // solo dibujamos el impacto si el rayo llega al plano del display
+	impact(curspos[0],curspos[1],0.9, 0.1, 0.1);
       glEnable(GL_LIGHTING);
       glDisable(GL_FOG);
 
@@ -519,6 +520,7 @@ int main(int argc, char** argv)
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
   glutMotionFunc(motion);
+  glutPassiveMotionFunc(motion);
   glutMouseFunc(mouse);
   glutIdleFunc(redraw);
   glutMainLoop();
