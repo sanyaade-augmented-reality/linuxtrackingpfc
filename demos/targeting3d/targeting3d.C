@@ -163,6 +163,33 @@ void drawballs(){
   }
 }
 
+// funcion auxiliar para calcular la magnitud de un vector
+float magnitud( float* p1, float* p2 ){
+    
+  float aux[3];
+  aux[0] = p2[0] - p1[0];
+  aux[1] = p2[1] - p1[1];
+  aux[2] = p2[2] - p1[2];
+  return (float)sqrt( aux[0] * aux[0] + aux[1] * aux[1] + aux[2] * aux[2] );
+}
+
+float distanciapuntolinea( float *p, float *l1, float *l2, float* fact){
+    
+    float length = magnitud( l2, l1 );
+    float u = ( ( ( p[0] - l1[0] ) * ( l2[0] - l1[0] ) ) +
+        ( ( p[1] - l1[1] ) * ( l2[1] - l1[1] ) ) +
+        ( ( p[2] - l1[2] ) * ( l2[2] - l1[2] ) ) ) /
+        ( length * length );
+    // if( U < 0.0f || U > 1.0f ) -> el punto no cae en el segmento
+    float intersec[3]; 
+    intersec[0] = l1[0] + u * ( l2[0] - l1[0] );
+    intersec[1] = l1[1] + u * ( l2[1] - l1[1] );
+    intersec[2] = l1[2] + u * ( l2[2] - l1[2] );
+    
+    *fact=u;
+    return magnitud( p, intersec );
+}
+
 // Dibuja el rayo y calcula las intersecciones
 void ray(){
   float* pos = track->getlastpos(1);
@@ -188,29 +215,72 @@ void ray(){
     dist[0]=curspos[0]-pos[0];
     dist[1]=curspos[1]-pos[1];
     dist[2]=curspos[2]-pos[2];
+
+    float aux;
+    int ind=-1;
+    float fact = 999;
+    // recorremos las esferas
+    for (int i =0; i<TOTALBALLS;i++){
+      // comprobamos si el rayo intersecta
+      if (distanciapuntolinea(balls[i].pos,pos, curspos, &aux) < balls[i].size){
+	//(en aux esta el factor por el que habira que multiplicar el rayo para llegar a esa esfera
+	if (aux<fact){
+	  // si es la mas cercana , guardamos sus datos
+	  ind = i;
+	  fact=aux;
+	}
+      }
+    }
+    // si al llegar aqui ind==-1 es que no intersectamos con ninguna bola
+    // si no, tenemos el indice de la 1a esfera que intersecta
+    if (ind!=-1){
+      
+      // reducimos la esfera
+      balls[ind].size=balls[ind].size/1.1;
+      
+      float fondopos[3];
+      // sumamos curpos+fact*dist para obtener el rayo completo
+      fondopos[0]=pos[0]+dist[0]*fact;
+      fondopos[1]=pos[1]+dist[1]*fact;
+      fondopos[2]=pos[2]+dist[2]*fact;
+
+      // dibujamos el rayo
+      glEnable(GL_FOG);
+      glDisable(GL_LIGHTING);
+      glLineWidth(8.0);
+      glColor4f(0.9, 0.1, 0.1, 0.7);
+      glBegin(GL_LINES);
+	glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
+	glVertex3f(pos[0],pos[1],pos[2]);
+      glEnd();
+      glEnable(GL_LIGHTING);
+      glDisable(GL_FOG);
+
+    }else{
     
-    // obtenemos el factor por el que hay que multiplicar distancia para llegar a zfar
-    float fact = -(FONDO+100.0)/dist[2];
+      // obtenemos el factor por el que hay que multiplicar distancia para llegar a zfar
+      fact = -(FONDO+100.0)/dist[2];
 
-    // y obtenemos en que punto del fondo va a parar el rayo
-    float fondopos[3];
-    // sumamos curpos+fact*dist para obtener el rayo completo
-    fondopos[0]=curspos[0]+dist[0]*fact;
-    fondopos[1]=curspos[1]+dist[1]*fact;
-    fondopos[2]=curspos[2]+dist[2]*fact;
+      // y obtenemos en que punto del fondo va a parar el rayo
+      float fondopos[3];
+      // sumamos curpos+fact*dist para obtener el rayo completo
+      fondopos[0]=curspos[0]+dist[0]*fact;
+      fondopos[1]=curspos[1]+dist[1]*fact;
+      fondopos[2]=curspos[2]+dist[2]*fact;
 
-    // dibujamos el rayo
-    glEnable(GL_FOG);
-    glDisable(GL_LIGHTING);
-    glLineWidth(8.0);
-    glColor4f(0.3, 0.8, 0.99, 0.7);
-    glBegin(GL_LINES);
-      glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
-      glVertex3f(pos[0],pos[1],pos[2]);
-    glEnd();
-    glEnable(GL_LIGHTING);
-    glDisable(GL_FOG);
+      // dibujamos el rayo
 
+      glEnable(GL_FOG);
+      glDisable(GL_LIGHTING);
+      glLineWidth(8.0);
+      glColor4f(0.3, 0.8, 0.99, 0.7);
+      glBegin(GL_LINES);
+	glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
+	glVertex3f(pos[0],pos[1],pos[2]);
+      glEnd();
+      glEnable(GL_LIGHTING);
+      glDisable(GL_FOG);
+    }
   }
 }
 // Redibuja la escena
