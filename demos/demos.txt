@@ -1,20 +1,12 @@
 Demos simples:
-0 - Cube
-1 - Model viewer
-2 - Google Street view
-3 - Escritorio 3d
+0 - cube
+1 - 3D_Desktop
+2 - model_viewer
 
 Avanzadas:
-4 - Reajuste de elementos
-5 - interacción con personajes
-6 - Modo "sin pantalla" 
-7 - pantalla partida para multiusuario
-8 - estereoscopica
-9 - Multipantalla
+3 - robot
+4 - blender
 
 Como input:
-10 - pantalla tactil
-11 - char IO
-12 - Blender
-13 - Gestos
-14 - Ray-casting (apuntar en 3d)
+5 - trackIO
+6 - targeting3d
