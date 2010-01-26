@@ -110,6 +110,9 @@ void init(void){
   glFogi(GL_FOG_MODE, GL_EXP2);
   glFogf(GL_FOG_DENSITY, 0.0125);
   glFogfv(GL_FOG_COLOR, fog_color);
+
+  // cursor
+  glutSetCursor(GLUT_CURSOR_NONE);
 }
 
 // Funcion auxiliar para mostrar mensajes
@@ -190,6 +193,36 @@ float distanciapuntolinea( float *p, float *l1, float *l2, float* fact){
     return magnitud( p, intersec );
 }
 
+// Dibuja un circulo con fade en el lugar x,y,0
+#define IMPSIZE 0.4
+void impact(float x, float y, float r, float g, float b){
+  glBegin(GL_TRIANGLES);
+    glColor4f(r,g,b,1.0);
+    glVertex3f(x,y,0);
+    glColor4f(r,g,b,0.0);
+    glVertex3f(x+IMPSIZE,y,0);
+    glVertex3f(x,y+IMPSIZE,0);
+
+    glColor4f(r,g,b,1.0);
+    glVertex3f(x,y,0);
+    glColor4f(r,g,b,0.0);
+    glVertex3f(x,y+IMPSIZE,0);
+    glVertex3f(x+-IMPSIZE,y,0);
+
+    glColor4f(r,g,b,1.0);
+    glVertex3f(x,y,0);
+    glColor4f(r,g,b,0.0);
+    glVertex3f(x-IMPSIZE,y,0);
+    glVertex3f(x,y-IMPSIZE,0);
+
+    glColor4f(r,g,b,1.0);
+    glVertex3f(x,y,0);
+    glColor4f(r,g,b,0.0);
+    glVertex3f(x,y-IMPSIZE,0);
+    glVertex3f(x+IMPSIZE,y,0);
+  glEnd();
+}
+
 // Dibuja el rayo y calcula las intersecciones
 void ray(){
   float* pos = track->getlastpos(1);
@@ -253,6 +286,7 @@ void ray(){
 	glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
 	glVertex3f(pos[0],pos[1],pos[2]);
       glEnd();
+      impact(curspos[0],curspos[1],0.9, 0.1, 0.1);
       glEnable(GL_LIGHTING);
       glDisable(GL_FOG);
 
@@ -278,6 +312,7 @@ void ray(){
 	glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
 	glVertex3f(pos[0],pos[1],pos[2]);
       glEnd();
+      impact(curspos[0],curspos[1],0.3, 0.8, 0.99);
       glEnable(GL_LIGHTING);
       glDisable(GL_FOG);
     }
