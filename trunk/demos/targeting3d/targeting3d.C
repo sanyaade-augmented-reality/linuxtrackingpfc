@@ -9,14 +9,14 @@
 // Tamaños de la sala
 #define ALTO 8
 #define ANCHO 50
-#define FONDO 150
+#define FONDO 500
 #define CERCA 50
 
 // Tamaño y numero de pelotas
 #define MAXBALLSIZE 3
 #define MINBALLSIZE 1
 #define BALLSUB 40
-#define TOTALBALLS 75
+#define TOTALBALLS 200
 
 // Framerate
 #define UPDATETIME 0.016 // 60 frames por segundo
@@ -41,6 +41,7 @@ bool buttonpressed;
 // Flags de control
 bool useht; // usar HT
 bool laser; // usar laser o linterna?
+bool penetration; // el laser impacta solo en una bola o en todas?
 
 // control de tiempo para el redraw
 struct timeval lastframeupdate;
@@ -284,15 +285,17 @@ void ray(){
 	  // si es la mas cercana , guardamos sus datos
 	  ind = i;
 	  fact=aux;
+	  if (penetration)
+	    balls[i].size=balls[i].size/1.05;
 	}
       }
     }
     // si al llegar aqui ind==-1 es que no intersectamos con ninguna bola
     // si no, tenemos el indice de la 1a esfera que intersecta
-    if (ind!=-1){
+    if (ind!=-1 && !penetration){
       
       // reducimos la esfera
-      balls[ind].size=balls[ind].size/1.02;
+      balls[ind].size=balls[ind].size/1.05;
       
       float fondopos[3];
       // sumamos curpos+fact*dist para obtener el rayo completo
@@ -509,6 +512,9 @@ void keyboard(unsigned char key, int x, int y){
     case 102: // f (flashlight)
 	laser=!laser;
 	break;
+    case 112: // p (power)
+	penetration=!penetration;
+	break;
     default:
       printf("Key %i not supported\n", key);
       break;
@@ -563,6 +569,7 @@ int main(int argc, char** argv)
   useht=true;
   // y el modo a laser
   laser=true;
+  penetration=false;
   
   // inicializamos las propiedades de la ventana y el raton
   winx=960;
