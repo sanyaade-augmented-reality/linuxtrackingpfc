@@ -218,39 +218,38 @@ float distanciapuntolinea( float *p, float *l1, float *l2, float* fact){
 }
 
 // Dibuja un circulo con fade en el lugar x,y,0
-#define IMPSIZE 0.4
-void impact(float x, float y, float r, float g, float b){
+void impact(float x, float y, float r, float g, float b, float a, float s){
   glBegin(GL_TRIANGLES);
-    glColor4f(r,g,b,1.0);
+    glColor4f(r,g,b,a);
     glVertex3f(x,y,0);
     glColor4f(r,g,b,0.0);
-    glVertex3f(x+IMPSIZE,y,0);
-    glVertex3f(x,y+IMPSIZE,0);
+    glVertex3f(x+s,y,0);
+    glVertex3f(x,y+s,0);
 
-    glColor4f(r,g,b,1.0);
+    glColor4f(r,g,b,a);
     glVertex3f(x,y,0);
     glColor4f(r,g,b,0.0);
-    glVertex3f(x,y+IMPSIZE,0);
-    glVertex3f(x+-IMPSIZE,y,0);
+    glVertex3f(x,y+s,0);
+    glVertex3f(x+-s,y,0);
 
-    glColor4f(r,g,b,1.0);
+    glColor4f(r,g,b,a);
     glVertex3f(x,y,0);
     glColor4f(r,g,b,0.0);
-    glVertex3f(x-IMPSIZE,y,0);
-    glVertex3f(x,y-IMPSIZE,0);
+    glVertex3f(x-s,y,0);
+    glVertex3f(x,y-s,0);
 
-    glColor4f(r,g,b,1.0);
+    glColor4f(r,g,b,a);
     glVertex3f(x,y,0);
     glColor4f(r,g,b,0.0);
-    glVertex3f(x,y-IMPSIZE,0);
-    glVertex3f(x+IMPSIZE,y,0);
+    glVertex3f(x,y-s,0);
+    glVertex3f(x+s,y,0);
   glEnd();
 }
 
 // Dibuja el rayo y calcula las intersecciones
 void ray(){
   float* pos = track->getlastpos(1);
-  if (pos==NULL || pos[7]>ALIVETIME){
+   if (pos==NULL || pos[7]>ALIVETIME){
     glColor3f(1.0, 0.0, 0.0);
     char buffer[160];
     sprintf(buffer, "No hay sensor!");   
@@ -311,7 +310,7 @@ void ray(){
 	glVertex3f(pos[0],pos[1],pos[2]);
       glEnd();
       if (fact>=1) // solo dibujamos el impacto si el rayo llega al plano del display
-	impact(curspos[0],curspos[1],0.9, 0.1, 0.1);
+	impact(curspos[0],curspos[1],0.9, 0.1, 0.1, 1.0,0.4);
       glEnable(GL_LIGHTING);
       glDisable(GL_FOG);
 
@@ -337,7 +336,7 @@ void ray(){
 	glVertex3f(fondopos[0],fondopos[1],fondopos[2]);
 	glVertex3f(pos[0],pos[1],pos[2]);
       glEnd();
-      impact(curspos[0],curspos[1],0.3, 0.8, 0.99);
+      impact(curspos[0],curspos[1],0.3, 0.8, 0.99, 1.0,0.4);
       glEnable(GL_LIGHTING);
       glDisable(GL_FOG);
     }
@@ -376,6 +375,17 @@ void display(void){
     gluLookAt(0, 0, 12,  0, 0, -1.0,  0.0, 1.0, 0.0);
   }
 
+  // gestion de luces segun el modo
+  if (laser){
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
+    glDisable(GL_LIGHT2);
+  }else{
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
+  }
+
   // Lineas del techo y el suelo
   // activamos niebla y desactivamos la iluminacion
   glEnable(GL_FOG);
@@ -401,9 +411,7 @@ void display(void){
     glVertex3f( i, -ALTO-MAXBALLSIZE, -FONDO);
    glEnd();
   }
-  // devolvemos la niebla y la iluminacion a su estado normal
-  glEnable(GL_LIGHTING);
-  glDisable(GL_FOG);
+  
 
   // si estamos en modo linterna, updateamos la posicion de LIGHT2
   if (!laser){
@@ -414,6 +422,7 @@ void display(void){
       char buffer[160];
       sprintf(buffer, "No hay sensor!");   
       output(5.3,-3.0,buffer );
+      glDisable(GL_LIGHT2);
     }else{
       // calculamos la posicion del sensor
       float scale = track->getscale();
@@ -424,12 +433,18 @@ void display(void){
       aux[3]=1.0;
       glLightfv(GL_LIGHT2, GL_POSITION, aux);
       // la del cursor
-      aux[0]=(((float)mousepos[0]/(float)winx)-0.5)*16.0-aux[0];
-      aux[1]=-(((float)mousepos[1]/(float)winy)-0.5)*10.0-aux[1];
+      float mousepx = (((float)mousepos[0]/(float)winx)-0.5)*16.0;
+      float mousepy = -(((float)mousepos[1]/(float)winy)-0.5)*10.0;
+      aux[0]=mousepx-aux[0];
+      aux[1]=mousepy-aux[1];
       aux[2]=-aux[2];
       glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, aux);
     }
   }
+
+  // devolvemos la niebla y la iluminacion a su estado normal
+  glEnable(GL_LIGHTING);
+  glDisable(GL_FOG);
   
   // añadimos mensajes
   glColor3f(1.0, 1.0, 1.0);
@@ -453,6 +468,16 @@ void display(void){
   drawballs();
   if (laser && buttonpressed)
     ray();
+  /*if (!laser){
+    glEnable(GL_FOG);
+    glDisable(GL_LIGHTING);
+    float mousepx = (((float)mousepos[0]/(float)winx)-0.5)*16.0;
+    float mousepy = -(((float)mousepos[1]/(float)winy)-0.5)*10.0;
+    impact(mousepx, mousepy, 1.0, 1.0, 1.0,  1.0, 2);
+    glEnable(GL_LIGHTING);
+    glDisable(GL_FOG);
+  }*/
+
 
   glutSwapBuffers(); //swap the buffers
 }
@@ -483,15 +508,6 @@ void keyboard(unsigned char key, int x, int y){
     case 108: // L (luces, laser)
     case 102: // f (flashlight)
 	laser=!laser;
-	if (laser){
-	  glEnable(GL_LIGHT0);
-	  glEnable(GL_LIGHT1);
-	  glDisable(GL_LIGHT2);
-	}else{
-	  glDisable(GL_LIGHT0);
-	  glDisable(GL_LIGHT1);
-	  glEnable(GL_LIGHT2);
-	}
 	break;
     default:
       printf("Key %i not supported\n", key);
