@@ -1,12 +1,9 @@
 #include "TrackingPFC_client.h"
 // calback que actualiza los datos y llama al callback personalizado si lo hay
 void TrackingPFC_client::TrackingPFC_client_callback(void *userdata, const vrpn_TRACKERCB t){
-   // t.sensor es la variable que da el numero de sensor
-   // en este ejemplo no se usa xq se ha registrado el callback para ejecutarse solo con el sensor0
-
   // obtenemos el tracker desde los argumentos
   TrackingPFC_client * trk= (TrackingPFC_client*)(userdata);
-  pthread_mutex_lock( trk->lock ); // liberamos el acceso
+  pthread_mutex_lock( trk->lock ); // obtenemos accesoel acceso
   // nos aseguramos de que el sensor tiene espacio en el vector
   while (trk->data.size()<=t.sensor){
     trk->data.push_back(new float[7]);
@@ -50,10 +47,8 @@ TrackingPFC_client::TrackingPFC_client(const char* tname, void (cbfx)(TrackingPF
 
   alive=1;
   tracker = new vrpn_Tracker_Remote(tname);
-  //tracker->register_change_handler(this, TrackingPFC_client_callback,0);
   tracker->register_change_handler(this, TrackingPFC_client_callback);
   
-  //cbfx(NULL);
   callback_func= cbfx;
   pthread_create( &mainloop_thread, NULL, mainloop_executer,this);
 
