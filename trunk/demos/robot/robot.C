@@ -465,7 +465,7 @@ void display(void){
       output(-7,-4.5,buffer );
 
       q_vec_type vn, dir;
-      // inversa al vector posicion
+      // vector posicion
       q_vec_set(dir, pos[0],pos[1],pos[2]);
       // vector normal al display
       q_vec_set(vn, 0,0,1);
@@ -473,7 +473,7 @@ void display(void){
       q_type diff;
       q_from_two_vecs(diff, vn, dir);
       if (!useht){
-	// dividimos la rotacion a la 1/4 (por alguna razon el efecto queda mejor)
+	// dividimos la rotacion a la 1/2 (por alguna razon el efecto queda mejor)
 	// pero solo si no estamos usando HT
 	q_type zero;
 	zero[Q_X]=0;zero[Q_Y]=0;zero[Q_Z]=0;zero[Q_W]=1;
