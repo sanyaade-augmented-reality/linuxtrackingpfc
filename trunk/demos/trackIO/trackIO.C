@@ -17,6 +17,7 @@
 #define UPDATETIME 0.033 // 30 frames por segundo
 
 #define TRESHOLD 0.4 // angulo (en radianes) a partir del que se detecta
+#define MAXT	0.4 // angulo en radianes a partir de TRESHOLD en el que se considera que la rotacion es maxima
 
 // Cliente
 TrackingPFC_client* track;
@@ -327,24 +328,41 @@ void updatepos(){
 
   // avance
   double fwd = 0.0;
-  if (euler[Q_Z]<-TRESHOLD)
-    fwd=-MOVUNIT;
-  if (euler[Q_Z]>TRESHOLD)
-    fwd=MOVUNIT;
+  if (euler[Q_Z]<-TRESHOLD){
+    float f = (euler[Q_Z]+TRESHOLD)/MAXT;
+    if (f>1) f = 1;
+    fwd=f*MOVUNIT;
+  }
+  if (euler[Q_Z]>TRESHOLD){
+    float f = (euler[Q_Z]-TRESHOLD)/MAXT;
+    if (f>1) f = 1;
+    fwd=f*MOVUNIT;
+  }
   
   // strafe
   double left = 0.0;
-  if (euler[Q_X]<-TRESHOLD)
-    left=-MOVUNIT;
-  if (euler[Q_X]>TRESHOLD)
-    left=MOVUNIT;
+  if (euler[Q_X]<-TRESHOLD){
+    float f = (euler[Q_X]+TRESHOLD)/MAXT;
+    if (f>1) f = 1;
+    left=f*MOVUNIT;
+  }
+  if (euler[Q_X]>TRESHOLD){
+    float f = (euler[Q_X]-TRESHOLD)/MAXT;
+    if (f>1) f = 1;
+    left=f*MOVUNIT;
+  }
   // giro
   double ccw = 0.0;
-  if (euler[Q_Y]<-TRESHOLD)
-    ccw=ROTUNIT;
-  if (euler[Q_Y]>TRESHOLD)
-    ccw=-ROTUNIT;
-
+  if (euler[Q_Y]<-TRESHOLD){
+    float f = (euler[Q_Y]+TRESHOLD)/MAXT;
+    if (f>1) f = 1;
+    ccw=-f*ROTUNIT;
+  }
+  if (euler[Q_Y]>TRESHOLD){
+    float f = (euler[Q_Y]-TRESHOLD)/MAXT;
+    if (f>1) f = 1;
+    ccw=-f*ROTUNIT;
+  }
 
   move(fwd, left, ccw);
 }
