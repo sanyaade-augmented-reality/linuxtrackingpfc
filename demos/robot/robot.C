@@ -466,13 +466,9 @@ void display(void){
 
       q_vec_type vn, dir;
       // inversa al vector posicion
-      dir[Q_X]=pos[0];
-      dir[Q_Y]=pos[1];
-      dir[Q_Z]=pos[2];
+      q_vec_set(dir, pos[0],pos[1],pos[2]);
       // vector normal al display
-      vn[Q_X]=0;
-      vn[Q_Y]=0;
-      vn[Q_Z]=1;
+      q_vec_set(vn, 0,0,1);
       // quaternion que pasa de vn a dir
       q_type diff;
       q_from_two_vecs(diff, vn, dir);
