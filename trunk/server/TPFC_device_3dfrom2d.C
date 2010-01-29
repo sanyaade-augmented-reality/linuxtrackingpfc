@@ -4,8 +4,8 @@
 TPFC_device_3dfrom2d::TPFC_device_3dfrom2d(int ident, TPFC_device* s):TPFC_device(ident){
   // creamos los datos
   data = new TrackingPFC_data(TrackingPFC_data::TPFCDATA3D);
-  // La opción de merge esta activada por defecto
-  merge = true;
+  // La opción de merge esta activada por defecto solo si la fuente es 2d sin tamaño
+  merge = s->getdata()->datatype()==TrackingPFC_data::TPFCDATA2D;
   // La opción por defecto es usar una profundidad fija
   deep=FIJA;
   dist = 1.0;
