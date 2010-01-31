@@ -789,12 +789,12 @@ int main( int argc, char** argv ){
 	  printf("                    cambia la forma de calcular la profundidad\n");
 	  printf("     setmerge (merge) <on, off> [id del dispositivo, el ultimo por defecto]\n");
 	  printf(" 		      Activa o desactiva la opcion de juntar los puntos\n");
-	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>");
+	  printf("dev 3dstereo (stereo) <id del 1r disp.o fuente> <id del 2o disp.o fuente>\n");
 	  printf("                      [distancia entre sensores en mm]\n");
 	  printf("dev 3dmerge (merge) <id de la fuente1> <id de la fuente2>.\n");
 	  printf("     different (diff) <on/off> [id del device]\n");
 	  printf("dev 3dmod (mod) <id de la fuente>.\n");
-	  printf("     setscale (scale) <% de escala> [id del device]\n");
+	  printf("     setscale (scale) <porcentaje de escala> [id del device]\n");
 	  printf("     setorientation (setorient, orient) <none, all, untagged> [center, forward]\n");
 	  printf("                    [id del device]\n");
 	  printf("     setfilter (filter, setkalman, kalman) [id del device]\n");
