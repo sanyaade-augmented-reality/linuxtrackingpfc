@@ -1,0 +1,1 @@
+This project will provide the developers and end users a unified platform to work with headtracking and other objects tracking using low-cost common devices such as webcams and wiimotes. The project will also provide some demos to illustrate the possibilities and functionality it offers.
